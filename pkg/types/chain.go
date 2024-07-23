@@ -7,9 +7,7 @@ import (
 type Chain struct {
 	Name           string    `toml:"name"`
 	PrettyName     string    `toml:"pretty-name"`
-	KeplrName      string    `toml:"keplr-name"`
-	LCDEndpoints   []string  `toml:"lcd-endpoints"`
-	ProposalsType  string    `default:"v1beta1"          toml:"proposals-type"`
+	LCDEndpoint    string    `toml:"lcd-endpoint"`
 	MintscanPrefix string    `toml:"mintscan-prefix"`
 	PingPrefix     string    `toml:"ping-prefix"`
 	PingHost       string    `default:"https://ping.pub" toml:"ping-host"`
@@ -23,8 +21,8 @@ func (c *Chain) Validate() error {
 		return fmt.Errorf("empty chain name")
 	}
 
-	if len(c.LCDEndpoints) == 0 {
-		return fmt.Errorf("no LCD endpoints provided")
+	if c.LCDEndpoint == "" {
+		return fmt.Errorf("empty LCD endpoint")
 	}
 
 	return nil
@@ -66,13 +64,6 @@ func (c *Chain) DisplayWarnings() []Warning {
 		})
 	} else {
 		warnings = append(warnings, c.Explorer.DisplayWarnings(c.Name)...)
-	}
-
-	if c.KeplrName == "" {
-		warnings = append(warnings, Warning{
-			Labels:  map[string]string{"chain": c.Name},
-			Message: "keplr-name is not set, cannot generate Keplr link to proposal",
-		})
 	}
 
 	return warnings

@@ -41,8 +41,8 @@ func main() {
 	var ConfigPath string
 
 	rootCmd := &cobra.Command{
-		Use:     "cosmos-proposals-checker --config [config path]",
-		Long:    "Checks the specific wallets on different chains for proposal votes.",
+		Use:     "astronomer --config [config path]",
+		Long:    "A multi-chain explorer/wallet as a Telegram/Discord bot.",
 		Version: version,
 		Run: func(cmd *cobra.Command, args []string) {
 			ExecuteMain(ConfigPath)
@@ -51,7 +51,7 @@ func main() {
 
 	validateConfigCmd := &cobra.Command{
 		Use:     "validate-config --config [config path]",
-		Long:    "Checks the specific wallets on different chains for proposal votes.",
+		Long:    "A multi-chain explorer/wallet as a Telegram/Discord bot.",
 		Version: version,
 		Run: func(cmd *cobra.Command, args []string) {
 			ExecuteValidateConfig(ConfigPath)
