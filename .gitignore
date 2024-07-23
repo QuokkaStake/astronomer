@@ -1,0 +1,8 @@
+config.toml
+config2.toml
+main
+.idea
+cover.out
+astronomer
+dist
+**/.DS_Store
