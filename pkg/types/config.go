@@ -2,20 +2,14 @@ package types
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/rs/zerolog"
 )
 
 type Config struct {
-	LogConfig       LogConfig       `toml:"log"`
-	PagerDutyConfig PagerDutyConfig `toml:"pagerduty"`
-	TelegramConfig  TelegramConfig  `toml:"telegram"`
-	StatePath       string          `toml:"state-path"`
-	MutesPath       string          `toml:"mutes-path"`
-	Chains          Chains          `toml:"chains"`
-	Timezone        string          `toml:"timezone"`
-	Interval        string          `default:"* * * * *" toml:"interval"`
+	LogConfig      LogConfig      `toml:"log"`
+	TelegramConfig TelegramConfig `toml:"telegram"`
+	Chains         Chains         `toml:"chains"`
 }
 
 type PagerDutyConfig struct {
@@ -24,8 +18,9 @@ type PagerDutyConfig struct {
 }
 
 type TelegramConfig struct {
-	TelegramChat  int64  `toml:"chat"`
-	TelegramToken string `toml:"token"`
+	Chat   int64   `toml:"chat"`
+	Token  string  `toml:"token"`
+	Admins []int64 `default:"[]" toml:"admins"`
 }
 
 type DiscordConfig struct {
@@ -44,11 +39,6 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("error in chain %d: %s", index, err)
 		}
 	}
-
-	if _, err := time.LoadLocation(c.Timezone); err != nil {
-		return fmt.Errorf("error parsing timezone: %s", err)
-	}
-
 	return nil
 }
 
@@ -57,20 +47,6 @@ func (c *Config) DisplayWarnings() []Warning {
 
 	for _, chain := range c.Chains {
 		warnings = append(warnings, chain.DisplayWarnings()...)
-	}
-
-	if c.MutesPath == "" {
-		warnings = append(warnings, Warning{
-			Labels:  map[string]string{},
-			Message: "mutes-path is not set, cannot persist proposals mutes on disk.",
-		})
-	}
-
-	if c.StatePath == "" {
-		warnings = append(warnings, Warning{
-			Labels:  map[string]string{},
-			Message: "state-path is not set, cannot persist proposals state on disk.",
-		})
 	}
 
 	return warnings

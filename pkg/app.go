@@ -1,7 +1,10 @@
 package pkg
 
 import (
+	datafetcher "main/pkg/data_fetcher"
 	"main/pkg/fs"
+	interacterPkg "main/pkg/interacter"
+	"main/pkg/interacter/telegram"
 	"main/pkg/logger"
 	"main/pkg/types"
 
@@ -11,6 +14,8 @@ import (
 type App struct {
 	Logger *zerolog.Logger
 	Config *types.Config
+
+	Interacters []interacterPkg.Interacter
 
 	StopChannel chan bool
 }
@@ -32,16 +37,32 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	}
 
 	log := logger.GetLogger(config.LogConfig)
+	dataFetcher := datafetcher.NewDataFetcher(config, log)
+	interacters := []interacterPkg.Interacter{
+		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher),
+	}
 
 	return &App{
 		Logger:      log,
 		Config:      config,
+		Interacters: interacters,
 		StopChannel: make(chan bool),
 	}
 }
 
 func (a *App) Start() {
-	a.Logger.Info().Str("interval", a.Config.Interval).Msg("Scheduled proposals reporting")
+	a.Logger.Info().Msg("Listening")
+
+	for _, interacter := range a.Interacters {
+		interacter.Init()
+
+		if interacter.Enabled() {
+			a.Logger.Info().Str("name", interacter.Name()).Msg("Interacter is enabled")
+			go interacter.Start()
+		} else {
+			a.Logger.Info().Str("name", interacter.Name()).Msg("Interacter is disabled")
+		}
+	}
 
 	<-a.StopChannel
 	a.Logger.Info().Msg("Shutting down...")
