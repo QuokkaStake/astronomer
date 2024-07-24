@@ -2,6 +2,16 @@ package utils
 
 import "strings"
 
+func Filter[T any](slice []T, f func(T) bool) []T {
+	var n []T
+	for _, e := range slice {
+		if f(e) {
+			n = append(n, e)
+		}
+	}
+	return n
+}
+
 func Find[T any](slice []T, f func(T) bool) (T, bool) {
 	for _, elt := range slice {
 		if f(elt) {

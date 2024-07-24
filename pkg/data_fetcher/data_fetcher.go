@@ -62,11 +62,22 @@ func (f *DataFetcher) FindValidator(query string) map[string]types.ValidatorInfo
 				return strings.Contains(strings.ToLower(v.Description.Moniker), lowercaseQuery)
 			})
 
-			response[chain.Name] = types.ValidatorInfo{
+			totalVP := validators.GetTotalVP()
+
+			info := types.ValidatorInfo{
 				Chain:     chain,
 				Validator: validator,
 				Error:     nil,
 			}
+
+			if validator != nil {
+				info.VotingPowerPercent = validator.DelegatorShares.Quo(totalVP).MustFloat64()
+				if validator.Active() {
+					info.Rank = validators.FindValidatorRank(validator.OperatorAddress)
+				}
+			}
+
+			response[chain.Name] = info
 		}(chain, rpc)
 	}
 

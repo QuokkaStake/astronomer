@@ -17,6 +17,18 @@ func StringOfRandomLength(n int) string {
 	return string(b)
 }
 
+func TestFilter(t *testing.T) {
+	t.Parallel()
+
+	array := []string{"true", "false"}
+	filtered := Filter(array, func(s string) bool {
+		return s == "true"
+	})
+
+	assert.Len(t, filtered, 1, "Array should have 1 entry!")
+	assert.Equal(t, "true", filtered[0], "Value mismatch!")
+}
+
 func TestSplitStringIntoChunksLessThanOneChunk(t *testing.T) {
 	t.Parallel()
 
