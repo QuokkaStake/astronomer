@@ -2,6 +2,7 @@ package telegram
 
 import (
 	datafetcher "main/pkg/data_fetcher"
+	databasePkg "main/pkg/database"
 	"main/pkg/templates"
 	"main/pkg/types"
 	"time"
@@ -22,6 +23,7 @@ type Interacter struct {
 	TelegramBot     *tele.Bot
 	Logger          zerolog.Logger
 	DataFetcher     *datafetcher.DataFetcher
+	Database        *databasePkg.Database
 	TemplateManager templates.Manager
 }
 
@@ -34,6 +36,7 @@ func NewInteracter(
 	version string,
 	logger *zerolog.Logger,
 	dataFetcher *datafetcher.DataFetcher,
+	database *databasePkg.Database,
 ) *Interacter {
 	return &Interacter{
 		Token:           config.Token,
@@ -41,6 +44,7 @@ func NewInteracter(
 		Logger:          logger.With().Str("component", "telegram_interacter").Logger(),
 		Version:         version,
 		DataFetcher:     dataFetcher,
+		Database:        database,
 		TemplateManager: templates.NewTelegramTemplatesManager(logger),
 	}
 }
@@ -69,7 +73,7 @@ func (interacter *Interacter) Init() {
 	// bot.Handle("/help", interacter.HandleHelp)
 	// bot.Handle("/subscribe", interacter.HandleSubscribe)
 	// bot.Handle("/unsubscribe", interacter.HandleUnsubscribe)
-	//bot.Handle("/status", interacter.HandleStatus)
+	// bot.Handle("/status", interacter.HandleStatus)
 	//bot.Handle("/validators", interacter.HandleListValidators)
 	//bot.Handle("/missing", interacter.HandleMissingValidators)
 	//bot.Handle("/notifiers", interacter.HandleNotifiers)

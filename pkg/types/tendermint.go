@@ -115,5 +115,4 @@ type ValidatorInfo struct {
 
 func (i ValidatorInfo) GetVotingPowerPercent() string {
 	return fmt.Sprintf("%.2f", i.VotingPowerPercent*100)
-
 }

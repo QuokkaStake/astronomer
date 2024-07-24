@@ -6,6 +6,7 @@ require (
 	cosmossdk.io/math v1.3.0
 	github.com/BurntSushi/toml v1.4.0
 	github.com/creasty/defaults v1.7.0
+	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0

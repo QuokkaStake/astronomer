@@ -7,14 +7,10 @@ import (
 )
 
 type Config struct {
+	DatabaseConfig DatabaseConfig `toml:"database"`
 	LogConfig      LogConfig      `toml:"log"`
 	TelegramConfig TelegramConfig `toml:"telegram"`
 	Chains         Chains         `toml:"chains"`
-}
-
-type PagerDutyConfig struct {
-	PagerDutyURL string `default:"https://events.pagerduty.com" toml:"url"`
-	APIKey       string `toml:"api-key"`
 }
 
 type TelegramConfig struct {
@@ -30,6 +26,10 @@ type DiscordConfig struct {
 }
 
 func (c *Config) Validate() error {
+	if err := c.DatabaseConfig.Validate(); err != nil {
+		return fmt.Errorf("database config is invalid: %s", err)
+	}
+
 	if len(c.Chains) == 0 {
 		return fmt.Errorf("no chains provided")
 	}

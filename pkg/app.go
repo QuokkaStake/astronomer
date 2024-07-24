@@ -2,6 +2,7 @@ package pkg
 
 import (
 	datafetcher "main/pkg/data_fetcher"
+	databasePkg "main/pkg/database"
 	"main/pkg/fs"
 	interacterPkg "main/pkg/interacter"
 	"main/pkg/interacter/telegram"
@@ -16,6 +17,7 @@ type App struct {
 	Config *types.Config
 
 	Interacters []interacterPkg.Interacter
+	Database    *databasePkg.Database
 
 	StopChannel chan bool
 }
@@ -38,20 +40,24 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 
 	log := logger.GetLogger(config.LogConfig)
 	dataFetcher := datafetcher.NewDataFetcher(config, log)
+	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
 	interacters := []interacterPkg.Interacter{
-		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher),
+		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database),
 	}
 
 	return &App{
 		Logger:      log,
 		Config:      config,
 		Interacters: interacters,
+		Database:    database,
 		StopChannel: make(chan bool),
 	}
 }
 
 func (a *App) Start() {
 	a.Logger.Info().Msg("Listening")
+
+	a.Database.Init()
 
 	for _, interacter := range a.Interacters {
 		interacter.Init()
