@@ -42,7 +42,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	dataFetcher := datafetcher.NewDataFetcher(config, log)
 	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
 	interacters := []interacterPkg.Interacter{
-		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database),
+		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database, config.Chains),
 	}
 
 	return &App{

@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"gopkg.in/telebot.v3/middleware"
 	datafetcher "main/pkg/data_fetcher"
 	databasePkg "main/pkg/database"
 	"main/pkg/templates"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/rs/zerolog"
 	tele "gopkg.in/telebot.v3"
-	"gopkg.in/telebot.v3/middleware"
 )
 
 type Interacter struct {
@@ -24,6 +24,7 @@ type Interacter struct {
 	Logger          zerolog.Logger
 	DataFetcher     *datafetcher.DataFetcher
 	Database        *databasePkg.Database
+	Chains          types.Chains
 	TemplateManager templates.Manager
 }
 
@@ -37,6 +38,7 @@ func NewInteracter(
 	logger *zerolog.Logger,
 	dataFetcher *datafetcher.DataFetcher,
 	database *databasePkg.Database,
+	chains types.Chains,
 ) *Interacter {
 	return &Interacter{
 		Token:           config.Token,
@@ -45,6 +47,7 @@ func NewInteracter(
 		Version:         version,
 		DataFetcher:     dataFetcher,
 		Database:        database,
+		Chains:          chains,
 		TemplateManager: templates.NewTelegramTemplatesManager(logger),
 	}
 }
@@ -64,11 +67,6 @@ func (interacter *Interacter) Init() {
 		return
 	}
 
-	if len(interacter.Admins) > 0 {
-		interacter.Logger.Debug().Msg("Using admins whitelist")
-		bot.Use(middleware.Whitelist(interacter.Admins...))
-	}
-
 	// bot.Handle("/start", interacter.HandleHelp)
 	// bot.Handle("/help", interacter.HandleHelp)
 	// bot.Handle("/subscribe", interacter.HandleSubscribe)
@@ -79,6 +77,13 @@ func (interacter *Interacter) Init() {
 	//bot.Handle("/notifiers", interacter.HandleNotifiers)
 	//bot.Handle("/params", interacter.HandleParams)
 	bot.Handle("/validator", interacter.HandleValidator)
+
+	if len(interacter.Admins) > 0 {
+		interacter.Logger.Debug().Msg("Using admins whitelist")
+		bot.Use(middleware.Whitelist(interacter.Admins...))
+	}
+
+	bot.Handle("/chain_bind", interacter.HandleChainBind)
 
 	interacter.TelegramBot = bot
 }

@@ -29,15 +29,13 @@ func (interacter *Interacter) HandleValidator(c tele.Context) error {
 		)))
 	}
 
-	validatorsInfo := interacter.DataFetcher.FindValidator(args[1])
+	validatorsInfo := interacter.DataFetcher.FindValidator(args[1], chainBinds)
 
 	template, err := interacter.TemplateManager.Render("validator", validatorsInfo)
 	if err != nil {
 		interacter.Logger.Error().Err(err).Msg("Error rendering template")
 		return interacter.BotReply(c, "Error rendering template")
 	}
-	//
-	// fmt.Printf("template: %s\n", template)
 
 	return interacter.BotReply(c, template)
 }

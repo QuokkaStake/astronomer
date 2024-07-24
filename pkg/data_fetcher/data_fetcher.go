@@ -4,6 +4,7 @@ import (
 	"main/pkg/tendermint"
 	"main/pkg/types"
 	"main/pkg/utils"
+	"slices"
 	"strings"
 	"sync"
 
@@ -29,7 +30,7 @@ func NewDataFetcher(config *types.Config, logger *zerolog.Logger) *DataFetcher {
 	}
 }
 
-func (f *DataFetcher) FindValidator(query string) map[string]types.ValidatorInfo {
+func (f *DataFetcher) FindValidator(query string, chains []string) map[string]types.ValidatorInfo {
 	lowercaseQuery := strings.ToLower(query)
 
 	var wg sync.WaitGroup
@@ -37,10 +38,14 @@ func (f *DataFetcher) FindValidator(query string) map[string]types.ValidatorInfo
 
 	response := map[string]types.ValidatorInfo{}
 
-	wg.Add(len(f.Chains))
-
 	for index, chain := range f.Chains {
+		if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
+			continue
+		}
+
 		rpc := f.RPCs[index]
+
+		wg.Add(1)
 
 		go func(chain *types.Chain, rpc *tendermint.RPC) {
 			defer wg.Done()
