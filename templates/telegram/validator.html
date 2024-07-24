@@ -1,0 +1,22 @@
+{{- range . }}
+{{- $chain := .Chain -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- if .Error }}
+❌ Error searching for validator: {{ .Error }}
+{{ else if .Validator }}
+{{ .Validator.Description.Moniker }}
+{{- if .Validator.Active }}
+✅Active
+{{- else if .Validator.Jailed }}
+❌Jailed
+{{- else }}
+😔Not active
+{{- end }}
+📋<i>{{ .Validator.Description.Details }}</i>
+🤝Contact {{ .Validator.Description.SecurityContact }}
+🌎Website {{ .Validator.Description.Website }}
+💸Commission {{ .Validator.FormatCommission }}%
+{{ else }}
+No validator found.
+{{ end }}
+{{ end }}

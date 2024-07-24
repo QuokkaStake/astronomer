@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"main/pkg/constants"
 	"time"
 
@@ -47,6 +48,10 @@ type Validator struct {
 
 func (v Validator) Active() bool {
 	return v.Status == constants.ValidatorStatusBonded
+}
+
+func (v Validator) FormatCommission() string {
+	return fmt.Sprintf("%.2f", v.Commission.CommissionRates.Rate.MustFloat64()*100)
 }
 
 type ConsensusPubkey struct {

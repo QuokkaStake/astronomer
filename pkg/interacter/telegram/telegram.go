@@ -2,6 +2,7 @@ package telegram
 
 import (
 	datafetcher "main/pkg/data_fetcher"
+	"main/pkg/templates"
 	"main/pkg/types"
 	"time"
 
@@ -18,9 +19,10 @@ type Interacter struct {
 
 	Version string
 
-	TelegramBot *tele.Bot
-	Logger      zerolog.Logger
-	DataFetcher *datafetcher.DataFetcher
+	TelegramBot     *tele.Bot
+	Logger          zerolog.Logger
+	DataFetcher     *datafetcher.DataFetcher
+	TemplateManager templates.Manager
 }
 
 const (
@@ -34,11 +36,12 @@ func NewInteracter(
 	dataFetcher *datafetcher.DataFetcher,
 ) *Interacter {
 	return &Interacter{
-		Token:       config.Token,
-		Admins:      config.Admins,
-		Logger:      logger.With().Str("component", "telegram_interacter").Logger(),
-		Version:     version,
-		DataFetcher: dataFetcher,
+		Token:           config.Token,
+		Admins:          config.Admins,
+		Logger:          logger.With().Str("component", "telegram_interacter").Logger(),
+		Version:         version,
+		DataFetcher:     dataFetcher,
+		TemplateManager: templates.NewTelegramTemplatesManager(logger),
 	}
 }
 
@@ -64,8 +67,8 @@ func (interacter *Interacter) Init() {
 
 	// bot.Handle("/start", interacter.HandleHelp)
 	// bot.Handle("/help", interacter.HandleHelp)
-	//bot.Handle("/subscribe", interacter.HandleSubscribe)
-	//bot.Handle("/unsubscribe", interacter.HandleUnsubscribe)
+	// bot.Handle("/subscribe", interacter.HandleSubscribe)
+	// bot.Handle("/unsubscribe", interacter.HandleUnsubscribe)
 	//bot.Handle("/status", interacter.HandleStatus)
 	//bot.Handle("/validators", interacter.HandleListValidators)
 	//bot.Handle("/missing", interacter.HandleMissingValidators)

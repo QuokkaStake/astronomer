@@ -22,16 +22,15 @@ func (interacter *Interacter) HandleValidator(c tele.Context) error {
 		)))
 	}
 
-	validators := interacter.DataFetcher.FindValidator(args[1])
+	validatorsInfo := interacter.DataFetcher.FindValidator(args[1])
 
-	var sb strings.Builder
-
-	for _, info := range validators {
-		sb.WriteString(fmt.Sprintf("chain: %+v\n", info.Chain))
-		sb.WriteString(fmt.Sprintf("error: %+v\n", info.Error))
-		sb.WriteString(fmt.Sprintf("validator: %+v\n", info.Validator))
-		sb.WriteString("\n------------\n")
+	template, err := interacter.TemplateManager.Render("validator", validatorsInfo)
+	if err != nil {
+		interacter.Logger.Error().Err(err).Msg("Error rendering template")
+		return interacter.BotReply(c, "Error rendering template")
 	}
+	//
+	// fmt.Printf("template: %s\n", template)
 
-	return interacter.BotReply(c, html.EscapeString(sb.String()))
+	return interacter.BotReply(c, template)
 }
