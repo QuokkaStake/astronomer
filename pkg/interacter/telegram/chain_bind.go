@@ -9,7 +9,14 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-func (interacter *Interacter) HandleChainBind(c tele.Context) error {
+func (interacter *Interacter) GetChainBindCommand() Command {
+	return Command{
+		Name:    "chain_bind",
+		Execute: interacter.HandleChainBind,
+	}
+}
+
+func (interacter *Interacter) HandleChainBind(c tele.Context) (string, error) {
 	interacter.Logger.Info().
 		Str("sender", c.Sender().Username).
 		Str("text", c.Text()).
@@ -17,18 +24,18 @@ func (interacter *Interacter) HandleChainBind(c tele.Context) error {
 
 	args := strings.Split(c.Text(), " ")
 	if len(args) != 2 {
-		return interacter.BotReply(c, html.EscapeString(fmt.Sprintf(
+		return html.EscapeString(fmt.Sprintf(
 			"Usage: %s <chain>",
 			args[0],
-		)))
+		)), fmt.Errorf("invalid command invocation")
 	}
 
 	chain := interacter.Chains.FindByName(args[1])
 	if chain == nil {
-		return interacter.BotReply(c, html.EscapeString(fmt.Sprintf(
+		return html.EscapeString(fmt.Sprintf(
 			"Could not find a chain with the name '%s'",
 			args[1],
-		)))
+		)), fmt.Errorf("could not find chain to bind")
 	}
 
 	err := interacter.Database.InsertChainBind(
@@ -39,8 +46,8 @@ func (interacter *Interacter) HandleChainBind(c tele.Context) error {
 	)
 	if err != nil {
 		interacter.Logger.Error().Err(err).Msg("Error inserting chain bind")
-		return interacter.BotReply(c, "Internal error!")
+		return "", err
 	}
 
-	return interacter.BotReply(c, "Successfully added a chain bind to this chat!")
+	return "Successfully added a chain bind to this chat!", nil
 }

@@ -76,16 +76,41 @@ func (interacter *Interacter) Init() {
 	//bot.Handle("/missing", interacter.HandleMissingValidators)
 	//bot.Handle("/notifiers", interacter.HandleNotifiers)
 	//bot.Handle("/params", interacter.HandleParams)
-	bot.Handle("/validator", interacter.HandleValidator)
+	interacter.AddCommand(bot, interacter.GetValidatorCommand())
 
 	if len(interacter.Admins) > 0 {
 		interacter.Logger.Debug().Msg("Using admins whitelist")
 		bot.Use(middleware.Whitelist(interacter.Admins...))
 	}
 
-	bot.Handle("/chain_bind", interacter.HandleChainBind)
+	interacter.AddCommand(bot, interacter.GetChainBindCommand())
 
 	interacter.TelegramBot = bot
+}
+
+func (interacter *Interacter) AddCommand(bot *tele.Bot, command Command) {
+	bot.Handle("/"+command.Name, func(c tele.Context) error {
+		interacter.Logger.Info().
+			Str("sender", c.Sender().Username).
+			Str("text", c.Text()).
+			Str("command", command.Name).
+			Msg("Got query")
+
+		result, err := command.Execute(c)
+		if err != nil {
+			interacter.Logger.Error().
+				Err(err).
+				Str("command", command.Name).
+				Msg("Error processing command")
+			if result != "" {
+				return interacter.BotReply(c, result)
+			} else {
+				return interacter.BotReply(c, "Internal error!")
+			}
+		}
+
+		return interacter.BotReply(c, result)
+	})
 }
 
 func (interacter *Interacter) Start() {
