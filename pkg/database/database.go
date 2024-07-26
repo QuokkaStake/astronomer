@@ -130,12 +130,14 @@ func (d *Database) GetAllChainBinds(chatID string) ([]string, error) {
 func (d *Database) InsertChainBind(
 	reporter string,
 	chatID string,
+	chatName string,
 	chain string,
 ) error {
 	_, err := d.client.Exec(
-		"INSERT INTO chain_binds (reporter, chat_id, chain) VALUES ($1, $2, $3)",
+		"INSERT INTO chain_binds (reporter, chat_id, chat_name, chain) VALUES ($1, $2, $3, $4)",
 		reporter,
 		chatID,
+		chatName,
 		chain,
 	)
 	if err != nil {

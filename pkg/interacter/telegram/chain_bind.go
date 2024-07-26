@@ -34,6 +34,7 @@ func (interacter *Interacter) HandleChainBind(c tele.Context) error {
 	err := interacter.Database.InsertChainBind(
 		interacter.Name(),
 		strconv.FormatInt(c.Chat().ID, 10),
+		c.Chat().Title,
 		chain.Name,
 	)
 	if err != nil {
