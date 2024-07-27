@@ -1,12 +1,17 @@
 package telegram
 
 import (
-	"gopkg.in/telebot.v3/middleware"
+	"errors"
+	"fmt"
+	"html"
 	datafetcher "main/pkg/data_fetcher"
 	databasePkg "main/pkg/database"
 	"main/pkg/templates"
 	"main/pkg/types"
+	"strings"
 	"time"
+
+	"gopkg.in/telebot.v3/middleware"
 
 	"main/pkg/utils"
 
@@ -72,29 +77,40 @@ func (interacter *Interacter) Init() {
 	// bot.Handle("/subscribe", interacter.HandleSubscribe)
 	// bot.Handle("/unsubscribe", interacter.HandleUnsubscribe)
 	// bot.Handle("/status", interacter.HandleStatus)
-	//bot.Handle("/validators", interacter.HandleListValidators)
-	//bot.Handle("/missing", interacter.HandleMissingValidators)
-	//bot.Handle("/notifiers", interacter.HandleNotifiers)
-	//bot.Handle("/params", interacter.HandleParams)
-	interacter.AddCommand(bot, interacter.GetValidatorCommand())
+	// bot.Handle("/validators", interacter.HandleListValidators)
+	// bot.Handle("/missing", interacter.HandleMissingValidators)
+	// bot.Handle("/notifiers", interacter.HandleNotifiers)
+	// bot.Handle("/params", interacter.HandleParams)
+	interacter.AddCommand("/validator", bot, interacter.GetValidatorCommand())
 
 	if len(interacter.Admins) > 0 {
 		interacter.Logger.Debug().Msg("Using admins whitelist")
 		bot.Use(middleware.Whitelist(interacter.Admins...))
 	}
 
-	interacter.AddCommand(bot, interacter.GetChainBindCommand())
+	interacter.AddCommand("/chain_bind", bot, interacter.GetChainBindCommand())
+	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
 
 	interacter.TelegramBot = bot
 }
 
-func (interacter *Interacter) AddCommand(bot *tele.Bot, command Command) {
-	bot.Handle("/"+command.Name, func(c tele.Context) error {
+func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Command) {
+	bot.Handle(query, func(c tele.Context) error {
 		interacter.Logger.Info().
 			Str("sender", c.Sender().Username).
 			Str("text", c.Text()).
 			Str("command", command.Name).
 			Msg("Got query")
+
+		args := strings.Split(c.Text(), " ")
+
+		if len(args)-1 < command.MinArgs {
+			if err := interacter.BotReply(c, html.EscapeString(fmt.Sprintf(command.Usage, args[0]))); err != nil {
+				return err
+			}
+
+			return errors.New("invalid invocation")
+		}
 
 		result, err := command.Execute(c)
 		if err != nil {

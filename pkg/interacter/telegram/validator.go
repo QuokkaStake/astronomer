@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -12,6 +11,8 @@ func (interacter *Interacter) GetValidatorCommand() Command {
 	return Command{
 		Name:    "validator",
 		Execute: interacter.HandleValidator,
+		MinArgs: 1,
+		Usage:   "Usage: %s <query>",
 	}
 }
 
@@ -23,17 +24,7 @@ func (interacter *Interacter) HandleValidator(c tele.Context) (string, error) {
 	}
 
 	args := strings.SplitN(c.Text(), " ", 2)
-	if len(args) < 2 {
-		return fmt.Sprintf("Usage: %s <query>", args[0]), fmt.Errorf("invalid command invocation")
-	}
-
 	validatorsInfo := interacter.DataFetcher.FindValidator(args[1], chainBinds)
 
-	template, err := interacter.TemplateManager.Render("validator", validatorsInfo)
-	if err != nil {
-		interacter.Logger.Error().Err(err).Msg("Error rendering template")
-		return "", err
-	}
-
-	return template, nil
+	return interacter.TemplateManager.Render("validator", validatorsInfo)
 }

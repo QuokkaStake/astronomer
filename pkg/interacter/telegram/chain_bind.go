@@ -13,22 +13,13 @@ func (interacter *Interacter) GetChainBindCommand() Command {
 	return Command{
 		Name:    "chain_bind",
 		Execute: interacter.HandleChainBind,
+		MinArgs: 1,
+		Usage:   "Usage: %s <chain>",
 	}
 }
 
 func (interacter *Interacter) HandleChainBind(c tele.Context) (string, error) {
-	interacter.Logger.Info().
-		Str("sender", c.Sender().Username).
-		Str("text", c.Text()).
-		Msg("Got status query")
-
 	args := strings.Split(c.Text(), " ")
-	if len(args) != 2 {
-		return html.EscapeString(fmt.Sprintf(
-			"Usage: %s <chain>",
-			args[0],
-		)), fmt.Errorf("invalid command invocation")
-	}
 
 	chain := interacter.Chains.FindByName(args[1])
 	if chain == nil {

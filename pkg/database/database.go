@@ -2,11 +2,11 @@ package database
 
 import (
 	"database/sql"
-	"github.com/rs/zerolog"
 	migrationsPkg "main/migrations"
 	"main/pkg/types"
 	"strings"
-	"sync"
+
+	"github.com/rs/zerolog"
 
 	_ "github.com/lib/pq"
 )
@@ -15,7 +15,6 @@ type Database struct {
 	logger zerolog.Logger
 	config types.DatabaseConfig
 	client *sql.DB
-	mutex  sync.Mutex
 }
 
 func NewDatabase(
@@ -29,7 +28,7 @@ func NewDatabase(
 }
 
 func (d *Database) Init() {
-	var db *sql.DB = d.InitPostgresDatabase()
+	var db = d.InitPostgresDatabase()
 	migrations, err := migrationsPkg.EmbedFS.ReadDir(".")
 	if err != nil {
 		d.logger.Panic().
@@ -68,7 +67,7 @@ func (d *Database) Init() {
 				Msg("Could not execute migration")
 		}
 
-		_ = statement.Close()
+		_ = statement.Close() //nolint:sqlclosecheck // false positive
 	}
 
 	d.client = db

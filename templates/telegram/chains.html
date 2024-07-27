@@ -1,0 +1,15 @@
+<strong>Chains</strong>
+There are {{ len .Chains }} chains configured:
+{{- range .Chains }}
+- {{ .Name }} {{ if .PrettyName }}({{ .PrettyName }}){{ end }}
+{{- end }}
+
+<strong>Chain binds</strong>
+{{- if not .ChainBinds }}
+There are no chains bound to this chat.
+{{- else }}
+There are {{ len .ChainBinds }} chains bound to this chat.
+{{- range .ChainBinds }}
+- {{ . }}
+{{ end }}
+{{ end }}
