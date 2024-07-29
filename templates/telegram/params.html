@@ -1,0 +1,10 @@
+{{- range . }}
+{{- $chain := .Chain -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- if .StakingParamsError }}
+❌ Error fetching staking params: {{ .StakingParamsError }}
+{{ else }}
+Max validators: {{ .StakingParams.MaxValidators }}
+Unbonding time: {{ FormatDuration .StakingParams.UnbondingTime.Duration }}
+{{ end }}
+{{ end }}

@@ -82,6 +82,7 @@ func (interacter *Interacter) Init() {
 	// bot.Handle("/notifiers", interacter.HandleNotifiers)
 	// bot.Handle("/params", interacter.HandleParams)
 	interacter.AddCommand("/validator", bot, interacter.GetValidatorCommand())
+	interacter.AddCommand("/params", bot, interacter.GetParamsCommand())
 
 	if len(interacter.Admins) > 0 {
 		interacter.Logger.Debug().Msg("Using admins whitelist")

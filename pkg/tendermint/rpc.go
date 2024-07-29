@@ -52,6 +52,22 @@ func (rpc *RPC) GetAllValidators() (*types.ValidatorsResponse, types.QueryInfo, 
 	return response, info, nil
 }
 
+func (rpc *RPC) GetStakingParams() (*types.StakingParamsResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/params"
+
+	var response *types.StakingParamsResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.StakingParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) Get(
 	url string,
 	target interface{},

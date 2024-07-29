@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"html/template"
+	"main/pkg/utils"
 	"main/templates"
 
 	"github.com/rs/zerolog"
@@ -54,7 +55,9 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 
 	filename := templateName + ".html"
 
-	t, err := template.New(filename).Funcs(template.FuncMap{}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
+	t, err := template.New(filename).Funcs(template.FuncMap{
+		"FormatDuration": utils.FormatDuration,
+	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
 		return nil, err
 	}

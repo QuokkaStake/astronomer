@@ -90,3 +90,42 @@ func (f *DataFetcher) FindValidator(query string, chains []string) map[string]ty
 
 	return response
 }
+
+func (f *DataFetcher) GetChainsParams(chains []string) map[string]*types.ChainParams {
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
+
+	response := map[string]*types.ChainParams{}
+
+	for index, chain := range f.Chains {
+		if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
+			continue
+		}
+
+		response[chain.Name] = &types.ChainParams{
+			Chain: chain,
+		}
+
+		rpc := f.RPCs[index]
+
+		wg.Add(1)
+
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			params, _, err := rpc.GetStakingParams()
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].StakingParamsError = err
+			} else {
+				response[chain.Name].StakingParams = params.Params
+			}
+		}(chain, rpc)
+	}
+
+	wg.Wait()
+
+	return response
+}

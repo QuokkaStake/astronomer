@@ -3,6 +3,7 @@ package utils
 import (
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -52,4 +53,13 @@ func TestSplitStringIntoChunksMoreChunks(t *testing.T) {
 	str := "aaaa\nbbbb\ncccc\ndddd\neeeee\n"
 	chunks := SplitStringIntoChunks(str, 10)
 	assert.Len(t, chunks, 3, "There should be 3 chunks!")
+}
+
+func TestFormatDuration(t *testing.T) {
+	t.Parallel()
+
+	duration := time.Hour*24 + time.Hour*2 + time.Second*4
+	formatted := FormatDuration(duration)
+
+	assert.Equal(t, "1 day 2 hours 4 seconds", formatted)
 }

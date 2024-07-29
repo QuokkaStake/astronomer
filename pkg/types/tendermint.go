@@ -116,3 +116,19 @@ type ValidatorInfo struct {
 func (i ValidatorInfo) GetVotingPowerPercent() string {
 	return fmt.Sprintf("%.2f", i.VotingPowerPercent*100)
 }
+
+type StakingParamsResponse struct {
+	Code   int           `json:"code"`
+	Params StakingParams `json:"params"`
+}
+
+type StakingParams struct {
+	UnbondingTime Duration `json:"unbonding_time"`
+	MaxValidators int      `json:"max_validators"`
+}
+
+type ChainParams struct {
+	Chain              *Chain
+	StakingParams      StakingParams
+	StakingParamsError error
+}
