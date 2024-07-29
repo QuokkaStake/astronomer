@@ -146,3 +146,23 @@ func (d *Database) InsertChainBind(
 
 	return nil
 }
+
+func (d *Database) DeleteChainBind(
+	reporter string,
+	chatID string,
+	chain string,
+) (bool, error) {
+	result, err := d.client.Exec(
+		"DELETE FROM chain_binds WHERE reporter = $1 AND chat_id = $2 AND chain = $3",
+		reporter,
+		chatID,
+		chain,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not delete chain bind")
+		return false, err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	return rowsAffected > 0, nil
+}

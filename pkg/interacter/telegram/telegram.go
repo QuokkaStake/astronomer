@@ -89,6 +89,7 @@ func (interacter *Interacter) Init() {
 	}
 
 	interacter.AddCommand("/chain_bind", bot, interacter.GetChainBindCommand())
+	interacter.AddCommand("/chain_unbind", bot, interacter.GetChainUnbindCommand())
 	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
 
 	interacter.TelegramBot = bot
