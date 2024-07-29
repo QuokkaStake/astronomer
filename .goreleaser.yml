@@ -1,5 +1,5 @@
 builds:
-  - main: ./cmd/cosmos-proposals-checker.go
+  - main: ./cmd/astronomer.go
     env:
       - CGO_ENABLED=0
     goos:
