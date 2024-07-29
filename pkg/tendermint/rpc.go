@@ -68,6 +68,22 @@ func (rpc *RPC) GetStakingParams() (*types.StakingParamsResponse, types.QueryInf
 	return response, info, nil
 }
 
+func (rpc *RPC) GetSlashingParams() (*types.SlashingParamsResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/slashing/v1beta1/params"
+
+	var response *types.SlashingParamsResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.SlashingParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) Get(
 	url string,
 	target interface{},

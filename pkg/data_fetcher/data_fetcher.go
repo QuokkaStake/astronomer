@@ -109,7 +109,6 @@ func (f *DataFetcher) GetChainsParams(chains []string) map[string]*types.ChainPa
 		rpc := f.RPCs[index]
 
 		wg.Add(1)
-
 		go func(chain *types.Chain, rpc *tendermint.RPC) {
 			defer wg.Done()
 
@@ -121,6 +120,21 @@ func (f *DataFetcher) GetChainsParams(chains []string) map[string]*types.ChainPa
 				response[chain.Name].StakingParamsError = err
 			} else {
 				response[chain.Name].StakingParams = params.Params
+			}
+		}(chain, rpc)
+
+		wg.Add(1)
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			params, _, err := rpc.GetSlashingParams()
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].SlashingParamsError = err
+			} else {
+				response[chain.Name].SlashingParams = params.Params
 			}
 		}(chain, rpc)
 	}

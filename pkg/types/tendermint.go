@@ -127,8 +127,23 @@ type StakingParams struct {
 	MaxValidators int      `json:"max_validators"`
 }
 
+type SlashingParamsResponse struct {
+	Code   int            `json:"code"`
+	Params SlashingParams `json:"params"`
+}
+
+type SlashingParams struct {
+	SignedBlocksWindow      int      `json:"signed_blocks_window,string"`
+	MinSignedPerWindow      float64  `json:"min_signed_per_window,string"`
+	DowntimeJailDuration    Duration `json:"downtime_jail_duration"`
+	SlashFractionDowntime   float64  `json:"slash_fraction_downtime,string"`
+	SlashFractionDoubleSign float64  `json:"slash_fraction_double_sign,string"`
+}
+
 type ChainParams struct {
-	Chain              *Chain
-	StakingParams      StakingParams
-	StakingParamsError error
+	Chain               *Chain
+	StakingParams       StakingParams
+	StakingParamsError  error
+	SlashingParams      SlashingParams
+	SlashingParamsError error
 }

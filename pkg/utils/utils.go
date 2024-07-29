@@ -77,3 +77,7 @@ func FormatDuration(duration time.Duration) string {
 
 	return strings.Join(parts, " ")
 }
+
+func FormatPercent(percent float64) string {
+	return fmt.Sprintf("%.2f%%", percent*100)
+}

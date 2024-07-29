@@ -1,10 +1,20 @@
 {{- range . }}
 {{- $chain := .Chain -}}
 <strong>{{ .Chain.GetName }}</strong>
-{{- if .StakingParamsError }}
-❌ Error fetching staking params: {{ .StakingParamsError }}
-{{ else }}
-Max validators: {{ .StakingParams.MaxValidators }}
-Unbonding time: {{ FormatDuration .StakingParams.UnbondingTime.Duration }}
+{{- if not .StakingParamsError }}
+<i>Staking params</i>
+- Max validators: {{ .StakingParams.MaxValidators }}
+- Unbonding time: {{ FormatDuration .StakingParams.UnbondingTime.Duration }}
+{{- end }}
+{{- if not .SlashingParamsError }}
+<i>Slashing params</i>
+- Min signed per window: {{ FormatPercent .SlashingParams.MinSignedPerWindow }}
+- Signed blocks window: {{ .SlashingParams.SignedBlocksWindow }}
+- Downtime jail duration: {{ FormatDuration .SlashingParams.DowntimeJailDuration.Duration }}
+- Slashing percent: downtime {{ FormatPercent .SlashingParams.SlashFractionDowntime }}, double sign {{ FormatPercent .SlashingParams.SlashFractionDoubleSign }}
 {{ end }}
+{{ if .StakingParamsError }}❌ Error fetching staking params: {{ .StakingParamsError }}
+{{ end -}}
+{{ if .SlashingParamsError }}❌ Error fetching slashing params: {{ .SlashingParamsError }}
+{{ end -}}
 {{ end }}
