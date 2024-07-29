@@ -84,6 +84,22 @@ func (rpc *RPC) GetSlashingParams() (*types.SlashingParamsResponse, types.QueryI
 	return response, info, nil
 }
 
+func (rpc *RPC) GetGovParams(paramsType string) (*types.GovParamsResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/params/" + paramsType
+
+	var response *types.GovParamsResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.GovParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) Get(
 	url string,
 	target interface{},

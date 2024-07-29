@@ -12,9 +12,29 @@
 - Signed blocks window: {{ .SlashingParams.SignedBlocksWindow }}
 - Downtime jail duration: {{ FormatDuration .SlashingParams.DowntimeJailDuration.Duration }}
 - Slashing percent: downtime {{ FormatPercent .SlashingParams.SlashFractionDowntime }}, double sign {{ FormatPercent .SlashingParams.SlashFractionDoubleSign }}
-{{ end }}
+{{- end }}
+{{- if and (not .VotingParamsError) (not .DepositParamsError) (not .TallyParamsError) }}
+<i>Voting params</i>
+{{- if not .VotingParamsError }}
+- Voting period: {{ FormatDuration .VotingParams.VotingPeriod.Duration }}
+{{- end }}
+{{- if not .DepositParamsError }}
+- Max deposit period: {{ FormatDuration .DepositParams.MaxDepositPeriod.Duration }}
+{{- end }}
+{{- if not .TallyParamsError }}
+- Quorum: {{ FormatPercent .TallyParams.Quorum }}
+- Threshold: {{ FormatPercent .TallyParams.Threshold }}
+- Veto threshold: {{ FormatPercent .TallyParams.VetoThreshold }}
+{{- end }}
+{{- end }}
 {{ if .StakingParamsError }}❌ Error fetching staking params: {{ .StakingParamsError }}
 {{ end -}}
 {{ if .SlashingParamsError }}❌ Error fetching slashing params: {{ .SlashingParamsError }}
 {{ end -}}
+{{ if .VotingParamsError }}❌ Error fetching governance voting params: {{ .VotingParamsError }}
+{{ end -}}
+{{ if .DepositParamsError }}❌ Error fetching governance deposit params: {{ .DepositParamsError }}
+{{ end -}}
+{{ if .TallyParamsError }}❌ Error fetching governance tally params: {{ .TallyParamsError }}
+{{ end }}
 {{ end }}

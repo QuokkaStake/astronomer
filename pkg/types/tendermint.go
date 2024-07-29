@@ -140,10 +140,38 @@ type SlashingParams struct {
 	SlashFractionDoubleSign float64  `json:"slash_fraction_double_sign,string"`
 }
 
+type GovParamsResponse struct {
+	Code          int           `json:"code"`
+	VotingParams  VotingParams  `json:"voting_params"`
+	DepositParams DepositParams `json:"deposit_params"`
+	TallyParams   TallyParams   `json:"tally_params"`
+}
+
+type VotingParams struct {
+	VotingPeriod Duration `json:"voting_period"`
+}
+
+type DepositParams struct {
+	MaxDepositPeriod Duration `json:"max_deposit_period"`
+}
+
+type TallyParams struct {
+	Quorum        float64 `json:"quorum,string"`
+	Threshold     float64 `json:"threshold,string"`
+	VetoThreshold float64 `json:"veto_threshold,string"`
+}
+
 type ChainParams struct {
 	Chain               *Chain
 	StakingParams       StakingParams
 	StakingParamsError  error
 	SlashingParams      SlashingParams
 	SlashingParamsError error
+
+	VotingParams       VotingParams
+	VotingParamsError  error
+	DepositParams      DepositParams
+	DepositParamsError error
+	TallyParams        TallyParams
+	TallyParamsError   error
 }

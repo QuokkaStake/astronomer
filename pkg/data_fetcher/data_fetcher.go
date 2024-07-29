@@ -137,6 +137,51 @@ func (f *DataFetcher) GetChainsParams(chains []string) map[string]*types.ChainPa
 				response[chain.Name].SlashingParams = params.Params
 			}
 		}(chain, rpc)
+
+		wg.Add(1)
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			params, _, err := rpc.GetGovParams("voting")
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].VotingParamsError = err
+			} else {
+				response[chain.Name].VotingParams = params.VotingParams
+			}
+		}(chain, rpc)
+
+		wg.Add(1)
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			params, _, err := rpc.GetGovParams("deposit")
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].DepositParamsError = err
+			} else {
+				response[chain.Name].DepositParams = params.DepositParams
+			}
+		}(chain, rpc)
+
+		wg.Add(1)
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			params, _, err := rpc.GetGovParams("tallying")
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].TallyParamsError = err
+			} else {
+				response[chain.Name].TallyParams = params.TallyParams
+			}
+		}(chain, rpc)
 	}
 
 	wg.Wait()
