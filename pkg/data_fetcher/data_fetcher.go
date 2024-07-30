@@ -197,6 +197,36 @@ func (f *DataFetcher) GetChainsParams(chains []string) map[string]*types.ChainPa
 				response[chain.Name].BlockTime = blockTime
 			}
 		}(chain, rpc)
+
+		wg.Add(1)
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			params, _, err := rpc.GetMintParams()
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].MintParamsError = err
+			} else {
+				response[chain.Name].MintParams = params.Params
+			}
+		}(chain, rpc)
+
+		wg.Add(1)
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			inflation, _, err := rpc.GetInflation()
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].InflationError = err
+			} else {
+				response[chain.Name].Inflation = inflation.Inflation
+			}
+		}(chain, rpc)
 	}
 
 	wg.Wait()

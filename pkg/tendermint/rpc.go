@@ -102,6 +102,38 @@ func (rpc *RPC) GetGovParams(paramsType string) (*types.GovParamsResponse, types
 	return response, info, nil
 }
 
+func (rpc *RPC) GetMintParams() (*types.MintParamsResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/mint/v1beta1/params"
+
+	var response *types.MintParamsResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.MintParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+	}
+
+	return response, info, nil
+}
+
+func (rpc *RPC) GetInflation() (*types.InflationResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/mint/v1beta1/inflation"
+
+	var response *types.InflationResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.InflationResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	var newerBlock *types.BlockResponse
 	_, err := rpc.Get(rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/latest", &newerBlock)

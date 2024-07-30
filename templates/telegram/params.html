@@ -13,8 +13,16 @@
 - Downtime jail duration: {{ FormatDuration .SlashingParams.DowntimeJailDuration.Duration }}
 - Slashing percent: downtime {{ FormatPercent .SlashingParams.SlashFractionDowntime }}, double sign {{ FormatPercent .SlashingParams.SlashFractionDoubleSign }}
 {{- end }}
+{{- if not .MintParamsError }}
+<i>💸Mint params</i>
+- Goal bonded: {{ FormatPercent .MintParams.GoalBonded }}
+- Inflation: 🔻min {{ FormatPercent .MintParams.InflationMin }},🔺max {{ FormatPercent .MintParams.InflationMax }}
+{{- end }}
+{{- if not .InflationError }}
+<i>💸Current inflation: </i> {{ FormatPercent .Inflation }}
+{{- end }}
 {{- if not .BlockTimeError }}
-<i>⏱️Block time: </i> {{ FormatFloat .BlockTime.Seconds }} seconds
+<i>⏱️Block time:</i> {{ FormatFloat .BlockTime.Seconds }} seconds
 {{- end }}
 {{- if and (not .VotingParamsError) (not .DepositParamsError) (not .TallyParamsError) }}
 <i>🗳️Voting params</i>
@@ -39,7 +47,11 @@
 {{ if .DepositParamsError }}❌ Error fetching governance deposit params: {{ .DepositParamsError }}
 {{ end -}}
 {{ if .TallyParamsError }}❌ Error fetching governance tally params: {{ .TallyParamsError }}
-{{ end }}
+{{ end -}}
+{{ if .MintParamsError }}❌ Error fetching mint params: {{ .MintParamsError }}
+{{ end -}}
+{{ if .InflationError }}❌ Error fetching inflation: {{ .InflationError }}
+{{ end -}}
 {{ if .BlockTimeError }}❌ Error fetching block time: {{ .BlockTimeError }}
 {{ end }}
 {{ end }}
