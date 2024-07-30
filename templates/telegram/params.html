@@ -2,19 +2,22 @@
 {{- $chain := .Chain -}}
 <strong>{{ .Chain.GetName }}</strong>
 {{- if not .StakingParamsError }}
-<i>Staking params</i>
+<i>🏦Staking params</i>
 - Max validators: {{ .StakingParams.MaxValidators }}
 - Unbonding time: {{ FormatDuration .StakingParams.UnbondingTime.Duration }}
 {{- end }}
 {{- if not .SlashingParamsError }}
-<i>Slashing params</i>
+<i>🔪Slashing params</i>
 - Min signed per window: {{ FormatPercent .SlashingParams.MinSignedPerWindow }}
 - Signed blocks window: {{ .SlashingParams.SignedBlocksWindow }}
 - Downtime jail duration: {{ FormatDuration .SlashingParams.DowntimeJailDuration.Duration }}
 - Slashing percent: downtime {{ FormatPercent .SlashingParams.SlashFractionDowntime }}, double sign {{ FormatPercent .SlashingParams.SlashFractionDoubleSign }}
 {{- end }}
+{{- if not .BlockTimeError }}
+<i>⏱️Block time: </i> {{ FormatFloat .BlockTime.Seconds }} seconds
+{{- end }}
 {{- if and (not .VotingParamsError) (not .DepositParamsError) (not .TallyParamsError) }}
-<i>Voting params</i>
+<i>🗳️Voting params</i>
 {{- if not .VotingParamsError }}
 - Voting period: {{ FormatDuration .VotingParams.VotingPeriod.Duration }}
 {{- end }}
@@ -36,5 +39,7 @@
 {{ if .DepositParamsError }}❌ Error fetching governance deposit params: {{ .DepositParamsError }}
 {{ end -}}
 {{ if .TallyParamsError }}❌ Error fetching governance tally params: {{ .TallyParamsError }}
+{{ end }}
+{{ if .BlockTimeError }}❌ Error fetching block time: {{ .BlockTimeError }}
 {{ end }}
 {{ end }}

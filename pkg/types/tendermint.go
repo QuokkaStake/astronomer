@@ -161,6 +161,16 @@ type TallyParams struct {
 	VetoThreshold float64 `json:"veto_threshold,string"`
 }
 
+type BlockResponse struct {
+	Code  int `json:"code"`
+	Block struct {
+		Header struct {
+			Time   time.Time `json:"time"`
+			Height int64     `json:"height,string"`
+		} `json:"header"`
+	} `json:"block"`
+}
+
 type ChainParams struct {
 	Chain               *Chain
 	StakingParams       StakingParams
@@ -174,4 +184,7 @@ type ChainParams struct {
 	DepositParamsError error
 	TallyParams        TallyParams
 	TallyParamsError   error
+
+	BlockTime      time.Duration
+	BlockTimeError error
 }

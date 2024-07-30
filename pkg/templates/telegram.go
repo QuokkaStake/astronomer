@@ -58,6 +58,7 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 	t, err := template.New(filename).Funcs(template.FuncMap{
 		"FormatDuration": utils.FormatDuration,
 		"FormatPercent":  utils.FormatPercent,
+		"FormatFloat":    utils.FormatFloat,
 	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
 		return nil, err
