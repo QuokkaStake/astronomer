@@ -7,6 +7,16 @@ import (
 	"time"
 )
 
+func Map[T, V any](slice []T, f func(T) V) []V {
+	result := make([]V, len(slice))
+
+	for index, value := range slice {
+		result[index] = f(value)
+	}
+
+	return result
+}
+
 func Filter[T any](slice []T, f func(T) bool) []T {
 	var n []T
 	for _, e := range slice {

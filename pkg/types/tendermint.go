@@ -189,26 +189,27 @@ type InflationResponse struct {
 	Inflation float64 `json:"inflation,string"`
 }
 
-type ChainParams struct {
-	Chain               *Chain
-	StakingParams       StakingParams
-	StakingParamsError  error
-	SlashingParams      SlashingParams
-	SlashingParamsError error
+type ProposalsV1Response struct {
+	Code      int          `json:"code"`
+	Proposals []ProposalV1 `json:"proposals"`
+}
 
-	VotingParams       VotingParams
-	VotingParamsError  error
-	DepositParams      DepositParams
-	DepositParamsError error
-	TallyParams        TallyParams
-	TallyParamsError   error
+type ProposalV1 struct {
+	ID              string    `json:"id"`
+	Status          string    `json:"status"`
+	VotingStartTime time.Time `json:"voting_start_time"`
+	VotingEndTime   time.Time `json:"voting_end_time"`
+	Title           string    `json:"title"`
+	Summary         string    `json:"summary"`
+}
 
-	BlockTime      time.Duration
-	BlockTimeError error
-
-	MintParams      MintParams
-	MintParamsError error
-
-	Inflation      float64
-	InflationError error
+func (p *ProposalV1) ToProposal() Proposal {
+	return Proposal{
+		ID:              p.ID,
+		Status:          p.Status,
+		VotingStartTime: p.VotingStartTime,
+		VotingEndTime:   p.VotingEndTime,
+		Title:           p.Title,
+		Summary:         p.Summary,
+	}
 }

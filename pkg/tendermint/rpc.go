@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"main/pkg/http"
 	"main/pkg/types"
+	"main/pkg/utils"
 	"strconv"
 	"sync"
 	"time"
@@ -28,11 +29,11 @@ func NewRPC(
 ) *RPC {
 	return &RPC{
 		Chain:   chain,
-		Client:  http.NewClient(logger, chain.GetName()),
+		Client:  http.NewClient(logger, chain.Name),
 		Timeout: timeout,
 		Logger: logger.With().
 			Str("component", "rpc").
-			Str("chain", chain.GetName()).
+			Str("chain", chain.Name).
 			Logger(),
 		LastHeight: map[string]int64{},
 	}
@@ -164,6 +165,24 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	heightDiff := olderBlock.Block.Header.Height - newerBlock.Block.Header.Height
 
 	return time.Duration(float64(timeDiff.Nanoseconds()) / float64(heightDiff)), nil
+}
+
+func (rpc *RPC) GetActiveProposals() ([]types.Proposal, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
+
+	var response *types.ProposalsV1Response
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return []types.Proposal{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+	}
+
+	return utils.Map(response.Proposals, func(p types.ProposalV1) types.Proposal {
+		return p.ToProposal()
+	}), info, nil
 }
 
 func (rpc *RPC) Get(

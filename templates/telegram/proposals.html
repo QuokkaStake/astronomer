@@ -1,0 +1,16 @@
+{{- range . }}
+{{- $chain := .Chain -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- if .ProposalsError }}
+❌ Error querying proposals: {{ .ProposalsError }}
+{{ else if .Proposals }}
+{{- range .Proposals }}
+<i>🗳Proposal ID:</i> {{ .ID }}
+<i>📝Status:</i> {{ .FormatStatus }}
+<i>📝Title:</i> {{ .Title }}
+<i>⏳Voting ends at:</i> {{ .VotingEndTime }} (in {{ FormatDuration .VotingTimeLeft }})
+{{ end }}
+{{ else }}
+No active proposals.
+{{ end }}
+{{ end }}

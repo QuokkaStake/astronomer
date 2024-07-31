@@ -233,3 +233,41 @@ func (f *DataFetcher) GetChainsParams(chains []string) map[string]*types.ChainPa
 
 	return response
 }
+
+func (f *DataFetcher) GetActiveProposals(chains []string) map[string]*types.ActiveProposals {
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
+
+	response := map[string]*types.ActiveProposals{}
+
+	for index, chain := range f.Chains {
+		if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
+			continue
+		}
+
+		response[chain.Name] = &types.ActiveProposals{
+			Chain: chain,
+		}
+
+		rpc := f.RPCs[index]
+
+		wg.Add(1)
+		go func(chain *types.Chain, rpc *tendermint.RPC) {
+			defer wg.Done()
+
+			proposals, _, err := rpc.GetActiveProposals()
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				response[chain.Name].ProposalsError = err
+			} else {
+				response[chain.Name].Proposals = proposals
+			}
+		}(chain, rpc)
+	}
+
+	wg.Wait()
+
+	return response
+}

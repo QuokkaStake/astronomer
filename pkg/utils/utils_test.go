@@ -18,6 +18,21 @@ func StringOfRandomLength(n int) string {
 	return string(b)
 }
 
+func TestMap(t *testing.T) {
+	t.Parallel()
+
+	array := []int64{1, 2, 3}
+
+	filtered := Map(array, func(value int64) int64 {
+		return value * 2
+	})
+
+	assert.Len(t, filtered, 3)
+	assert.Equal(t, int64(2), filtered[0])
+	assert.Equal(t, int64(4), filtered[1])
+	assert.Equal(t, int64(6), filtered[2])
+}
+
 func TestFilter(t *testing.T) {
 	t.Parallel()
 
