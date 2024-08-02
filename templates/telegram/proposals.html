@@ -10,7 +10,7 @@
 <i>📝Title:</i> {{ .Title }}
 <i>⏳Voting ends at:</i> {{ .VotingEndTime }} ({{ FormatSince .VotingEndTime }})
 {{ end }}
-{{ else }}
+{{- else }}
 No active proposals.
 {{ end }}
 {{ end }}
