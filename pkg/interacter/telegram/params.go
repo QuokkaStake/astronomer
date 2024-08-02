@@ -8,8 +8,9 @@ import (
 
 func (interacter *Interacter) GetParamsCommand() Command {
 	return Command{
-		Name:    "params",
-		Execute: interacter.HandleParams,
+		Name:         "params",
+		Execute:      interacter.HandleParams,
+		ValidateArgs: NoArgs(),
 	}
 }
 

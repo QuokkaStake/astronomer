@@ -11,10 +11,9 @@ import (
 
 func (interacter *Interacter) GetChainUnbindCommand() Command {
 	return Command{
-		Name:    "chain_unbind",
-		Execute: interacter.HandleChainUnbind,
-		MinArgs: 1,
-		Usage:   "Usage: %s <chain>",
+		Name:         "chain_unbind",
+		Execute:      interacter.HandleChainUnbind,
+		ValidateArgs: MinArgs(1, "Usage: %s <chain>"),
 	}
 }
 

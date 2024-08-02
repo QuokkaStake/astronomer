@@ -8,8 +8,9 @@ import (
 
 func (interacter *Interacter) GetActiveProposalsCommand() Command {
 	return Command{
-		Name:    "proposals",
-		Execute: interacter.HandleActiveProposals,
+		Name:         "proposals",
+		Execute:      interacter.HandleActiveProposals,
+		ValidateArgs: NoArgs(),
 	}
 }
 

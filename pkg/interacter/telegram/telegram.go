@@ -108,8 +108,8 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 
 		args := strings.Split(c.Text(), " ")
 
-		if len(args)-1 < command.MinArgs {
-			if err := interacter.BotReply(c, html.EscapeString(fmt.Sprintf(command.Usage, args[0]))); err != nil {
+		if valid, usage := command.ValidateArgs(c); !valid {
+			if err := interacter.BotReply(c, html.EscapeString(fmt.Sprintf(usage, args[0]))); err != nil {
 				return err
 			}
 

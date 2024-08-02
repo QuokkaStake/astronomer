@@ -8,8 +8,9 @@ import (
 
 func (interacter *Interacter) GetChainsListCommand() Command {
 	return Command{
-		Name:    "chains",
-		Execute: interacter.HandleChainsList,
+		Name:         "chains",
+		Execute:      interacter.HandleChainsList,
+		ValidateArgs: NoArgs(),
 	}
 }
 

@@ -9,10 +9,9 @@ import (
 
 func (interacter *Interacter) GetValidatorCommand() Command {
 	return Command{
-		Name:    "validator",
-		Execute: interacter.HandleValidator,
-		MinArgs: 1,
-		Usage:   "Usage: %s <query>",
+		Name:         "validator",
+		Execute:      interacter.HandleValidator,
+		ValidateArgs: MinArgs(1, "Usage: %s <query>"),
 	}
 }
 

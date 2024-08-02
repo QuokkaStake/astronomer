@@ -11,10 +11,9 @@ import (
 
 func (interacter *Interacter) GetChainBindCommand() Command {
 	return Command{
-		Name:    "chain_bind",
-		Execute: interacter.HandleChainBind,
-		MinArgs: 1,
-		Usage:   "Usage: %s <chain>",
+		Name:         "chain_bind",
+		Execute:      interacter.HandleChainBind,
+		ValidateArgs: MinArgs(1, "Usage: %s <chain>"),
 	}
 }
 

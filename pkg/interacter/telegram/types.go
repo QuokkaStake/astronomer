@@ -7,10 +7,9 @@ import (
 )
 
 type Command struct {
-	Name    string
-	Execute func(c tele.Context) (string, error)
-	MinArgs int
-	Usage   string
+	Name         string
+	Execute      func(c tele.Context) (string, error)
+	ValidateArgs ArgsValidator
 }
 
 type ChainsInfo struct {
