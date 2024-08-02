@@ -49,7 +49,7 @@ func (rpc *RPC) GetAllValidators() (*types.ValidatorsResponse, types.QueryInfo, 
 	}
 
 	if response.Code != 0 {
-		return &types.ValidatorsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return &types.ValidatorsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil
@@ -65,7 +65,7 @@ func (rpc *RPC) GetStakingParams() (*types.StakingParamsResponse, types.QueryInf
 	}
 
 	if response.Code != 0 {
-		return &types.StakingParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return &types.StakingParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil
@@ -81,7 +81,7 @@ func (rpc *RPC) GetSlashingParams() (*types.SlashingParamsResponse, types.QueryI
 	}
 
 	if response.Code != 0 {
-		return &types.SlashingParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return &types.SlashingParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil
@@ -97,7 +97,7 @@ func (rpc *RPC) GetGovParams(paramsType string) (*types.GovParamsResponse, types
 	}
 
 	if response.Code != 0 {
-		return &types.GovParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return &types.GovParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil
@@ -113,7 +113,7 @@ func (rpc *RPC) GetMintParams() (*types.MintParamsResponse, types.QueryInfo, err
 	}
 
 	if response.Code != 0 {
-		return &types.MintParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return &types.MintParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil
@@ -129,7 +129,7 @@ func (rpc *RPC) GetInflation() (*types.InflationResponse, types.QueryInfo, error
 	}
 
 	if response.Code != 0 {
-		return &types.InflationResponse{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return &types.InflationResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil
@@ -143,7 +143,7 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	}
 
 	if newerBlock.Code != 0 {
-		return 0, fmt.Errorf("expected code 0, but got %d", newerBlock.Code)
+		return 0, fmt.Errorf("expected code 0, but got %d: %s", newerBlock.Code, newerBlock.Message)
 	}
 
 	newerHeight := newerBlock.Block.Header.Height - 1000
@@ -158,7 +158,7 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	}
 
 	if olderBlock.Code != 0 {
-		return 0, fmt.Errorf("expected code 0, but got %d", olderBlock.Code)
+		return 0, fmt.Errorf("expected code 0, but got %d: %s", olderBlock.Code, olderBlock.Message)
 	}
 
 	timeDiff := olderBlock.Block.Header.Time.Sub(newerBlock.Block.Header.Time)
@@ -187,13 +187,17 @@ func (rpc *RPC) GetActiveProposals() ([]types.Proposal, types.QueryInfo, error) 
 			return nil, info, err
 		}
 
+		if response.Code != 0 {
+			return []types.Proposal{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+		}
+
 		return utils.Map(response.Proposals, func(p types.ProposalV1Beta1) types.Proposal {
 			return p.ToProposal()
 		}), info, nil
 	}
 
 	if response.Code != 0 {
-		return []types.Proposal{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return []types.Proposal{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return utils.Map(response.Proposals, func(p types.ProposalV1) types.Proposal {
@@ -229,12 +233,16 @@ func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.Que
 			return nil, info, nil
 		}
 
+		if response.Code != 0 {
+			return nil, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+		}
+
 		proposal := response.Proposal.ToProposal()
 		return &proposal, info, nil
 	}
 
 	if response.Code != 0 {
-		return nil, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+		return nil, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	proposal := response.Proposal.ToProposal()

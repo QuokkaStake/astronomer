@@ -12,6 +12,7 @@ import (
 
 type ValidatorResponse struct {
 	Code      int       `json:"code"`
+	Message   string    `json:"message"`
 	Validator Validator `json:"validator"`
 }
 
@@ -63,6 +64,7 @@ type ConsensusPubkey struct {
 
 type PaginationResponse struct {
 	Code       int        `json:"code"`
+	Message    string     `json:"message"`
 	Pagination Pagination `json:"pagination"`
 }
 
@@ -72,6 +74,7 @@ type Pagination struct {
 
 type ValidatorsResponse struct {
 	Code       int          `json:"code"`
+	Message    string       `json:"message"`
 	Validators []*Validator `json:"validators"`
 }
 
@@ -118,18 +121,21 @@ func (i ValidatorInfo) GetVotingPowerPercent() string {
 }
 
 type StakingParamsResponse struct {
-	Code   int           `json:"code"`
-	Params StakingParams `json:"params"`
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Params  StakingParams `json:"params"`
 }
 
 type StakingParams struct {
 	UnbondingTime Duration `json:"unbonding_time"`
+	Message       string   `json:"message"`
 	MaxValidators int      `json:"max_validators"`
 }
 
 type SlashingParamsResponse struct {
-	Code   int            `json:"code"`
-	Params SlashingParams `json:"params"`
+	Code    int            `json:"code"`
+	Message string         `json:"message"`
+	Params  SlashingParams `json:"params"`
 }
 
 type SlashingParams struct {
@@ -142,6 +148,7 @@ type SlashingParams struct {
 
 type GovParamsResponse struct {
 	Code          int           `json:"code"`
+	Message       string        `json:"message"`
 	VotingParams  VotingParams  `json:"voting_params"`
 	DepositParams DepositParams `json:"deposit_params"`
 	TallyParams   TallyParams   `json:"tally_params"`
@@ -162,8 +169,9 @@ type TallyParams struct {
 }
 
 type BlockResponse struct {
-	Code  int `json:"code"`
-	Block struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Block   struct {
 		Header struct {
 			Time   time.Time `json:"time"`
 			Height int64     `json:"height,string"`
@@ -172,8 +180,9 @@ type BlockResponse struct {
 }
 
 type MintParamsResponse struct {
-	Code   int        `json:"code"`
-	Params MintParams `json:"params"`
+	Code    int        `json:"code"`
+	Message string     `json:"message"`
+	Params  MintParams `json:"params"`
 }
 
 type MintParams struct {
@@ -186,16 +195,19 @@ type MintParams struct {
 
 type InflationResponse struct {
 	Code      int     `json:"code"`
+	Message   string  `json:"message"`
 	Inflation float64 `json:"inflation,string"`
 }
 
 type ProposalsV1Response struct {
 	Code      int          `json:"code"`
+	Message   string       `json:"message"`
 	Proposals []ProposalV1 `json:"proposals"`
 }
 
 type ProposalV1Response struct {
 	Code     int         `json:"code"`
+	Message  string      `json:"message"`
 	Proposal *ProposalV1 `json:"proposal"`
 }
 
@@ -221,11 +233,13 @@ func (p *ProposalV1) ToProposal() Proposal {
 
 type ProposalsV1Beta1Response struct {
 	Code      int               `json:"code"`
+	Message   string            `json:"message"`
 	Proposals []ProposalV1Beta1 `json:"proposals"`
 }
 
 type ProposalV1Beta1Response struct {
 	Code     int              `json:"code"`
+	Message  string           `json:"message"`
 	Proposal *ProposalV1Beta1 `json:"proposal"`
 }
 
