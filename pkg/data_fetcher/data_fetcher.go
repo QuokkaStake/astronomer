@@ -271,3 +271,27 @@ func (f *DataFetcher) GetActiveProposals(chains []string) map[string]*types.Acti
 
 	return response
 }
+
+func (f *DataFetcher) GetSingleProposal(chainName string, proposalID string) types.SingleProposal {
+	response := types.SingleProposal{}
+
+	for index, chain := range f.Chains {
+		if chain.Name != chainName {
+			continue
+		}
+
+		response.Chain = chain
+
+		rpc := f.RPCs[index]
+
+		proposal, _, err := rpc.GetSingleProposal(proposalID)
+
+		if err != nil {
+			response.ProposalError = err
+		} else {
+			response.Proposal = proposal
+		}
+	}
+
+	return response
+}

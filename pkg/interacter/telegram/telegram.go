@@ -1,9 +1,9 @@
 package telegram
 
 import (
-	"errors"
 	"fmt"
 	"html"
+	"main/pkg/constants"
 	datafetcher "main/pkg/data_fetcher"
 	databasePkg "main/pkg/database"
 	"main/pkg/templates"
@@ -83,6 +83,7 @@ func (interacter *Interacter) Init() {
 	// bot.Handle("/params", interacter.HandleParams)
 	interacter.AddCommand("/validator", bot, interacter.GetValidatorCommand())
 	interacter.AddCommand("/params", bot, interacter.GetParamsCommand())
+	interacter.AddCommand("/proposal", bot, interacter.GetSingleProposalCommand())
 	interacter.AddCommand("/proposals", bot, interacter.GetActiveProposalsCommand())
 
 	if len(interacter.Admins) > 0 {
@@ -112,7 +113,7 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 				return err
 			}
 
-			return errors.New("invalid invocation")
+			return constants.ErrWrongInvocation
 		}
 
 		result, err := command.Execute(c)

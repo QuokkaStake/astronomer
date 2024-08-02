@@ -95,3 +95,12 @@ func FormatPercent(percent float64) string {
 func FormatFloat(value float64) string {
 	return fmt.Sprintf("%.2f", value)
 }
+
+func FormatSince(since time.Time) string {
+	duration := time.Since(since)
+	if duration < 0 {
+		return fmt.Sprintf("in %s", FormatDuration(-duration))
+	} else {
+		return fmt.Sprintf("%s ago", FormatDuration(duration))
+	}
+}

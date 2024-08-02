@@ -176,6 +176,22 @@ func (rpc *RPC) GetActiveProposals() ([]types.Proposal, types.QueryInfo, error) 
 		return nil, info, err
 	}
 
+	if response.Code == 12 { // Not implemented, falling back to v1beta1
+		rpc.Logger.Warn().Msg("v1 proposals are not supported, falling back to v1")
+
+		url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
+
+		var response *types.ProposalsV1Beta1Response
+		info, err := rpc.Get(url, &response)
+		if err != nil {
+			return nil, info, err
+		}
+
+		return utils.Map(response.Proposals, func(p types.ProposalV1Beta1) types.Proposal {
+			return p.ToProposal()
+		}), info, nil
+	}
+
 	if response.Code != 0 {
 		return []types.Proposal{}, info, fmt.Errorf("expected code 0, but got %d", response.Code)
 	}
@@ -183,6 +199,46 @@ func (rpc *RPC) GetActiveProposals() ([]types.Proposal, types.QueryInfo, error) 
 	return utils.Map(response.Proposals, func(p types.ProposalV1) types.Proposal {
 		return p.ToProposal()
 	}), info, nil
+}
+
+func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1/proposals/" + proposalID
+
+	var response *types.ProposalV1Response
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code == 5 || response.Proposal == nil { // proposal xxx doesn't exist
+		return nil, info, nil
+	}
+
+	if response.Code == 12 { // Not implemented, falling back to v1beta1
+		rpc.Logger.Warn().Msg("v1 proposal are not supported, falling back to v1")
+
+		url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals/" + proposalID
+
+		var response *types.ProposalV1Beta1Response
+		info, err := rpc.Get(url, &response)
+		if err != nil {
+			return nil, info, err
+		}
+
+		if response.Code == 5 || response.Proposal == nil { // proposal xxx doesn't exist
+			return nil, info, nil
+		}
+
+		proposal := response.Proposal.ToProposal()
+		return &proposal, info, nil
+	}
+
+	if response.Code != 0 {
+		return nil, info, fmt.Errorf("expected code 0, but got %d", response.Code)
+	}
+
+	proposal := response.Proposal.ToProposal()
+	return &proposal, info, nil
 }
 
 func (rpc *RPC) Get(

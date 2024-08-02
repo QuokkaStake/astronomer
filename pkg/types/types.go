@@ -25,10 +25,6 @@ type Proposal struct {
 	Summary         string    `json:"summary"`
 }
 
-func (p Proposal) VotingTimeLeft() time.Duration {
-	return time.Until(p.VotingEndTime)
-}
-
 func (p Proposal) FormatStatus() string {
 	switch p.Status {
 	case "PROPOSAL_STATUS_VOTING_PERIOD":
@@ -70,4 +66,10 @@ type ActiveProposals struct {
 	Chain          *Chain
 	Proposals      []Proposal
 	ProposalsError error
+}
+
+type SingleProposal struct {
+	Chain         *Chain
+	Proposal      *Proposal
+	ProposalError error
 }
