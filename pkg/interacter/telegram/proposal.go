@@ -17,7 +17,6 @@ func (interacter *Interacter) GetSingleProposalCommand() Command {
 	}
 }
 
-//nolint:nestif // this is ok for now
 func (interacter *Interacter) HandleSingleProposal(c tele.Context) (string, error) {
 	chainBinds, err := interacter.Database.GetAllChainBinds(strconv.FormatInt(c.Chat().ID, 10))
 	if err != nil {
