@@ -179,7 +179,7 @@ func (rpc *RPC) GetActiveProposals() ([]types.Proposal, types.QueryInfo, error) 
 	if response.Code == 12 { // Not implemented, falling back to v1beta1
 		rpc.Logger.Warn().Msg("v1 proposals are not supported, falling back to v1")
 
-		url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
+		url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=2"
 
 		var response *types.ProposalsV1Beta1Response
 		info, err := rpc.Get(url, &response)
