@@ -1,29 +1,25 @@
 package telegram
 
 import (
-	"strconv"
-	"strings"
+	"main/pkg/constants"
 
 	tele "gopkg.in/telebot.v3"
 )
 
 func (interacter *Interacter) GetValidatorCommand() Command {
 	return Command{
-		Name:         "validator",
-		Execute:      interacter.HandleValidator,
-		ValidateArgs: MinArgs(1, "Usage: %s <query>"),
+		Name:    "validator",
+		Execute: interacter.HandleValidator,
 	}
 }
 
-func (interacter *Interacter) HandleValidator(c tele.Context) (string, error) {
-	chainBinds, err := interacter.Database.GetAllChainBinds(strconv.FormatInt(c.Chat().ID, 10))
-	if err != nil {
-		interacter.Logger.Error().Err(err).Msg("Error getting chain binds")
-		return "", err
+func (interacter *Interacter) HandleValidator(c tele.Context, chainBinds []string) (string, error) {
+	valid, usage, args := interacter.SingleQueryParser(c)
+	if !valid {
+		return usage, constants.ErrWrongInvocation
 	}
 
-	args := strings.SplitN(c.Text(), " ", 2)
-	validatorsInfo := interacter.DataFetcher.FindValidator(args[1], chainBinds)
+	validatorsInfo := interacter.DataFetcher.FindValidator(args.Value, chainBinds)
 
 	return interacter.TemplateManager.Render("validator", validatorsInfo)
 }

@@ -1,14 +1,11 @@
 package telegram
 
 import (
-	"fmt"
-	"html"
-	"main/pkg/constants"
 	datafetcher "main/pkg/data_fetcher"
 	databasePkg "main/pkg/database"
 	"main/pkg/templates"
 	"main/pkg/types"
-	"strings"
+	"strconv"
 	"time"
 
 	"gopkg.in/telebot.v3/middleware"
@@ -106,17 +103,13 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 			Str("command", command.Name).
 			Msg("Got query")
 
-		args := strings.Split(c.Text(), " ")
-
-		if valid, usage := command.ValidateArgs(c); !valid {
-			if err := interacter.BotReply(c, html.EscapeString(fmt.Sprintf(usage, args[0]))); err != nil {
-				return err
-			}
-
-			return constants.ErrWrongInvocation
+		chainBinds, err := interacter.Database.GetAllChainBinds(strconv.FormatInt(c.Chat().ID, 10))
+		if err != nil {
+			interacter.Logger.Error().Err(err).Msg("Error getting chain binds")
+			return interacter.BotReply(c, "Internal error!")
 		}
 
-		result, err := command.Execute(c)
+		result, err := command.Execute(c, chainBinds)
 		if err != nil {
 			interacter.Logger.Error().
 				Err(err).

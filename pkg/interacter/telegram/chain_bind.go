@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	"html"
+	"main/pkg/constants"
 	"strconv"
 	"strings"
 
@@ -11,21 +12,23 @@ import (
 
 func (interacter *Interacter) GetChainBindCommand() Command {
 	return Command{
-		Name:         "chain_bind",
-		Execute:      interacter.HandleChainBind,
-		ValidateArgs: MinArgs(1, "Usage: %s <chain>"),
+		Name:    "chain_bind",
+		Execute: interacter.HandleChainBind,
 	}
 }
 
-func (interacter *Interacter) HandleChainBind(c tele.Context) (string, error) {
-	args := strings.Split(c.Text(), " ")
+func (interacter *Interacter) HandleChainBind(c tele.Context, chainBinds []string) (string, error) {
+	valid, usage, args := interacter.SingleArgParser(c, "chain")
+	if !valid {
+		return usage, constants.ErrWrongInvocation
+	}
 
-	chain := interacter.Chains.FindByName(args[1])
+	chain := interacter.Chains.FindByName(args.Value)
 	if chain == nil {
 		return html.EscapeString(fmt.Sprintf(
 			"Could not find a chain with the name '%s'",
-			args[1],
-		)), fmt.Errorf("could not find chain to bind")
+			args.Value,
+		)), constants.ErrChainNotFound
 	}
 
 	err := interacter.Database.InsertChainBind(

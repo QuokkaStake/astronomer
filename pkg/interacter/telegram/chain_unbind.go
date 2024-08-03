@@ -3,29 +3,31 @@ package telegram
 import (
 	"fmt"
 	"html"
+	"main/pkg/constants"
 	"strconv"
-	"strings"
 
 	tele "gopkg.in/telebot.v3"
 )
 
 func (interacter *Interacter) GetChainUnbindCommand() Command {
 	return Command{
-		Name:         "chain_unbind",
-		Execute:      interacter.HandleChainUnbind,
-		ValidateArgs: MinArgs(1, "Usage: %s <chain>"),
+		Name:    "chain_unbind",
+		Execute: interacter.HandleChainUnbind,
 	}
 }
 
-func (interacter *Interacter) HandleChainUnbind(c tele.Context) (string, error) {
-	args := strings.Split(c.Text(), " ")
+func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []string) (string, error) {
+	valid, usage, args := interacter.SingleArgParser(c, "chain")
+	if !valid {
+		return usage, constants.ErrWrongInvocation
+	}
 
-	chain := interacter.Chains.FindByName(args[1])
+	chain := interacter.Chains.FindByName(args.Value)
 	if chain == nil {
 		return html.EscapeString(fmt.Sprintf(
 			"Could not find a chain with the name '%s'",
-			args[1],
-		)), fmt.Errorf("could not find chain to unbound")
+			args.Value,
+		)), constants.ErrChainNotFound
 	}
 
 	deleted, err := interacter.Database.DeleteChainBind(

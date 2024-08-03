@@ -1,6 +1,9 @@
 package constants
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type FetcherName string
 
@@ -10,4 +13,5 @@ const (
 
 var (
 	ErrWrongInvocation = errors.New("wrong invocation")
+	ErrChainNotFound   = fmt.Errorf("chain not found")
 )

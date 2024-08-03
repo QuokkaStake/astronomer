@@ -7,9 +7,8 @@ import (
 )
 
 type Command struct {
-	Name         string
-	Execute      func(c tele.Context) (string, error)
-	ValidateArgs ArgsValidator
+	Name    string
+	Execute func(c tele.Context, chainBinds []string) (string, error)
 }
 
 type ChainsInfo struct {
