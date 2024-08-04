@@ -29,23 +29,41 @@ func (interacter *Interacter) SingleArgParser(
 	return true, "", SingleArg{Value: args[1]}
 }
 
-type SingleQuery struct {
-	Value string
+type BoundChainSingleQuery struct {
+	ChainNames []string
+	Query      string
 }
 
-func (interacter *Interacter) SingleQueryParser(
-	c tele.Context,
-) (bool, string, SingleArg) {
-	args := strings.SplitN(c.Text(), " ", 2)
+// Args parser when the command is called with 1 argument (like ID, but with chains)
+// on multiple chains (like validator search).
+// How it can be called:
+// - /command query params - if there is 1 chain bound to a chat
+// - /command chain1,chain2,chain3 query params - if there are 0 or 2+ chains bound to a chat.
 
-	if len(args) < 2 {
-		return false, html.EscapeString(fmt.Sprintf(
-			"Usage: %s <query>",
-			args[0],
-		)), SingleArg{}
+func (interacter *Interacter) BoundChainSingleQueryParser(
+	c tele.Context,
+	chainBinds []string,
+) (bool, string, BoundChainSingleQuery) {
+	if len(chainBinds) == 1 {
+		interacter.Logger.Debug().Msg("Single chain bound to a chat")
+	} else {
+		interacter.Logger.Debug().
+			Strs("chains", chainBinds).
+			Msg("Multiple or no chain bound to a chat")
 	}
 
-	return true, "", SingleArg{Value: args[1]}
+	args := strings.SplitN(c.Text(), " ", 3)
+
+	if len(args) == 3 {
+		return true, "", BoundChainSingleQuery{ChainNames: strings.Split(args[1], ","), Query: args[2]}
+	} else if len(chainBinds) > 0 && len(args) == 2 {
+		return true, "", BoundChainSingleQuery{ChainNames: chainBinds, Query: args[1]}
+	} else {
+		return false, html.EscapeString(fmt.Sprintf(
+			"Usage: %s [chain] <query>",
+			args[0],
+		)), BoundChainSingleQuery{}
+	}
 }
 
 type SingleChainItemArgs struct {
@@ -98,7 +116,7 @@ type BoundChainsNoArgs struct {
 // Args parser when the command is called without arguments, but with chains.
 // How it can be called:
 // - /command - if there are chains bound to a chat
-// - /command chain1,chain2 - if there are no chains bound to this chat
+// - /command chain1,chain2 - in any case
 
 func (interacter *Interacter) BoundChainsNoArgsParser(
 	c tele.Context,

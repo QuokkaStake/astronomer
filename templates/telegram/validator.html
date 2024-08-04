@@ -1,12 +1,12 @@
 {{- if .Error }}
 ❌ Error searching for validator: {{ .Error }}
-{{- else }}
+{{- else if not .Chains }}
+No chains found.
+{{- else -}}
 {{- $chainsData := .Chains -}}
 {{- range .Chains }}
 {{- $chain := .Chain -}}
-{{- if gt (len $chainsData) 1 -}}
 <strong>{{ .Chain.GetName }}</strong>
-{{- end -}}
 {{- if .Error }}
 ❌ Error searching for validator: {{ .Error }}
 {{ else if .Validators }}
@@ -23,7 +23,7 @@
 🤝{{ .Validator.Description.SecurityContact }}
 🌎{{ .Validator.Description.Website }}
 💸Commission: {{ .Validator.FormatCommission }}%
-{{ end }}
+{{- end }}
 {{ else }}
 No validator found.
 {{ end }}

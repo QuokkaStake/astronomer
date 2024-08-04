@@ -14,11 +14,11 @@ func (interacter *Interacter) GetValidatorCommand() Command {
 }
 
 func (interacter *Interacter) HandleValidator(c tele.Context, chainBinds []string) (string, error) {
-	valid, usage, args := interacter.SingleQueryParser(c)
+	valid, usage, args := interacter.BoundChainSingleQueryParser(c, chainBinds)
 	if !valid {
 		return usage, constants.ErrWrongInvocation
 	}
 
-	validatorsInfo := interacter.DataFetcher.FindValidator(args.Value, chainBinds)
+	validatorsInfo := interacter.DataFetcher.FindValidator(args.Query, args.ChainNames)
 	return interacter.TemplateManager.Render("validator", validatorsInfo)
 }
