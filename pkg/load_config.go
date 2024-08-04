@@ -22,10 +22,5 @@ func GetConfig(filesystem fs.FS, path string) (*types.Config, error) {
 	}
 
 	defaults.MustSet(configStruct)
-
-	for _, chain := range configStruct.Chains {
-		chain.Explorer = chain.GetExplorer()
-	}
-
 	return configStruct, nil
 }

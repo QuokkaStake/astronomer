@@ -40,7 +40,6 @@ func NewInteracter(
 	logger *zerolog.Logger,
 	dataFetcher *datafetcher.DataFetcher,
 	database *databasePkg.Database,
-	chains types.Chains,
 ) *Interacter {
 	return &Interacter{
 		Token:           config.Token,
@@ -49,7 +48,6 @@ func NewInteracter(
 		Version:         version,
 		DataFetcher:     dataFetcher,
 		Database:        database,
-		Chains:          chains,
 		TemplateManager: templates.NewTelegramTemplatesManager(logger),
 	}
 }

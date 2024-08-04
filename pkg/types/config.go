@@ -10,7 +10,6 @@ type Config struct {
 	DatabaseConfig DatabaseConfig `toml:"database"`
 	LogConfig      LogConfig      `toml:"log"`
 	TelegramConfig TelegramConfig `toml:"telegram"`
-	Chains         Chains         `toml:"chains"`
 }
 
 type TelegramConfig struct {
@@ -29,25 +28,11 @@ func (c *Config) Validate() error {
 	if err := c.DatabaseConfig.Validate(); err != nil {
 		return fmt.Errorf("database config is invalid: %s", err)
 	}
-
-	if len(c.Chains) == 0 {
-		return fmt.Errorf("no chains provided")
-	}
-
-	for index, chain := range c.Chains {
-		if err := chain.Validate(); err != nil {
-			return fmt.Errorf("error in chain %d: %s", index, err)
-		}
-	}
 	return nil
 }
 
 func (c *Config) DisplayWarnings() []Warning {
 	warnings := make([]Warning, 0)
-
-	for _, chain := range c.Chains {
-		warnings = append(warnings, chain.DisplayWarnings()...)
-	}
 
 	return warnings
 }
