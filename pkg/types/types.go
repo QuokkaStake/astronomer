@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -77,4 +78,25 @@ type SingleProposal struct {
 	Chain         *Chain
 	Proposal      *Proposal
 	ProposalError error
+}
+
+type ValidatorsInfo struct {
+	Error  error
+	Chains map[string]ChainValidatorsInfo
+}
+
+type ChainValidatorsInfo struct {
+	Chain      *Chain
+	Error      error
+	Validators []ValidatorInfo
+}
+
+type ValidatorInfo struct {
+	Validator          *Validator
+	VotingPowerPercent float64
+	Rank               int
+}
+
+func (i ValidatorInfo) GetVotingPowerPercent() string {
+	return fmt.Sprintf("%.2f", i.VotingPowerPercent*100)
 }

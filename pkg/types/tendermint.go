@@ -108,27 +108,6 @@ func (v ValidatorsResponse) FindValidatorRank(valoper string) int {
 	return 0
 }
 
-type ValidatorsInfo struct {
-	Error  error
-	Chains map[string]ChainValidatorsInfo
-}
-
-type ChainValidatorsInfo struct {
-	Chain      *Chain
-	Error      error
-	Validators []ValidatorInfo
-}
-
-type ValidatorInfo struct {
-	Validator          *Validator
-	VotingPowerPercent float64
-	Rank               int
-}
-
-func (i ValidatorInfo) GetVotingPowerPercent() string {
-	return fmt.Sprintf("%.2f", i.VotingPowerPercent*100)
-}
-
 type StakingParamsResponse struct {
 	Code    int           `json:"code"`
 	Message string        `json:"message"`
