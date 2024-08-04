@@ -162,6 +162,17 @@ func (d *Database) InsertChain(chain *types.Chain) error {
 	return nil
 }
 
+func (d *Database) DeleteChain(chainName string) (bool, error) {
+	result, err := d.client.Exec("DELETE FROM chains WHERE name = $1", chainName)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not delete chain")
+		return false, err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	return rowsAffected > 0, nil
+}
+
 func (d *Database) DeleteChainBind(
 	reporter string,
 	chatID string,

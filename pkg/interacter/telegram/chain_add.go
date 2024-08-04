@@ -60,7 +60,4 @@ func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string
 	}
 
 	return "Successfully added a new chain!", nil
-
-	// params := interacter.DataFetcher.GetChainsParams(chainBinds)
-	// return interacter.TemplateManager.Render("params", params)
 }
