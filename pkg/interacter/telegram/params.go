@@ -14,7 +14,7 @@ func (interacter *Interacter) GetParamsCommand() Command {
 }
 
 func (interacter *Interacter) HandleParams(c tele.Context, chainBinds []string) (string, error) {
-	valid, usage, args := interacter.SingleChainNoArgsParser(c, chainBinds)
+	valid, usage, args := interacter.BoundChainsNoArgsParser(c, chainBinds)
 	if !valid {
 		return usage, constants.ErrWrongInvocation
 	}

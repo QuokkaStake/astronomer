@@ -53,7 +53,8 @@ type SingleChainItemArgs struct {
 	ItemID    string
 }
 
-// Args parser when the command is called with 1 argument (like ID, but with chains).
+// Args parser when the command is called with 1 argument (like ID, but with chains)
+// on 1 chain (like, a proposal on a specific chain).
 // How it can be called:
 // - /command ID - if there's exactly 1 chain bound to a chat
 // - /command chain_name ID - if there's 0 or 2+ more chains bound to a chat
@@ -90,19 +91,19 @@ func (interacter *Interacter) SingleChainItemParser(
 	}
 }
 
-type SingleChainNoArgs struct {
+type BoundChainsNoArgs struct {
 	ChainNames []string
 }
 
 // Args parser when the command is called without arguments, but with chains.
 // How it can be called:
-// - /command - if there's exactly 1 chain bound to a chat
-// - /command chain1,chain2 - if there's 0 or 2+ more chains bound to a chat
+// - /command - if there are chains bound to a chat
+// - /command chain1,chain2 - if there are no chains bound to this chat
 
-func (interacter *Interacter) SingleChainNoArgsParser(
+func (interacter *Interacter) BoundChainsNoArgsParser(
 	c tele.Context,
 	chainBinds []string,
-) (bool, string, SingleChainNoArgs) {
+) (bool, string, BoundChainsNoArgs) {
 	if len(chainBinds) == 1 {
 		interacter.Logger.Debug().Msg("Single chain bound to a chat")
 	} else {
@@ -115,16 +116,16 @@ func (interacter *Interacter) SingleChainNoArgsParser(
 
 	if len(args) == 2 {
 		// call is like /command <chain name>
-		return true, "", SingleChainNoArgs{ChainNames: strings.Split(args[1], ",")}
-	} else if len(chainBinds) == 1 && len(args) == 1 {
+		return true, "", BoundChainsNoArgs{ChainNames: strings.Split(args[1], ",")}
+	} else if len(chainBinds) > 0 && len(args) == 1 {
 		// 1 chain bound to a chat, call is like /command
-		return true, "", SingleChainNoArgs{ChainNames: chainBinds}
+		return true, "", BoundChainsNoArgs{ChainNames: chainBinds}
 	} else {
-		// 0 or >=2 chains bound to a chat and there's not enough info from query
+		// No chains bound to a chat and there's not enough info from query
 		// to understand which chain to query.
 		return false, html.EscapeString(fmt.Sprintf(
 			"Usage: %s [chain]",
 			args[0],
-		)), SingleChainNoArgs{}
+		)), BoundChainsNoArgs{}
 	}
 }
