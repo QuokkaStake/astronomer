@@ -1,5 +1,10 @@
-{{- $chainsData := . -}}
-{{- range . }}
+{{- if .Error }}
+❌ Error getting proposals: {{ .Error }}
+{{- else if not .Proposals }}
+No active proposals
+{{- else -}}
+{{- $chainsData := .Proposals -}}
+{{- range .Proposals }}
 {{- $chain := .Chain -}}
 {{- if gt (len $chainsData) 1 -}}
 <strong>{{ .Chain.GetName }}</strong>
@@ -15,5 +20,6 @@
 {{ end }}
 {{- else }}
 No active proposals.
+{{ end }}
 {{ end }}
 {{ end }}

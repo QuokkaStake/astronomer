@@ -69,6 +69,11 @@ type ChainParams struct {
 }
 
 type ActiveProposals struct {
+	Error     error
+	Proposals map[string]*ChainActiveProposals
+}
+
+type ChainActiveProposals struct {
 	Chain          *Chain
 	Proposals      []Proposal
 	ProposalsError error

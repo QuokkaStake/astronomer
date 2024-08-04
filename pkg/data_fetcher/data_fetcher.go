@@ -241,40 +241,46 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 	return response
 }
 
-func (f *DataFetcher) GetActiveProposals(chains []string) map[string]*types.ActiveProposals {
-	//var wg sync.WaitGroup
-	//var mutex sync.Mutex
+func (f *DataFetcher) GetActiveProposals(chainNames []string) types.ActiveProposals {
+	response := types.ActiveProposals{}
 
-	response := map[string]*types.ActiveProposals{}
+	var wg sync.WaitGroup
+	var mutex sync.Mutex
 
-	//for index, chain := range f.Chains {
-	//	if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
-	//		continue
-	//	}
-	//
-	//	response[chain.Name] = &types.ActiveProposals{
-	//		Chain: chain,
-	//	}
-	//
-	//	rpc := f.RPCs[index]
-	//
-	//	wg.Add(1)
-	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
-	//		defer wg.Done()
-	//
-	//		proposals, _, err := rpc.GetActiveProposals()
-	//		mutex.Lock()
-	//		defer mutex.Unlock()
-	//
-	//		if err != nil {
-	//			response[chain.Name].ProposalsError = err
-	//		} else {
-	//			response[chain.Name].Proposals = proposals
-	//		}
-	//	}(chain, rpc)
-	//}
-	//
-	//wg.Wait()
+	chains, err := f.Database.GetChainsByNames(chainNames)
+	if err != nil {
+		response.Error = err
+		return response
+	}
+
+	chainProposals := map[string]*types.ChainActiveProposals{}
+
+	for _, chain := range chains {
+		chainProposals[chain.Name] = &types.ChainActiveProposals{
+			Chain: chain,
+		}
+
+		wg.Add(1)
+		go func(chain *types.Chain) {
+			defer wg.Done()
+
+			rpc := tendermint.NewRPC(chain, 10, f.Logger)
+
+			proposals, _, err := rpc.GetActiveProposals()
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				chainProposals[chain.Name].ProposalsError = err
+			} else {
+				chainProposals[chain.Name].Proposals = proposals
+			}
+		}(chain)
+	}
+
+	wg.Wait()
+
+	response.Proposals = chainProposals
 
 	return response
 }
