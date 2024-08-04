@@ -1,11 +1,13 @@
+{{- if .Error }}
+❌ Error querying proposal: {{ .Error }}
+{{- else }}
 <strong>{{ .Chain.GetName }}</strong>
-{{- if .ProposalError }}
-❌ Error querying proposal: {{ .ProposalError }}
-{{ else if .Proposal }}
+{{- if .Proposal }}
 <i>🗳Proposal ID:</i> {{ .Proposal.ID }}
 <i>📝Status:</i> {{ .Proposal.FormatStatus }}
 <i>📝Title:</i> {{ .Proposal.Title }}
 <i>⏳Voting ends at:</i> {{ .Proposal.VotingEndTime }} ({{ FormatSince .Proposal.VotingEndTime }})
 {{ else }}
 Proposal is not found.
+{{ end }}
 {{ end }}

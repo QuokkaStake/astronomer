@@ -2,11 +2,12 @@ package telegram
 
 import (
 	"fmt"
-	tele "gopkg.in/telebot.v3"
 	"main/pkg/constants"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"strings"
+
+	tele "gopkg.in/telebot.v3"
 )
 
 func (interacter *Interacter) GetChainAddCommand() Command {
@@ -27,7 +28,6 @@ func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string
 	if !valid {
 		return "Invalid input syntax!", constants.ErrWrongInvocation
 	}
-	fmt.Printf("args as map: %s %+v\n", valid, argsAsMap)
 
 	chain := &types.Chain{}
 
@@ -61,6 +61,6 @@ func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string
 
 	return "Successfully added a new chain!", nil
 
-	//params := interacter.DataFetcher.GetChainsParams(chainBinds)
-	//return interacter.TemplateManager.Render("params", params)
+	// params := interacter.DataFetcher.GetChainsParams(chainBinds)
+	// return interacter.TemplateManager.Render("params", params)
 }

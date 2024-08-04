@@ -2,15 +2,13 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
-	"github.com/lib/pq"
 	migrationsPkg "main/migrations"
 	"main/pkg/types"
 	"strings"
 
-	"github.com/rs/zerolog"
+	"github.com/lib/pq"
 
-	_ "github.com/lib/pq"
+	"github.com/rs/zerolog"
 )
 
 type Database struct {
@@ -134,8 +132,6 @@ func (d *Database) InsertChainBind(
 	chatName string,
 	chain string,
 ) error {
-	fmt.Printf("insert: %s %s %s %s\n", reporter, chatID, chatName, chain)
-
 	_, err := d.client.Exec(
 		"INSERT INTO chain_binds (reporter, chat_id, chat_name, chain) VALUES ($1, $2, $3, $4)",
 		reporter,

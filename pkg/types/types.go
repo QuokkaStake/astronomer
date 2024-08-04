@@ -80,9 +80,9 @@ type ChainActiveProposals struct {
 }
 
 type SingleProposal struct {
-	Chain         *Chain
-	Proposal      *Proposal
-	ProposalError error
+	Chain    *Chain
+	Proposal *Proposal
+	Error    error
 }
 
 type ValidatorsInfo struct {
