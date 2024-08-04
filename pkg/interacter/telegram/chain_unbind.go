@@ -22,8 +22,10 @@ func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []str
 		return usage, constants.ErrWrongInvocation
 	}
 
-	chain := interacter.Chains.FindByName(args.Value)
-	if chain == nil {
+	chains, err := interacter.Database.GetChainsByNames([]string{args.Value})
+	if err != nil {
+		return "", err
+	} else if len(chains) < 1 {
 		return html.EscapeString(fmt.Sprintf(
 			"Could not find a chain with the name '%s'",
 			args.Value,
@@ -33,7 +35,7 @@ func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []str
 	deleted, err := interacter.Database.DeleteChainBind(
 		interacter.Name(),
 		strconv.FormatInt(c.Chat().ID, 10),
-		chain.Name,
+		chains[0].Name,
 	)
 	if err != nil {
 		interacter.Logger.Error().Err(err).Msg("Error inserting chain bind")
@@ -42,7 +44,7 @@ func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []str
 
 	if !deleted {
 		interacter.Logger.Error().Err(err).Msg("Chain is not bound to this chat!")
-		return "", err
+		return "Chain is not bound to this chat!", constants.ErrChainNotBound
 	}
 
 	return "Successfully removed a chain bind from this chat!", nil

@@ -23,19 +23,21 @@ func (interacter *Interacter) HandleChainBind(c tele.Context, chainBinds []strin
 		return usage, constants.ErrWrongInvocation
 	}
 
-	chain := interacter.Chains.FindByName(args.Value)
-	if chain == nil {
+	chains, err := interacter.Database.GetChainsByNames([]string{args.Value})
+	if err != nil {
+		return "", err
+	} else if len(chains) < 1 {
 		return html.EscapeString(fmt.Sprintf(
 			"Could not find a chain with the name '%s'",
 			args.Value,
 		)), constants.ErrChainNotFound
 	}
 
-	err := interacter.Database.InsertChainBind(
+	err = interacter.Database.InsertChainBind(
 		interacter.Name(),
 		strconv.FormatInt(c.Chat().ID, 10),
 		c.Chat().Title,
-		chain.Name,
+		chains[0].Name,
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {

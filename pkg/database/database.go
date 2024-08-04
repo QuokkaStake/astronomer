@@ -216,3 +216,31 @@ func (d *Database) GetChainsByNames(names []string) ([]*types.Chain, error) {
 
 	return chains, nil
 }
+
+func (d *Database) GetAllChains() ([]*types.Chain, error) {
+	chains := make([]*types.Chain, 0)
+
+	rows, err := d.client.Query("SELECT name, pretty_name, lcd_endpoint FROM chains")
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Error getting all chains")
+		return chains, err
+	}
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
+
+	for rows.Next() {
+		chain := &types.Chain{}
+
+		err = rows.Scan(&chain.Name, &chain.PrettyName, &chain.LCDEndpoint)
+		if err != nil {
+			d.logger.Error().Err(err).Msg("Error getting chain")
+			return chains, err
+		}
+
+		chains = append(chains, chain)
+	}
+
+	return chains, nil
+}

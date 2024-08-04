@@ -14,4 +14,5 @@ const (
 var (
 	ErrWrongInvocation = errors.New("wrong invocation")
 	ErrChainNotFound   = fmt.Errorf("chain not found")
+	ErrChainNotBound   = fmt.Errorf("chain not bound to this chat")
 )

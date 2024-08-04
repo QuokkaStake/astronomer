@@ -12,8 +12,13 @@ func (interacter *Interacter) GetChainsListCommand() Command {
 }
 
 func (interacter *Interacter) HandleChainsList(c tele.Context, chainBinds []string) (string, error) {
+	chains, err := interacter.Database.GetAllChains()
+	if err != nil {
+		return "Error fetching chains!", err
+	}
+
 	return interacter.TemplateManager.Render("chains", ChainsInfo{
-		Chains:     interacter.Chains,
+		Chains:     chains,
 		ChainBinds: chainBinds,
 	})
 }
