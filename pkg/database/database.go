@@ -162,6 +162,22 @@ func (d *Database) InsertChain(chain *types.Chain) error {
 	return nil
 }
 
+func (d *Database) UpdateChain(chain *types.Chain) (bool, error) {
+	result, err := d.client.Exec(
+		"UPDATE chains SET pretty_name = $1, lcd_endpoint = $2 WHERE name = $3",
+		chain.PrettyName,
+		chain.LCDEndpoint,
+		chain.Name,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not update chain")
+		return false, err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	return rowsAffected > 0, nil
+}
+
 func (d *Database) DeleteChain(chainName string) (bool, error) {
 	result, err := d.client.Exec("DELETE FROM chains WHERE name = $1", chainName)
 	if err != nil {

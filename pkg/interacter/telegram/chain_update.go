@@ -11,14 +11,14 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-func (interacter *Interacter) GetChainAddCommand() Command {
+func (interacter *Interacter) GetChainUpdateCommand() Command {
 	return Command{
-		Name:    "chain_add",
-		Execute: interacter.HandleAddChain,
+		Name:    "chain_update",
+		Execute: interacter.HandleUpdateChain,
 	}
 }
 
-func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string) (string, error) {
+func (interacter *Interacter) HandleUpdateChain(c tele.Context, chainBinds []string) (string, error) {
 	args := strings.SplitN(c.Text(), " ", 2)
 	if len(args) < 2 {
 		return html.EscapeString(fmt.Sprintf("Usage: %s <params>", args[0])), constants.ErrWrongInvocation
@@ -51,14 +51,14 @@ func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string
 		return fmt.Sprintf("Invalid data provided: %s", err.Error()), err
 	}
 
-	err := interacter.Database.InsertChain(chain)
+	updated, err := interacter.Database.UpdateChain(chain)
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key value") {
-			return "This chain is already inserted!", err
-		}
-
 		return "", err
 	}
 
-	return "Successfully updated chain!", nil
+	if !updated {
+		return "Chain was not found!", err
+	}
+
+	return "Successfully added a new chain!", nil
 }

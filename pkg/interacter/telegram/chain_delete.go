@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"fmt"
+	"html"
 	"main/pkg/constants"
 	"strings"
 
@@ -17,7 +19,7 @@ func (interacter *Interacter) GetChainDeleteCommand() Command {
 func (interacter *Interacter) HandleDeleteChain(c tele.Context, chainBinds []string) (string, error) {
 	args := strings.Split(c.Text(), " ")
 	if len(args) < 2 {
-		return "Usage: /chain_delete <chain name>", constants.ErrWrongInvocation
+		return html.EscapeString(fmt.Sprintf("Usage: %s <chain name>", args[0])), constants.ErrWrongInvocation
 	}
 
 	deleted, err := interacter.Database.DeleteChain(args[1])
