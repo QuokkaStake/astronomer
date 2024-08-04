@@ -18,12 +18,6 @@ type TelegramConfig struct {
 	Admins []int64 `default:"[]" toml:"admins"`
 }
 
-type DiscordConfig struct {
-	Guild   string `toml:"guild"`
-	Token   string `toml:"token"`
-	Channel string `toml:"channel"`
-}
-
 func (c *Config) Validate() error {
 	if err := c.DatabaseConfig.Validate(); err != nil {
 		return fmt.Errorf("database config is invalid: %s", err)

@@ -11,14 +11,14 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-func (interacter *Interacter) GetChainUpdateCommand() Command {
+func (interacter *Interacter) GetExplorerAddCommand() Command {
 	return Command{
-		Name:    "chain_update",
-		Execute: interacter.HandleUpdateChain,
+		Name:    "explorer_add",
+		Execute: interacter.HandleAddExplorer,
 	}
 }
 
-func (interacter *Interacter) HandleUpdateChain(c tele.Context, chainBinds []string) (string, error) {
+func (interacter *Interacter) HandleAddExplorer(c tele.Context, chainBinds []string) (string, error) {
 	args := strings.SplitN(c.Text(), " ", 2)
 	if len(args) < 2 {
 		return html.EscapeString(fmt.Sprintf("Usage: %s <params>", args[0])), constants.ErrWrongInvocation
@@ -30,19 +30,20 @@ func (interacter *Interacter) HandleUpdateChain(c tele.Context, chainBinds []str
 		return "Invalid input syntax!", constants.ErrWrongInvocation
 	}
 
-	chain := types.ChainFromArgs(argsAsMap)
-	if err := chain.Validate(); err != nil {
+	explorer := types.ExplorerFromArgs(argsAsMap)
+
+	if err := explorer.Validate(); err != nil {
 		return fmt.Sprintf("Invalid data provided: %s", err.Error()), err
 	}
 
-	updated, err := interacter.Database.UpdateChain(chain)
+	err := interacter.Database.InsertExplorer(explorer)
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value") {
+			return "This explorer is already inserted!", err
+		}
+
 		return "", err
 	}
 
-	if !updated {
-		return "Chain was not found!", err
-	}
-
-	return "Successfully added a new chain!", nil
+	return "Successfully inserted explorer!", nil
 }

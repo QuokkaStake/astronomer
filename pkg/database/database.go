@@ -267,3 +267,21 @@ func (d *Database) GetAllChains() ([]*types.Chain, error) {
 
 	return chains, nil
 }
+
+func (d *Database) InsertExplorer(explorer *types.Explorer) error {
+	_, err := d.client.Exec(
+		"INSERT INTO explorers (chain, name, proposal_link_pattern, wallet_link_pattern, validator_link_pattern, main_link) VALUES ($1, $2, $3, $4, $5, $6)",
+		explorer.Chain,
+		explorer.Name,
+		explorer.ProposalLinkPattern,
+		explorer.WalletLinkPattern,
+		explorer.ValidatorLinkPattern,
+		explorer.MainLink,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not insert explorer")
+		return err
+	}
+
+	return nil
+}

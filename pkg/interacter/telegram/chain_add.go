@@ -30,23 +30,7 @@ func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string
 		return "Invalid input syntax!", constants.ErrWrongInvocation
 	}
 
-	chain := &types.Chain{}
-
-	for key, value := range argsAsMap {
-		switch key {
-		case "name":
-			chain.Name = value
-		case "lcd_endpoint":
-			chain.LCDEndpoint = value
-		case "lcd-endpoint":
-			chain.LCDEndpoint = value
-		case "pretty_name":
-			chain.PrettyName = value
-		case "pretty-name":
-			chain.PrettyName = value
-		}
-	}
-
+	chain := types.ChainFromArgs(argsAsMap)
 	if err := chain.Validate(); err != nil {
 		return fmt.Sprintf("Invalid data provided: %s", err.Error()), err
 	}

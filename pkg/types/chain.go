@@ -16,6 +16,27 @@ type Chain struct {
 	Type string `default:"cosmos" toml:"type"`
 }
 
+func ChainFromArgs(args map[string]string) *Chain {
+	chain := &Chain{}
+
+	for key, value := range args {
+		switch key {
+		case "name":
+			chain.Name = value
+		case "lcd_endpoint":
+			chain.LCDEndpoint = value
+		case "lcd-endpoint":
+			chain.LCDEndpoint = value
+		case "pretty_name":
+			chain.PrettyName = value
+		case "pretty-name":
+			chain.PrettyName = value
+		}
+	}
+
+	return chain
+}
+
 func (c *Chain) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("empty chain name")
