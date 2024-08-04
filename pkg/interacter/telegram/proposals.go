@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"main/pkg/constants"
+
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -12,6 +14,11 @@ func (interacter *Interacter) GetActiveProposalsCommand() Command {
 }
 
 func (interacter *Interacter) HandleActiveProposals(c tele.Context, chainBinds []string) (string, error) {
-	proposalsInfo := interacter.DataFetcher.GetActiveProposals(chainBinds)
+	valid, usage, args := interacter.BoundChainsNoArgsParser(c, chainBinds)
+	if !valid {
+		return usage, constants.ErrWrongInvocation
+	}
+
+	proposalsInfo := interacter.DataFetcher.GetActiveProposals(args.ChainNames)
 	return interacter.TemplateManager.Render("proposals", proposalsInfo)
 }
