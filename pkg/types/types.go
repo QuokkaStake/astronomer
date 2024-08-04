@@ -38,6 +38,11 @@ func (p Proposal) FormatStatus() string {
 	}
 }
 
+type ChainsParams struct {
+	Error  error
+	Params map[string]*ChainParams
+}
+
 type ChainParams struct {
 	Chain               *Chain
 	StakingParams       StakingParams

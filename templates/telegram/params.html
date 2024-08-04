@@ -1,5 +1,10 @@
-{{- $chainsData := . -}}
-{{- range . }}
+{{- if .Error }}
+❌ Error getting chains params: {{ .Error }}
+{{- else if not .Params }}
+No chains params
+{{- else -}}
+{{- $chainsData := .Params -}}
+{{- range .Params }}
 {{- $chain := .Chain -}}
 {{- if gt (len $chainsData) 1 -}}
 <strong>{{ .Chain.GetName }}</strong>
@@ -56,5 +61,6 @@
 {{ if .InflationError }}❌ Error fetching inflation: {{ .InflationError }}
 {{ end -}}
 {{ if .BlockTimeError }}❌ Error fetching block time: {{ .BlockTimeError }}
+{{ end }}
 {{ end }}
 {{ end }}

@@ -93,19 +93,22 @@ func (f *DataFetcher) FindValidator(query string, chainNames []string) types.Val
 	return response
 }
 
-func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.ChainParams {
+func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
+	response := types.ChainsParams{}
+
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
 	chains, err := f.Database.GetChainsByNames(chainNames)
 	if err != nil {
-		return map[string]*types.ChainParams{}
+		response.Error = err
+		return response
 	}
 
-	response := map[string]*types.ChainParams{}
+	chainsParams := map[string]*types.ChainParams{}
 
 	for _, chain := range chains {
-		response[chain.Name] = &types.ChainParams{
+		chainsParams[chain.Name] = &types.ChainParams{
 			Chain: chain,
 		}
 
@@ -120,9 +123,9 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].StakingParamsError = err
+				chainsParams[chain.Name].StakingParamsError = err
 			} else {
-				response[chain.Name].StakingParams = params.Params
+				chainsParams[chain.Name].StakingParams = params.Params
 			}
 		}(chain, rpc)
 
@@ -135,9 +138,9 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].SlashingParamsError = err
+				chainsParams[chain.Name].SlashingParamsError = err
 			} else {
-				response[chain.Name].SlashingParams = params.Params
+				chainsParams[chain.Name].SlashingParams = params.Params
 			}
 		}(chain, rpc)
 
@@ -150,9 +153,9 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].VotingParamsError = err
+				chainsParams[chain.Name].VotingParamsError = err
 			} else {
-				response[chain.Name].VotingParams = params.VotingParams
+				chainsParams[chain.Name].VotingParams = params.VotingParams
 			}
 		}(chain, rpc)
 
@@ -165,9 +168,9 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].DepositParamsError = err
+				chainsParams[chain.Name].DepositParamsError = err
 			} else {
-				response[chain.Name].DepositParams = params.DepositParams
+				chainsParams[chain.Name].DepositParams = params.DepositParams
 			}
 		}(chain, rpc)
 
@@ -180,9 +183,9 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].TallyParamsError = err
+				chainsParams[chain.Name].TallyParamsError = err
 			} else {
-				response[chain.Name].TallyParams = params.TallyParams
+				chainsParams[chain.Name].TallyParams = params.TallyParams
 			}
 		}(chain, rpc)
 
@@ -195,9 +198,9 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].BlockTimeError = err
+				chainsParams[chain.Name].BlockTimeError = err
 			} else {
-				response[chain.Name].BlockTime = blockTime
+				chainsParams[chain.Name].BlockTime = blockTime
 			}
 		}(chain, rpc)
 
@@ -210,9 +213,9 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].MintParamsError = err
+				chainsParams[chain.Name].MintParamsError = err
 			} else {
-				response[chain.Name].MintParams = params.Params
+				chainsParams[chain.Name].MintParams = params.Params
 			}
 		}(chain, rpc)
 
@@ -225,15 +228,16 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) map[string]*types.Cha
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name].InflationError = err
+				chainsParams[chain.Name].InflationError = err
 			} else {
-				response[chain.Name].Inflation = inflation.Inflation
+				chainsParams[chain.Name].Inflation = inflation.Inflation
 			}
 		}(chain, rpc)
 	}
 
 	wg.Wait()
 
+	response.Params = chainsParams
 	return response
 }
 
