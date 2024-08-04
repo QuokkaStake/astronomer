@@ -1,6 +1,9 @@
+{{- $chainsData := . -}}
 {{- range . }}
 {{- $chain := .Chain -}}
+{{- if gt (len $chainsData) 1 -}}
 <strong>{{ .Chain.GetName }}</strong>
+{{- end -}}
 {{- if not .StakingParamsError }}
 <i>🏦Staking params</i>
 - Max validators: {{ .StakingParams.MaxValidators }}

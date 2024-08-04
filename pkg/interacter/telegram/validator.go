@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"fmt"
 	"main/pkg/constants"
 
 	tele "gopkg.in/telebot.v3"
@@ -20,6 +21,8 @@ func (interacter *Interacter) HandleValidator(c tele.Context, chainBinds []strin
 	}
 
 	validatorsInfo := interacter.DataFetcher.FindValidator(args.Value, chainBinds)
+
+	fmt.Printf("validatorsInfo: %v\n", validatorsInfo)
 
 	return interacter.TemplateManager.Render("validator", validatorsInfo)
 }

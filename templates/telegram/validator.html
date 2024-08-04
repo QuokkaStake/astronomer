@@ -1,9 +1,16 @@
-{{- range . }}
-{{- $chain := .Chain -}}
-<strong>{{ .Chain.GetName }}</strong>
 {{- if .Error }}
 ❌ Error searching for validator: {{ .Error }}
-{{ else if .Validator }}
+{{- else }}
+{{- $chainsData := .Chains -}}
+{{- range .Chains }}
+{{- $chain := .Chain -}}
+{{- if gt (len $chainsData) 1 -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- end -}}
+{{- if .Error }}
+❌ Error searching for validator: {{ .Error }}
+{{ else if .Validators }}
+{{- range .Validators }}
 {{ .Validator.Description.Moniker }}
 {{- if .Validator.Active }}
 ✅Active (#{{ .Rank }}, {{.GetVotingPowerPercent }}% voting power)
@@ -16,7 +23,9 @@
 🤝{{ .Validator.Description.SecurityContact }}
 🌎{{ .Validator.Description.Website }}
 💸Commission: {{ .Validator.FormatCommission }}%
+{{ end }}
 {{ else }}
 No validator found.
+{{ end }}
 {{ end }}
 {{ end }}

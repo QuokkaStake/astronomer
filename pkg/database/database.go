@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"github.com/lib/pq"
 	migrationsPkg "main/migrations"
 	"main/pkg/types"
 	"strings"
@@ -132,6 +134,8 @@ func (d *Database) InsertChainBind(
 	chatName string,
 	chain string,
 ) error {
+	fmt.Printf("insert: %s %s %s %s\n", reporter, chatID, chatName, chain)
+
 	_, err := d.client.Exec(
 		"INSERT INTO chain_binds (reporter, chat_id, chat_name, chain) VALUES ($1, $2, $3, $4)",
 		reporter,
@@ -141,6 +145,21 @@ func (d *Database) InsertChainBind(
 	)
 	if err != nil {
 		d.logger.Error().Err(err).Msg("Could not insert chain bind")
+		return err
+	}
+
+	return nil
+}
+
+func (d *Database) InsertChain(chain *types.Chain) error {
+	_, err := d.client.Exec(
+		"INSERT INTO chains (name, pretty_name, lcd_endpoint) VALUES ($1, $2, $3)",
+		chain.Name,
+		chain.PrettyName,
+		chain.LCDEndpoint,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not insert chain")
 		return err
 	}
 
@@ -165,4 +184,35 @@ func (d *Database) DeleteChainBind(
 
 	rowsAffected, _ := result.RowsAffected()
 	return rowsAffected > 0, nil
+}
+
+func (d *Database) GetChainsByNames(names []string) ([]*types.Chain, error) {
+	chains := make([]*types.Chain, 0)
+
+	rows, err := d.client.Query(
+		"SELECT name, pretty_name, lcd_endpoint FROM chains WHERE name = any($1)",
+		pq.Array(names),
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Error getting chains by names")
+		return chains, err
+	}
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
+
+	for rows.Next() {
+		chain := &types.Chain{}
+
+		err = rows.Scan(&chain.Name, &chain.PrettyName, &chain.LCDEndpoint)
+		if err != nil {
+			d.logger.Error().Err(err).Msg("Error getting chain bind")
+			return chains, err
+		}
+
+		chains = append(chains, chain)
+	}
+
+	return chains, nil
 }

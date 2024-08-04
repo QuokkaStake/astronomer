@@ -108,12 +108,21 @@ func (v ValidatorsResponse) FindValidatorRank(valoper string) int {
 	return 0
 }
 
+type ValidatorsInfo struct {
+	Error  error
+	Chains map[string]ChainValidatorsInfo
+}
+
+type ChainValidatorsInfo struct {
+	Chain      *Chain
+	Error      error
+	Validators []ValidatorInfo
+}
+
 type ValidatorInfo struct {
-	Chain              *Chain
 	Validator          *Validator
 	VotingPowerPercent float64
 	Rank               int
-	Error              error
 }
 
 func (i ValidatorInfo) GetVotingPowerPercent() string {

@@ -1,6 +1,9 @@
+{{- $chainsData := . -}}
 {{- range . }}
 {{- $chain := .Chain -}}
+{{- if gt (len $chainsData) 1 -}}
 <strong>{{ .Chain.GetName }}</strong>
+{{- end -}}
 {{- if .ProposalsError }}
 ❌ Error querying proposals: {{ .ProposalsError }}
 {{ else if .Proposals }}

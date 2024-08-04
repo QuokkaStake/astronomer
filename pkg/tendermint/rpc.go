@@ -25,7 +25,7 @@ type RPC struct {
 func NewRPC(
 	chain *types.Chain,
 	timeout int,
-	logger *zerolog.Logger,
+	logger zerolog.Logger,
 ) *RPC {
 	return &RPC{
 		Chain:   chain,

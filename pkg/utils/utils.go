@@ -5,6 +5,7 @@ import (
 	"math"
 	"strings"
 	"time"
+	"unicode"
 )
 
 func Map[T, V any](slice []T, f func(T) V) []V {
@@ -54,6 +55,50 @@ func SplitStringIntoChunks(msg string, maxLineLength int) []string {
 
 	outMessages = append(outMessages, sb.String())
 	return outMessages
+}
+
+func MaybeRemoveQuotes(source string) string {
+	if len(source) > 0 && source[0] == '"' {
+		source = source[1:]
+	}
+	if len(source) > 0 && source[len(source)-1] == '"' {
+		source = source[:len(source)-1]
+	}
+
+	return source
+}
+
+func ParseArgsAsMap(source string) (map[string]string, bool) {
+	response := map[string]string{}
+
+	lastQuote := rune(0)
+	f := func(c rune) bool {
+		switch {
+		case c == lastQuote:
+			lastQuote = rune(0)
+			return false
+		case lastQuote != rune(0):
+			return false
+		case unicode.In(c, unicode.Quotation_Mark):
+			lastQuote = c
+			return false
+		default:
+			return unicode.IsSpace(c)
+		}
+	}
+
+	// splitting string by space but considering quoted section
+	items := strings.FieldsFunc(source, f)
+
+	for _, item := range items {
+		if !strings.Contains(item, "=") {
+			return response, false
+		}
+		itemSplit := strings.Split(item, "=")
+		response[itemSplit[0]] = MaybeRemoveQuotes(itemSplit[1])
+	}
+
+	return response, true
 }
 
 func FormatDuration(duration time.Duration) string {

@@ -1,273 +1,278 @@
 package datafetcher
 
 import (
+	"fmt"
+	"github.com/rs/zerolog"
+	"main/pkg/database"
 	"main/pkg/tendermint"
 	"main/pkg/types"
 	"main/pkg/utils"
-	"slices"
 	"strings"
 	"sync"
-
-	"github.com/rs/zerolog"
 )
 
 type DataFetcher struct {
-	Chains types.Chains
-	RPCs   []*tendermint.RPC
-	Logger zerolog.Logger
+	Logger   zerolog.Logger
+	Database *database.Database
 }
 
-func NewDataFetcher(config *types.Config, logger *zerolog.Logger) *DataFetcher {
-	rpcs := make([]*tendermint.RPC, len(config.Chains))
-
-	for index, chain := range config.Chains {
-		rpcs[index] = tendermint.NewRPC(chain, 10, logger)
-	}
-
+func NewDataFetcher(logger *zerolog.Logger, database *database.Database) *DataFetcher {
 	return &DataFetcher{
-		Logger: logger.With().Str("component", "data_fetcher").Logger(),
-		Chains: config.Chains, RPCs: rpcs,
+		Logger:   logger.With().Str("component", "data_fetcher").Logger(),
+		Database: database,
 	}
 }
 
-func (f *DataFetcher) FindValidator(query string, chains []string) map[string]types.ValidatorInfo {
+func (f *DataFetcher) FindValidator(query string, chainNames []string) types.ValidatorsInfo {
+	response := types.ValidatorsInfo{}
+
+	chains, err := f.Database.GetChainsByNames(chainNames)
+	if err != nil {
+		response.Error = err
+		return response
+	}
+
+	fmt.Printf("chains: %+v\n", chains)
+
 	lowercaseQuery := strings.ToLower(query)
 
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
-	response := map[string]types.ValidatorInfo{}
+	chainValidators := map[string]types.ChainValidatorsInfo{}
 
-	for index, chain := range f.Chains {
-		if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
-			continue
-		}
-
-		rpc := f.RPCs[index]
-
+	for _, chain := range chains {
 		wg.Add(1)
 
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
+
+			rpc := tendermint.NewRPC(chain, 10, f.Logger)
 
 			validators, _, err := rpc.GetAllValidators()
 			mutex.Lock()
 			defer mutex.Unlock()
 
 			if err != nil {
-				response[chain.Name] = types.ValidatorInfo{
-					Chain:     chain,
-					Validator: nil,
-					Error:     err,
+				chainValidators[chain.Name] = types.ChainValidatorsInfo{
+					Chain: chain,
+					Error: err,
 				}
 				return
 			}
 
-			validator, _ := utils.Find(validators.Validators, func(v *types.Validator) bool {
+			foundValidators := utils.Filter(validators.Validators, func(v *types.Validator) bool {
 				return strings.Contains(strings.ToLower(v.Description.Moniker), lowercaseQuery)
 			})
 
 			totalVP := validators.GetTotalVP()
 
-			info := types.ValidatorInfo{
-				Chain:     chain,
-				Validator: validator,
-				Error:     nil,
+			info := types.ChainValidatorsInfo{
+				Chain:      chain,
+				Error:      nil,
+				Validators: make([]types.ValidatorInfo, len(foundValidators)),
 			}
 
-			if validator != nil {
-				info.VotingPowerPercent = validator.DelegatorShares.Quo(totalVP).MustFloat64()
-				if validator.Active() {
-					info.Rank = validators.FindValidatorRank(validator.OperatorAddress)
+			for index, validator := range foundValidators {
+				validatorInfo := types.ValidatorInfo{
+					Validator:          validator,
+					VotingPowerPercent: validator.DelegatorShares.Quo(totalVP).MustFloat64(),
 				}
+
+				if validator.Active() {
+					validatorInfo.Rank = validators.FindValidatorRank(validator.OperatorAddress)
+				}
+
+				info.Validators[index] = validatorInfo
 			}
 
-			response[chain.Name] = info
-		}(chain, rpc)
+			chainValidators[chain.Name] = info
+		}(chain)
 	}
 
 	wg.Wait()
 
+	response.Chains = chainValidators
 	return response
 }
 
 func (f *DataFetcher) GetChainsParams(chains []string) map[string]*types.ChainParams {
-	var wg sync.WaitGroup
-	var mutex sync.Mutex
+	//var wg sync.WaitGroup
+	//var mutex sync.Mutex
 
 	response := map[string]*types.ChainParams{}
 
-	for index, chain := range f.Chains {
-		if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
-			continue
-		}
-
-		response[chain.Name] = &types.ChainParams{
-			Chain: chain,
-		}
-
-		rpc := f.RPCs[index]
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			params, _, err := rpc.GetStakingParams()
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].StakingParamsError = err
-			} else {
-				response[chain.Name].StakingParams = params.Params
-			}
-		}(chain, rpc)
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			params, _, err := rpc.GetSlashingParams()
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].SlashingParamsError = err
-			} else {
-				response[chain.Name].SlashingParams = params.Params
-			}
-		}(chain, rpc)
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			params, _, err := rpc.GetGovParams("voting")
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].VotingParamsError = err
-			} else {
-				response[chain.Name].VotingParams = params.VotingParams
-			}
-		}(chain, rpc)
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			params, _, err := rpc.GetGovParams("deposit")
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].DepositParamsError = err
-			} else {
-				response[chain.Name].DepositParams = params.DepositParams
-			}
-		}(chain, rpc)
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			params, _, err := rpc.GetGovParams("tallying")
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].TallyParamsError = err
-			} else {
-				response[chain.Name].TallyParams = params.TallyParams
-			}
-		}(chain, rpc)
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			blockTime, err := rpc.GetBlockTime()
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].BlockTimeError = err
-			} else {
-				response[chain.Name].BlockTime = blockTime
-			}
-		}(chain, rpc)
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			params, _, err := rpc.GetMintParams()
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].MintParamsError = err
-			} else {
-				response[chain.Name].MintParams = params.Params
-			}
-		}(chain, rpc)
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			inflation, _, err := rpc.GetInflation()
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].InflationError = err
-			} else {
-				response[chain.Name].Inflation = inflation.Inflation
-			}
-		}(chain, rpc)
-	}
-
-	wg.Wait()
+	//for index, chain := range f.Chains {
+	//	if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
+	//		continue
+	//	}
+	//
+	//	response[chain.Name] = &types.ChainParams{
+	//		Chain: chain,
+	//	}
+	//
+	//	rpc := f.RPCs[index]
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		params, _, err := rpc.GetStakingParams()
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].StakingParamsError = err
+	//		} else {
+	//			response[chain.Name].StakingParams = params.Params
+	//		}
+	//	}(chain, rpc)
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		params, _, err := rpc.GetSlashingParams()
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].SlashingParamsError = err
+	//		} else {
+	//			response[chain.Name].SlashingParams = params.Params
+	//		}
+	//	}(chain, rpc)
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		params, _, err := rpc.GetGovParams("voting")
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].VotingParamsError = err
+	//		} else {
+	//			response[chain.Name].VotingParams = params.VotingParams
+	//		}
+	//	}(chain, rpc)
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		params, _, err := rpc.GetGovParams("deposit")
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].DepositParamsError = err
+	//		} else {
+	//			response[chain.Name].DepositParams = params.DepositParams
+	//		}
+	//	}(chain, rpc)
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		params, _, err := rpc.GetGovParams("tallying")
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].TallyParamsError = err
+	//		} else {
+	//			response[chain.Name].TallyParams = params.TallyParams
+	//		}
+	//	}(chain, rpc)
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		blockTime, err := rpc.GetBlockTime()
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].BlockTimeError = err
+	//		} else {
+	//			response[chain.Name].BlockTime = blockTime
+	//		}
+	//	}(chain, rpc)
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		params, _, err := rpc.GetMintParams()
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].MintParamsError = err
+	//		} else {
+	//			response[chain.Name].MintParams = params.Params
+	//		}
+	//	}(chain, rpc)
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		inflation, _, err := rpc.GetInflation()
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].InflationError = err
+	//		} else {
+	//			response[chain.Name].Inflation = inflation.Inflation
+	//		}
+	//	}(chain, rpc)
+	//}
+	//
+	//wg.Wait()
 
 	return response
 }
 
 func (f *DataFetcher) GetActiveProposals(chains []string) map[string]*types.ActiveProposals {
-	var wg sync.WaitGroup
-	var mutex sync.Mutex
+	//var wg sync.WaitGroup
+	//var mutex sync.Mutex
 
 	response := map[string]*types.ActiveProposals{}
 
-	for index, chain := range f.Chains {
-		if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
-			continue
-		}
-
-		response[chain.Name] = &types.ActiveProposals{
-			Chain: chain,
-		}
-
-		rpc := f.RPCs[index]
-
-		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
-			defer wg.Done()
-
-			proposals, _, err := rpc.GetActiveProposals()
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				response[chain.Name].ProposalsError = err
-			} else {
-				response[chain.Name].Proposals = proposals
-			}
-		}(chain, rpc)
-	}
-
-	wg.Wait()
+	//for index, chain := range f.Chains {
+	//	if len(chains) > 0 && !slices.Contains(chains, chain.Name) {
+	//		continue
+	//	}
+	//
+	//	response[chain.Name] = &types.ActiveProposals{
+	//		Chain: chain,
+	//	}
+	//
+	//	rpc := f.RPCs[index]
+	//
+	//	wg.Add(1)
+	//	go func(chain *types.Chain, rpc *tendermint.RPC) {
+	//		defer wg.Done()
+	//
+	//		proposals, _, err := rpc.GetActiveProposals()
+	//		mutex.Lock()
+	//		defer mutex.Unlock()
+	//
+	//		if err != nil {
+	//			response[chain.Name].ProposalsError = err
+	//		} else {
+	//			response[chain.Name].Proposals = proposals
+	//		}
+	//	}(chain, rpc)
+	//}
+	//
+	//wg.Wait()
 
 	return response
 }
@@ -275,23 +280,23 @@ func (f *DataFetcher) GetActiveProposals(chains []string) map[string]*types.Acti
 func (f *DataFetcher) GetSingleProposal(chainName string, proposalID string) types.SingleProposal {
 	response := types.SingleProposal{}
 
-	for index, chain := range f.Chains {
-		if chain.Name != chainName {
-			continue
-		}
-
-		response.Chain = chain
-
-		rpc := f.RPCs[index]
-
-		proposal, _, err := rpc.GetSingleProposal(proposalID)
-
-		if err != nil {
-			response.ProposalError = err
-		} else {
-			response.Proposal = proposal
-		}
-	}
+	//for index, chain := range f.Chains {
+	//	if chain.Name != chainName {
+	//		continue
+	//	}
+	//
+	//	response.Chain = chain
+	//
+	//	rpc := f.RPCs[index]
+	//
+	//	proposal, _, err := rpc.GetSingleProposal(proposalID)
+	//
+	//	if err != nil {
+	//		response.ProposalError = err
+	//	} else {
+	//		response.Proposal = proposal
+	//	}
+	//}
 
 	return response
 }
