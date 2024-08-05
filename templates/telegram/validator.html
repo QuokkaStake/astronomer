@@ -6,6 +6,7 @@ No chains found.
 {{- $chainsData := .Chains -}}
 {{- range .Chains }}
 {{- $chain := .Chain -}}
+{{- $explorers := .Explorers -}}
 <strong>{{ .Chain.GetName }}</strong>
 {{- if .Error }}
 ❌ Error searching for validator: {{ .Error }}
@@ -23,6 +24,9 @@ No chains found.
 🤝{{ .Validator.Description.SecurityContact }}
 🌎{{ .Validator.Description.Website }}
 💸Commission: {{ .Validator.FormatCommission }}%
+{{- if $explorers }}
+🌐{{ FormatLinks ($explorers.GetValidatorLinks (.Validator.OperatorAddress)) }}
+{{- end }}
 {{- end }}
 {{ else }}
 No validator found.

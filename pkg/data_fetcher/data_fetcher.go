@@ -33,6 +33,12 @@ func (f *DataFetcher) FindValidator(query string, chainNames []string) types.Val
 		return response
 	}
 
+	explorers, err := f.Database.GetExplorersByChains(chainNames)
+	if err != nil {
+		response.Error = err
+		return response
+	}
+
 	lowercaseQuery := strings.ToLower(query)
 
 	var wg sync.WaitGroup
@@ -68,6 +74,7 @@ func (f *DataFetcher) FindValidator(query string, chainNames []string) types.Val
 
 			info := types.ChainValidatorsInfo{
 				Chain:      chain,
+				Explorers:  explorers.GetExplorersByChain(chain.Name),
 				Error:      nil,
 				Validators: make([]types.ValidatorInfo, len(foundValidators)),
 			}
@@ -255,11 +262,18 @@ func (f *DataFetcher) GetActiveProposals(chainNames []string) types.ActivePropos
 		return response
 	}
 
+	explorers, err := f.Database.GetExplorersByChains(chainNames)
+	if err != nil {
+		response.Error = err
+		return response
+	}
+
 	chainProposals := map[string]*types.ChainActiveProposals{}
 
 	for _, chain := range chains {
 		chainProposals[chain.Name] = &types.ChainActiveProposals{
-			Chain: chain,
+			Chain:     chain,
+			Explorers: explorers.GetExplorersByChain(chain.Name),
 		}
 
 		wg.Add(1)
@@ -296,12 +310,19 @@ func (f *DataFetcher) GetSingleProposal(chainName string, proposalID string) typ
 		return response
 	}
 
+	explorers, err := f.Database.GetExplorersByChains([]string{chainName})
+	if err != nil {
+		response.Error = err
+		return response
+	}
+
 	if len(chains) != 1 {
 		response.Error = fmt.Errorf("chain '%s' is not found", chainName)
 		return response
 	}
 
 	response.Chain = chains[0]
+	response.Explorers = explorers.GetExplorersByChain(chainName)
 
 	rpc := tendermint.NewRPC(chains[0], 10, f.Logger)
 	proposal, _, err := rpc.GetSingleProposal(proposalID)

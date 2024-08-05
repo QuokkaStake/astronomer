@@ -1,6 +1,10 @@
 package types
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"main/pkg/utils"
+)
 
 type Explorer struct {
 	Chain                string
@@ -88,4 +92,36 @@ func (e *Explorer) DisplayWarnings(chainName string) []Warning {
 	}
 
 	return warnings
+}
+
+type Explorers []*Explorer
+
+func (e Explorers) GetExplorersByChain(chain string) Explorers {
+	return utils.Filter(e, func(e *Explorer) bool {
+		return e.Chain == chain
+	})
+}
+
+func (e Explorers) GetValidatorLinks(valoper string) []Link {
+	links := make([]Link, len(e))
+	for index, explorer := range e {
+		links[index] = Link{
+			Text: explorer.Name,
+			Href: fmt.Sprintf(explorer.ValidatorLinkPattern, valoper),
+		}
+	}
+
+	return links
+}
+
+func (e Explorers) GetProposalLinks(proposalID string) []Link {
+	links := make([]Link, len(e))
+	for index, explorer := range e {
+		links[index] = Link{
+			Text: explorer.Name,
+			Href: fmt.Sprintf(explorer.ProposalLinkPattern, proposalID),
+		}
+	}
+
+	return links
 }

@@ -6,6 +6,7 @@ No active proposals
 {{- $chainsData := .Proposals -}}
 {{- range .Proposals }}
 {{- $chain := .Chain -}}
+{{- $explorers := .Explorers -}}
 {{- if gt (len $chainsData) 1 -}}
 <strong>{{ .Chain.GetName }}</strong>
 {{- end -}}
@@ -17,6 +18,9 @@ No active proposals
 <i>📝Status:</i> {{ .FormatStatus }}
 <i>📝Title:</i> {{ .Title }}
 <i>⏳Voting ends at:</i> {{ .VotingEndTime }} ({{ FormatSince .VotingEndTime }})
+{{- if $explorers }}
+🌐{{ FormatLinks ($explorers.GetProposalLinks (.ID)) }}
+{{- end }}
 {{ end }}
 {{- else }}
 No active proposals.

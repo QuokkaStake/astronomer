@@ -285,3 +285,41 @@ func (d *Database) InsertExplorer(explorer *types.Explorer) error {
 
 	return nil
 }
+
+func (d *Database) GetExplorersByChains(chains []string) (types.Explorers, error) {
+	explorers := make(types.Explorers, 0)
+
+	rows, err := d.client.Query(
+		"SELECT chain, name, proposal_link_pattern, wallet_link_pattern, validator_link_pattern, main_link FROM explorers WHERE chain = any($1)",
+		pq.Array(chains),
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Error getting explorers by names")
+		return explorers, err
+	}
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
+
+	for rows.Next() {
+		explorer := &types.Explorer{}
+
+		err = rows.Scan(
+			&explorer.Chain,
+			&explorer.Name,
+			&explorer.ProposalLinkPattern,
+			&explorer.WalletLinkPattern,
+			&explorer.ValidatorLinkPattern,
+			&explorer.MainLink,
+		)
+		if err != nil {
+			d.logger.Error().Err(err).Msg("Error getting chain bind")
+			return explorers, err
+		}
+
+		explorers = append(explorers, explorer)
+	}
+
+	return explorers, nil
+}

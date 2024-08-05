@@ -214,7 +214,7 @@ func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.Que
 		return nil, info, err
 	}
 
-	if response.Code == 5 || response.Proposal == nil { // proposal xxx doesn't exist
+	if response.Code == 5 { // proposal xxx doesn't exist
 		return nil, info, nil
 	}
 
@@ -229,7 +229,7 @@ func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.Que
 			return nil, info, err
 		}
 
-		if response.Code == 5 || response.Proposal == nil { // proposal xxx doesn't exist
+		if response.Code == 5 { // proposal xxx doesn't exist
 			return nil, info, nil
 		}
 

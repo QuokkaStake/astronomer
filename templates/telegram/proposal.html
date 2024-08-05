@@ -7,6 +7,9 @@
 <i>📝Status:</i> {{ .Proposal.FormatStatus }}
 <i>📝Title:</i> {{ .Proposal.Title }}
 <i>⏳Voting ends at:</i> {{ .Proposal.VotingEndTime }} ({{ FormatSince .Proposal.VotingEndTime }})
+{{- if .Explorers }}
+🌐{{ FormatLinks (.Explorers.GetProposalLinks (.Proposal.ID)) }}
+{{- end }}
 {{ else }}
 Proposal is not found.
 {{ end }}

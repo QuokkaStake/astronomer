@@ -2,7 +2,9 @@ package templates
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
+	"main/pkg/types"
 	"main/pkg/utils"
 	"main/templates"
 
@@ -60,6 +62,8 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 		"FormatPercent":  utils.FormatPercent,
 		"FormatFloat":    utils.FormatFloat,
 		"FormatSince":    utils.FormatSince,
+		"FormatLink":     m.FormatLink,
+		"FormatLinks":    m.FormatLinks,
 	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
 		return nil, err
@@ -68,4 +72,17 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 	m.Templates[templateName] = t
 
 	return t, nil
+}
+
+func (m *TelegramTemplatesManager) FormatLink(link types.Link) template.HTML {
+	return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link.Href, link.Text))
+}
+func (m *TelegramTemplatesManager) FormatLinks(links []types.Link) template.HTML {
+	text := ""
+
+	for _, link := range links {
+		text += fmt.Sprintf("<a href='%s'>%s</a> ", link.Href, link.Text)
+	}
+
+	return template.HTML(text)
 }

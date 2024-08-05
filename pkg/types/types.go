@@ -75,14 +75,16 @@ type ActiveProposals struct {
 
 type ChainActiveProposals struct {
 	Chain          *Chain
+	Explorers      Explorers
 	Proposals      []Proposal
 	ProposalsError error
 }
 
 type SingleProposal struct {
-	Chain    *Chain
-	Proposal *Proposal
-	Error    error
+	Chain     *Chain
+	Explorers Explorers
+	Proposal  *Proposal
+	Error     error
 }
 
 type ValidatorsInfo struct {
@@ -92,6 +94,7 @@ type ValidatorsInfo struct {
 
 type ChainValidatorsInfo struct {
 	Chain      *Chain
+	Explorers  Explorers
 	Error      error
 	Validators []ValidatorInfo
 }
