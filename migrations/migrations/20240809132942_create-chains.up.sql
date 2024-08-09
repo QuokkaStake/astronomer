@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS chains (
+CREATE TABLE chains (
     name TEXT NOT NULL,
     pretty_name TEXT NOT NULL,
     lcd_endpoint TEXT NOT NULL,

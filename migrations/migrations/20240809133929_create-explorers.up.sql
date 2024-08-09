@@ -1,5 +1,5 @@
-CREATE TABLE IF NOT EXISTS explorers (
-    chain TEXT NOT NULL REFERENCES chains(name) ON DELETE CASCADE,
+CREATE TABLE explorers (
+    chain TEXT NOT NULL REFERENCES chains(name),
     name TEXT NOT NULL,
     proposal_link_pattern TEXT NOT NULL,
     wallet_link_pattern TEXT NOT NULL,

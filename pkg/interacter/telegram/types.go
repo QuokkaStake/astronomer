@@ -13,5 +13,6 @@ type Command struct {
 
 type ChainsInfo struct {
 	Chains     []*types.Chain
+	Explorers  types.Explorers
 	ChainBinds []string
 }

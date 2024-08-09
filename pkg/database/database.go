@@ -2,19 +2,40 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	migrationsPkg "main/migrations"
 	"main/pkg/types"
 	"strings"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+
 	"github.com/lib/pq"
 
 	"github.com/rs/zerolog"
+
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
+type Logger struct {
+	Logger zerolog.Logger
+}
+
+func (l *Logger) Printf(format string, v ...interface{}) {
+	l.Logger.Debug().Msgf(strings.TrimSpace(format), v...)
+}
+
+func (l *Logger) Verbose() bool {
+	return true
+}
+
 type Database struct {
-	logger zerolog.Logger
-	config types.DatabaseConfig
-	client *sql.DB
+	logger         zerolog.Logger
+	config         types.DatabaseConfig
+	client         *sql.DB
+	databaseLogger *Logger
+	migrator       *migrate.Migrate
 }
 
 func NewDatabase(
@@ -22,55 +43,62 @@ func NewDatabase(
 	config types.DatabaseConfig,
 ) *Database {
 	return &Database{
-		logger: logger.With().Str("component", "state_manager").Logger(),
+		logger: logger.With().Str("component", "database").Logger(),
 		config: config,
+		databaseLogger: &Logger{
+			Logger: logger.With().Str("component", "migrations").Logger(),
+		},
 	}
 }
 
 func (d *Database) Init() {
 	var db = d.InitPostgresDatabase()
-	migrations, err := migrationsPkg.EmbedFS.ReadDir(".")
-	if err != nil {
-		d.logger.Panic().
-			Err(err).
-			Msg("Error reading migrations dir")
-	}
-
-	for _, entry := range migrations {
-		if !strings.HasSuffix(entry.Name(), ".sql") {
-			continue
-		}
-
-		d.logger.Info().
-			Str("name", entry.Name()).
-			Msg("Applying sqlite migration")
-
-		content, err := migrationsPkg.EmbedFS.ReadFile(entry.Name())
-		if err != nil {
-			d.logger.Fatal().
-				Str("name", entry.Name()).
-				Err(err).
-				Msg("Could not read migration content")
-		}
-
-		statement, err := db.Prepare(string(content))
-		if err != nil {
-			d.logger.Fatal().
-				Str("name", entry.Name()).
-				Err(err).
-				Msg("Could not prepare migration")
-		}
-		if _, err := statement.Exec(); err != nil {
-			d.logger.Fatal().
-				Str("name", entry.Name()).
-				Err(err).
-				Msg("Could not execute migration")
-		}
-
-		_ = statement.Close() //nolint:sqlclosecheck // false positive
-	}
-
 	d.client = db
+
+	filesystem, err := iofs.New(migrationsPkg.EmbedFS, "migrations")
+	if err != nil {
+		d.logger.Panic().Err(err).Msg("Could not init filesystem")
+	}
+
+	driver, err := postgres.WithInstance(d.client, &postgres.Config{})
+	if err != nil {
+		d.logger.Panic().Err(err).Msg("Could not init migrations driver")
+	}
+
+	m, err := migrate.NewWithInstance(
+		"iofs",
+		filesystem,
+		"postgres",
+		driver,
+	)
+	if err != nil {
+		d.logger.Panic().Err(err).Msg("Could not init migrate instance")
+	}
+
+	m.Log = d.databaseLogger
+	d.migrator = m
+
+	d.Migrate()
+}
+
+func (d *Database) Migrate() {
+	if err := d.migrator.Up(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			d.logger.Debug().Msg("No pending migrations.")
+			return
+		}
+		d.logger.Panic().Err(err).Msg("Could not run migrations")
+	}
+}
+
+func (d *Database) Rollback() {
+	if err := d.migrator.Down(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			d.logger.Debug().Msg("No migrations to rollback.")
+			return
+		}
+		d.logger.Panic().Err(err).Msg("Could not rollback migrations")
+	}
 }
 
 func (d *Database) InitPostgresDatabase() *sql.DB {

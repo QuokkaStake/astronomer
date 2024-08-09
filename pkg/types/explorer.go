@@ -125,3 +125,19 @@ func (e Explorers) GetProposalLinks(proposalID string) []Link {
 
 	return links
 }
+
+func (e Explorers) GetChainLinks(chainName string) []Link {
+	links := make([]Link, 0)
+	for _, explorer := range e {
+		if explorer.Chain != chainName {
+			continue
+		}
+
+		links = append(links, Link{
+			Text: explorer.Name,
+			Href: explorer.MainLink,
+		})
+	}
+
+	return links
+}
