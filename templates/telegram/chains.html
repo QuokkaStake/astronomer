@@ -1,6 +1,6 @@
 <strong>Chains</strong>
 There are {{ len .Chains }} chains configured:
-{{ $explorers := .Explorers }}
+{{- $explorers := .Explorers }}
 {{- range .Chains }}
 - {{ .Name }}{{ if .PrettyName }} ({{ .PrettyName }}){{ end }} {{ FormatLinks ($explorers.GetChainLinks (.Name)) }}
 {{- end }}
