@@ -52,8 +52,7 @@ func NewDatabase(
 }
 
 func (d *Database) Init() {
-	var db = d.InitPostgresDatabase()
-	d.client = db
+	d.client = d.InitPostgresDatabase()
 
 	filesystem, err := iofs.New(migrationsPkg.EmbedFS, "migrations")
 	if err != nil {
@@ -77,28 +76,6 @@ func (d *Database) Init() {
 
 	m.Log = d.databaseLogger
 	d.migrator = m
-
-	d.Migrate()
-}
-
-func (d *Database) Migrate() {
-	if err := d.migrator.Up(); err != nil {
-		if errors.Is(err, migrate.ErrNoChange) {
-			d.logger.Debug().Msg("No pending migrations.")
-			return
-		}
-		d.logger.Panic().Err(err).Msg("Could not run migrations")
-	}
-}
-
-func (d *Database) Rollback() {
-	if err := d.migrator.Down(); err != nil {
-		if errors.Is(err, migrate.ErrNoChange) {
-			d.logger.Debug().Msg("No migrations to rollback.")
-			return
-		}
-		d.logger.Panic().Err(err).Msg("Could not rollback migrations")
-	}
 }
 
 func (d *Database) InitPostgresDatabase() *sql.DB {
@@ -121,6 +98,26 @@ func (d *Database) InitPostgresDatabase() *sql.DB {
 		Msg("PostgreSQL database connected")
 
 	return db
+}
+
+func (d *Database) Migrate() {
+	if err := d.migrator.Up(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			d.logger.Debug().Msg("No pending migrations.")
+			return
+		}
+		d.logger.Panic().Err(err).Msg("Could not run migrations")
+	}
+}
+
+func (d *Database) Rollback() {
+	if err := d.migrator.Down(); err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			d.logger.Debug().Msg("No migrations to rollback.")
+			return
+		}
+		d.logger.Panic().Err(err).Msg("Could not rollback migrations")
+	}
 }
 
 func (d *Database) GetAllChainBinds(chatID string) ([]string, error) {

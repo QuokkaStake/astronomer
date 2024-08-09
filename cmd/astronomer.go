@@ -2,6 +2,7 @@ package main
 
 import (
 	"main/pkg"
+	databasePkg "main/pkg/database"
 	"main/pkg/fs"
 	"main/pkg/logger"
 
@@ -37,6 +38,40 @@ func ExecuteValidateConfig(configPath string) {
 	}
 }
 
+func ExecuteMigrate(configPath string) {
+	filesystem := &fs.OsFS{}
+
+	config, err := pkg.GetConfig(filesystem, configPath)
+	if err != nil {
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Could not load config!")
+	}
+
+	if err := config.Validate(); err != nil {
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Config is invalid!")
+	}
+
+	database := databasePkg.NewDatabase(logger.GetDefaultLogger(), config.DatabaseConfig)
+	database.Init()
+	database.Migrate()
+}
+
+func ExecuteRollback(configPath string) {
+	filesystem := &fs.OsFS{}
+
+	config, err := pkg.GetConfig(filesystem, configPath)
+	if err != nil {
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Could not load config!")
+	}
+
+	if err := config.Validate(); err != nil {
+		logger.GetDefaultLogger().Panic().Err(err).Msg("Config is invalid!")
+	}
+
+	database := databasePkg.NewDatabase(logger.GetDefaultLogger(), config.DatabaseConfig)
+	database.Init()
+	database.Rollback()
+}
+
 func main() {
 	var ConfigPath string
 
@@ -51,10 +86,28 @@ func main() {
 
 	validateConfigCmd := &cobra.Command{
 		Use:     "validate-config --config [config path]",
-		Long:    "A multi-chain explorer/wallet as a Telegram/Discord bot.",
+		Long:    "Validate application config.",
 		Version: version,
 		Run: func(cmd *cobra.Command, args []string) {
 			ExecuteValidateConfig(ConfigPath)
+		},
+	}
+
+	migrateCmd := &cobra.Command{
+		Use:     "migrate --config [config path]",
+		Long:    "Perform a database migration.",
+		Version: version,
+		Run: func(cmd *cobra.Command, args []string) {
+			ExecuteMigrate(ConfigPath)
+		},
+	}
+
+	rollbackCmd := &cobra.Command{
+		Use:     "rollback --config [config path]",
+		Long:    "Rollback all database migrations.",
+		Version: version,
+		Run: func(cmd *cobra.Command, args []string) {
+			ExecuteRollback(ConfigPath)
 		},
 	}
 
@@ -62,8 +115,15 @@ func main() {
 	_ = rootCmd.MarkPersistentFlagRequired("config")
 
 	validateConfigCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
+	migrateCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
+	rollbackCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
 	_ = validateConfigCmd.MarkPersistentFlagRequired("config")
+	_ = migrateCmd.MarkPersistentFlagRequired("config")
+	_ = rollbackCmd.MarkPersistentFlagRequired("config")
+
 	rootCmd.AddCommand(validateConfigCmd)
+	rootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(rollbackCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		logger.GetDefaultLogger().Panic().Err(err).Msg("Could not start application")
