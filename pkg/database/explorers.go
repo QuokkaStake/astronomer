@@ -82,7 +82,7 @@ func (d *Database) UpdateExplorer(explorer *types.Explorer) (bool, error) {
 }
 
 func (d *Database) DeleteExplorer(chainName, explorerName string) (bool, error) {
-	result, err := d.client.Exec("DELETE FROM explorer WHERE chain = $1 AND name = $2", chainName, explorerName)
+	result, err := d.client.Exec("DELETE FROM explorers WHERE chain = $1 AND name = $2", chainName, explorerName)
 	if err != nil {
 		d.logger.Error().Err(err).Msg("Could not delete explorer")
 		return false, err
