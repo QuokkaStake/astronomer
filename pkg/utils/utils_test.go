@@ -1,10 +1,11 @@
 package utils
 
 import (
-	"cosmossdk.io/math"
 	"math/rand"
 	"testing"
 	"time"
+
+	"cosmossdk.io/math"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -93,6 +93,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/chain_delete", bot, interacter.GetChainDeleteCommand())
 	interacter.AddCommand("/explorer_add", bot, interacter.GetExplorerAddCommand())
 	interacter.AddCommand("/explorer_delete", bot, interacter.GetExplorerDeleteCommand())
+	interacter.AddCommand("/denom_add", bot, interacter.GetDenomAddCommand())
 	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
 
 	interacter.TelegramBot = bot
