@@ -58,12 +58,13 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 	filename := templateName + ".html"
 
 	t, err := template.New(filename).Funcs(template.FuncMap{
-		"FormatDuration": utils.FormatDuration,
-		"FormatPercent":  utils.FormatPercent,
-		"FormatFloat":    utils.FormatFloat,
-		"FormatSince":    utils.FormatSince,
-		"FormatLink":     m.FormatLink,
-		"FormatLinks":    m.FormatLinks,
+		"FormatDuration":  utils.FormatDuration,
+		"FormatPercent":   utils.FormatPercent,
+		"FormatFloat":     utils.FormatFloat,
+		"FormatSince":     utils.FormatSince,
+		"FormatLink":      m.FormatLink,
+		"FormatLinks":     m.FormatLinks,
+		"SerializeAmount": m.SerializeAmount,
 	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
 		return nil, err
@@ -85,4 +86,12 @@ func (m *TelegramTemplatesManager) FormatLinks(links []types.Link) template.HTML
 	}
 
 	return template.HTML(text)
+}
+
+func (m *TelegramTemplatesManager) SerializeAmount(amount types.Amount) string {
+	return fmt.Sprintf(
+		"%s %s",
+		utils.FormatDec(amount.Amount),
+		amount.Denom,
+	)
 }

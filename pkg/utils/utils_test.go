@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"cosmossdk.io/math"
 	"math/rand"
 	"testing"
 	"time"
@@ -77,4 +78,11 @@ func TestFormatDuration(t *testing.T) {
 	formatted := FormatDuration(duration)
 
 	assert.Equal(t, "1 day 2 hours 4 seconds", formatted)
+}
+
+func TestFormatLegacyDec(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, "123,456,789.123", FormatDec(math.LegacyMustNewDecFromStr("123456789.123456")))
+	assert.Equal(t, "1,234,567.123", FormatDec(math.LegacyMustNewDecFromStr("1234567.123456")))
 }

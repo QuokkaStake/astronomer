@@ -81,8 +81,22 @@ func (f *DataFetcher) FindValidator(query string, chainNames []string) types.Val
 
 			for index, validator := range foundValidators {
 				validatorInfo := types.ValidatorInfo{
-					Validator:          validator,
-					VotingPowerPercent: validator.DelegatorShares.Quo(totalVP).MustFloat64(),
+					OperatorAddress: validator.OperatorAddress,
+					Jailed:          validator.Jailed,
+					Status:          validator.Status,
+					Tokens: types.Amount{
+						Amount: validator.DelegatorShares,
+						Denom:  chain.BaseDenom,
+					},
+					Moniker:                 validator.Description.Moniker,
+					Details:                 validator.Description.Details,
+					Identity:                validator.Description.Identity,
+					Website:                 validator.Description.Website,
+					SecurityContact:         validator.Description.SecurityContact,
+					Commission:              validator.Commission.CommissionRates.Rate.MustFloat64(),
+					CommissionMax:           validator.Commission.CommissionRates.MaxRate.MustFloat64(),
+					CommissionMaxChangeRate: validator.Commission.CommissionRates.MaxChangeRate.MustFloat64(),
+					VotingPowerPercent:      validator.DelegatorShares.Quo(totalVP).MustFloat64(),
 				}
 
 				if validator.Active() {

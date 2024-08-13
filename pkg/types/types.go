@@ -2,7 +2,10 @@ package types
 
 import (
 	"fmt"
+	"main/pkg/constants"
 	"time"
+
+	"cosmossdk.io/math"
 )
 
 type QueryInfo struct {
@@ -13,7 +16,7 @@ type QueryInfo struct {
 }
 
 type Amount struct {
-	Amount float64
+	Amount math.LegacyDec
 	Denom  string
 }
 
@@ -100,9 +103,28 @@ type ChainValidatorsInfo struct {
 }
 
 type ValidatorInfo struct {
-	Validator          *Validator
-	VotingPowerPercent float64
-	Rank               int
+	OperatorAddress         string
+	Jailed                  bool
+	Status                  string
+	Tokens                  Amount
+	Moniker                 string
+	Details                 string
+	Identity                string
+	Website                 string
+	SecurityContact         string
+	Commission              float64
+	CommissionMax           float64
+	CommissionMaxChangeRate float64
+	VotingPowerPercent      float64
+	Rank                    int
+}
+
+func (i ValidatorInfo) Active() bool {
+	return i.Status == constants.ValidatorStatusBonded
+}
+
+func (i ValidatorInfo) FormatCommission() string {
+	return fmt.Sprintf("%.2f", i.Commission*100)
 }
 
 func (i ValidatorInfo) GetVotingPowerPercent() string {

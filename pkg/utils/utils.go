@@ -3,9 +3,12 @@ package utils
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 	"time"
 	"unicode"
+
+	cosmosMath "cosmossdk.io/math"
 )
 
 func Map[T, V any](slice []T, f func(T) V) []V {
@@ -148,4 +151,23 @@ func FormatSince(since time.Time) string {
 	} else {
 		return fmt.Sprintf("%s ago", FormatDuration(duration))
 	}
+}
+
+func FormatDec(dec cosmosMath.LegacyDec) string {
+	decAsString := dec.String()
+	decAsStringSplit := strings.SplitN(decAsString, ".", 2)
+	beforeSplit := decAsStringSplit[0]
+
+	chunks := []string{}
+
+	for len(beforeSplit) > 0 {
+		split := max(len(beforeSplit)-3, 0)
+		chunks = append(chunks, beforeSplit[split:])
+		beforeSplit = beforeSplit[:split]
+	}
+
+	slices.Reverse(chunks)
+	out := strings.Join(chunks, ",")
+	floatingPart := decAsStringSplit[1]
+	return out + "." + floatingPart[:3]
 }

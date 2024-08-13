@@ -12,20 +12,20 @@ No chains found.
 ❌ Error searching for validator: {{ .Error }}
 {{ else if .Validators }}
 {{- range .Validators }}
-{{ .Validator.Description.Moniker }}
-{{- if .Validator.Active }}
-✅Active (#{{ .Rank }}, {{.GetVotingPowerPercent }}% voting power)
-{{- else if .Validator.Jailed }}
+{{ .Moniker }}
+{{- if .Active }}
+✅Active (#{{ .Rank }}, {{.GetVotingPowerPercent }}% voting power) ({{ SerializeAmount .Tokens }})
+{{- else if .Jailed }}
 ❌Jailed
 {{- else }}
 😔Not active
 {{- end }}
-📋<i>{{ .Validator.Description.Details }}</i>
-🤝{{ .Validator.Description.SecurityContact }}
-🌎{{ .Validator.Description.Website }}
-💸Commission: {{ .Validator.FormatCommission }}%
+📋<i>{{ .Details }}</i>
+🤝{{ .SecurityContact }}
+🌎{{ .Website }}
+💸Commission: {{ .FormatCommission }}%
 {{- if $explorers }}
-🌐{{ FormatLinks ($explorers.GetValidatorLinks (.Validator.OperatorAddress)) }}
+🌐{{ FormatLinks ($explorers.GetValidatorLinks (.OperatorAddress)) }}
 {{- end }}
 {{- end }}
 {{ else }}
