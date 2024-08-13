@@ -18,3 +18,14 @@ func (d *Database) InsertDenom(denom *types.Denom) error {
 
 	return nil
 }
+
+func (d *Database) DeleteDenom(chainName, denom string) (bool, error) {
+	result, err := d.client.Exec("DELETE FROM denoms WHERE chain = $1 AND denom = $2", chainName, denom)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not delete denom")
+		return false, err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	return rowsAffected > 0, nil
+}
