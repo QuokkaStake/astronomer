@@ -6,11 +6,14 @@ import (
 )
 
 type FetcherName string
+type PriceFetcherName string
 
 const (
 	ValidatorStatusBonded = "BOND_STATUS_BONDED"
 
 	CoingeckoBaseCurrency = "usd"
+
+	PriceFetcherNameCoingecko = "coingecko"
 )
 
 var (
