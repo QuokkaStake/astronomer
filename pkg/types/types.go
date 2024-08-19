@@ -16,8 +16,10 @@ type QueryInfo struct {
 }
 
 type Amount struct {
-	Amount math.LegacyDec
-	Denom  string
+	Amount    math.LegacyDec
+	Denom     string
+	BaseDenom string
+	PriceUSD  *math.LegacyDec
 }
 
 type Proposal struct {
@@ -106,7 +108,7 @@ type ValidatorInfo struct {
 	OperatorAddress         string
 	Jailed                  bool
 	Status                  string
-	Tokens                  Amount
+	Tokens                  *Amount
 	Moniker                 string
 	Details                 string
 	Identity                string

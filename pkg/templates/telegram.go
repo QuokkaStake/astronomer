@@ -89,6 +89,15 @@ func (m *TelegramTemplatesManager) FormatLinks(links []types.Link) template.HTML
 }
 
 func (m *TelegramTemplatesManager) SerializeAmount(amount types.Amount) string {
+	if amount.PriceUSD != nil {
+		return fmt.Sprintf(
+			"%s %s ($%s)",
+			utils.FormatDec(amount.Amount),
+			amount.Denom,
+			utils.FormatDec(*amount.PriceUSD),
+		)
+	}
+
 	return fmt.Sprintf(
 		"%s %s",
 		utils.FormatDec(amount.Amount),

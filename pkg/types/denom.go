@@ -65,3 +65,29 @@ func DenomFromArgs(args map[string]string) *Denom {
 	defaults.MustSet(denom)
 	return denom
 }
+
+type Denoms []*Denom
+
+func (denoms Denoms) ToMap() map[string]map[string]*Denom {
+	m := make(map[string]map[string]*Denom)
+
+	for _, denom := range denoms {
+		if _, ok := m[denom.Chain]; !ok {
+			m[denom.Chain] = make(map[string]*Denom)
+		}
+
+		m[denom.Chain][denom.Denom] = denom
+	}
+
+	return m
+}
+
+type ChainWithDenom struct {
+	Chain string
+	Denom string
+}
+
+type AmountWithChain struct {
+	Chain  string
+	Amount *Amount
+}
