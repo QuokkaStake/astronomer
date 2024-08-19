@@ -14,12 +14,13 @@ No chains found.
 {{- range .Validators }}
 {{ .Moniker }}
 {{- if .Active }}
-✅Active (#{{ .Rank }}, {{.GetVotingPowerPercent }}% voting power) ({{ SerializeAmount .Tokens }})
+✅Active (#{{ .Rank }}, {{.GetVotingPowerPercent }}% voting power)
 {{- else if .Jailed }}
 ❌Jailed
 {{- else }}
 😔Not active
 {{- end }}
+🏦({{ SerializeAmount .Tokens }})
 📋<i>{{ .Details }}</i>
 🤝{{ .SecurityContact }}
 🌎{{ .Website }}
