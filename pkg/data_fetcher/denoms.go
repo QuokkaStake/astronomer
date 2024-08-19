@@ -12,6 +12,10 @@ import (
 	"cosmossdk.io/math"
 )
 
+func (f *DataFetcher) GetDenomCacheKey(chain, denom string) string {
+	return fmt.Sprintf("denom_%s_%s", chain, denom)
+}
+
 func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 	chainWithDenoms := utils.Map(amounts, func(a *types.AmountWithChain) types.ChainWithDenom {
 		return types.ChainWithDenom{
@@ -44,18 +48,48 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 		go func(priceFetcherName constants.PriceFetcherName, denoms []*types.Denom) {
 			defer wg.Done()
 
+			notCachedDenoms := []*types.Denom{}
+			allPrices := priceFetcher.Prices{}
+
+			for _, denom := range denoms {
+				value, cached := f.Cache.Get(f.GetDenomCacheKey(denom.Chain, denom.Denom))
+				if !cached {
+					notCachedDenoms = append(notCachedDenoms, denom)
+					continue
+				}
+
+				valueFloat, _ := value.(float64)
+				allPrices.Set(denom.Chain, denom.Denom, valueFloat)
+			}
+
+			if len(notCachedDenoms) == 0 {
+				f.Logger.Debug().
+					Str("price_fetcher", string(priceFetcherName)).
+					Msg("All denoms prices are cached, not fetching")
+				return
+			}
+
 			foundPriceFetcher, ok := f.PriceFetchers[priceFetcherName]
 			if !ok {
 				return
 			}
 
-			fetcherPrices, denomFetchError := foundPriceFetcher.GetPrices(denoms)
-			if denomFetchError != nil {
-				f.Logger.Err(denomFetchError).Msg("Could not fetch prices")
+			if fetcherPrices, denomFetchError := foundPriceFetcher.GetPrices(notCachedDenoms); denomFetchError != nil {
+				f.Logger.Err(denomFetchError).
+					Str("price_fetcher", string(priceFetcherName)).
+					Msg("Could not fetch prices")
 			} else {
-				mutex.Lock()
-				prices[priceFetcherName] = fetcherPrices
+				for chain, chainPrices := range fetcherPrices {
+					for denom, value := range chainPrices {
+						f.Cache.Set(f.GetDenomCacheKey(chain, denom), value)
+						allPrices.Set(chain, denom, value)
+					}
+				}
 			}
+
+			mutex.Lock()
+			prices[priceFetcherName] = allPrices
+			mutex.Unlock()
 		}(priceFetcherName, denoms)
 	}
 
