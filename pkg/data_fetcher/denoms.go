@@ -30,12 +30,12 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 		return
 	}
 
-	denomsByPriceFetcher := utils.GroupBy(foundDenoms, func(d *types.Denom) constants.PriceFetcherName {
+	denomsByPriceFetcher := utils.GroupBy(foundDenoms, func(d *types.Denom) []constants.PriceFetcherName {
 		if d.CoingeckoCurrency.IsZero() {
-			return ""
+			return []constants.PriceFetcherName{}
 		}
 
-		return constants.PriceFetcherNameCoingecko
+		return []constants.PriceFetcherName{constants.PriceFetcherNameCoingecko}
 	})
 
 	var wg sync.WaitGroup
@@ -71,6 +71,9 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 
 			foundPriceFetcher, ok := f.PriceFetchers[priceFetcherName]
 			if !ok {
+				mutex.Lock()
+				prices[priceFetcherName] = allPrices
+				mutex.Unlock()
 				return
 			}
 

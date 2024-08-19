@@ -21,16 +21,18 @@ func Map[T, V any](slice []T, f func(T) V) []V {
 	return result
 }
 
-func GroupBy[T any, V comparable](slice []T, f func(T) V) map[V][]T {
+func GroupBy[T any, V comparable](slice []T, f func(T) []V) map[V][]T {
 	result := make(map[V][]T)
 
 	for _, value := range slice {
-		key := f(value)
+		keys := f(value)
 
-		if _, ok := result[key]; !ok {
-			result[key] = []T{value}
-		} else {
-			result[key] = append(result[key], value)
+		for _, key := range keys {
+			if _, ok := result[key]; !ok {
+				result[key] = []T{value}
+			} else {
+				result[key] = append(result[key], value)
+			}
 		}
 	}
 

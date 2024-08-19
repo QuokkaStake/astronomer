@@ -47,6 +47,54 @@ func TestFilter(t *testing.T) {
 	assert.Equal(t, "true", filtered[0], "Value mismatch!")
 }
 
+func TestFind(t *testing.T) {
+	t.Parallel()
+
+	array := []string{"1", "2", "3"}
+
+	value1, found1 := Find(array, func(s string) bool {
+		return s == "1"
+	})
+	assert.Equal(t, "1", value1)
+	assert.True(t, found1)
+
+	value2, found2 := Find(array, func(s string) bool {
+		return s == "4"
+	})
+	assert.Equal(t, "", value2)
+	assert.False(t, found2)
+}
+
+func TestGroupBy(t *testing.T) {
+	t.Parallel()
+
+	type TestType struct {
+		Keys  []string
+		Value string
+	}
+
+	array := []TestType{
+		{Keys: []string{"key1"}, Value: "value1"},
+		{Keys: []string{"key2"}, Value: "value2"},
+		{Keys: []string{"key2"}, Value: "value3"},
+		{Keys: []string{"key2", "key3"}, Value: "value4"},
+	}
+
+	grouped := GroupBy(array, func(value TestType) []string {
+		return value.Keys
+	})
+
+	assert.Equal(t, map[string][]TestType{
+		"key1": {{Keys: []string{"key1"}, Value: "value1"}},
+		"key2": {
+			{Keys: []string{"key2"}, Value: "value2"},
+			{Keys: []string{"key2"}, Value: "value3"},
+			{Keys: []string{"key2", "key3"}, Value: "value4"},
+		},
+		"key3": {{Keys: []string{"key2", "key3"}, Value: "value4"}},
+	}, grouped)
+}
+
 func TestSplitStringIntoChunksLessThanOneChunk(t *testing.T) {
 	t.Parallel()
 
@@ -86,4 +134,42 @@ func TestFormatLegacyDec(t *testing.T) {
 
 	assert.Equal(t, "123,456,789.123", FormatDec(math.LegacyMustNewDecFromStr("123456789.123456")))
 	assert.Equal(t, "1,234,567.123", FormatDec(math.LegacyMustNewDecFromStr("1234567.123456")))
+}
+
+func TestFormatPercent(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "10.00%", FormatPercent(0.1))
+}
+
+func TestFormatFloat(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "10.00", FormatFloat(10.00))
+}
+
+func TestMaybeRemoveQuotes(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "string", MaybeRemoveQuotes("string"))
+	assert.Equal(t, "string", MaybeRemoveQuotes("\"string\""))
+}
+
+func TestParseArgsAsMap(t *testing.T) {
+	t.Parallel()
+
+	_, invalid := ParseArgsAsMap("a b c d")
+	assert.False(t, invalid)
+
+	args, valid := ParseArgsAsMap("key1=value1 key2=\"value2\" key3=\"value3 value4\"")
+	assert.True(t, valid)
+	assert.Equal(t, map[string]string{
+		"key1": "value1",
+		"key2": "value2",
+		"key3": "value3 value4",
+	}, args)
+}
+
+func TestFormatSince(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, "in 1 minute", FormatSince(time.Now().Add(time.Minute+time.Second)))
+	assert.Equal(t, "1 minute ago", FormatSince(time.Now().Add(-time.Minute)))
 }
