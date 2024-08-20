@@ -18,3 +18,25 @@ func (d *Database) InsertWalletLink(link *types.WalletLink) error {
 
 	return nil
 }
+
+func (d *Database) DeleteWalletLink(
+	chain string,
+	reporter string,
+	address string,
+	userID string,
+) (bool, error) {
+	result, err := d.client.Exec(
+		"DELETE FROM wallet_links WHERE chain = $1 AND reporter = $2 AND address = $3 AND user_id = $4",
+		chain,
+		reporter,
+		address,
+		userID,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not delete wallet link")
+		return false, err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	return rowsAffected > 0, nil
+}
