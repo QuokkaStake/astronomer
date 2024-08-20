@@ -66,6 +66,58 @@ func (interacter *Interacter) BoundChainSingleQueryParser(
 	}
 }
 
+// Args parser when the command is called with 2 arguments, like a wallet address and an alias.
+// How it can be called:
+// - /command wallet alias - if there is 1 chain bound to a chat
+// - /command chain1 wallet alias - if there are 0 or 2+ chains bound to a chat.
+
+type BoundChainAlias struct {
+	ChainName string
+	Value     string
+	Alias     string
+}
+
+func (interacter *Interacter) BoundChainAliasParser(
+	c tele.Context,
+	chainBinds []string,
+) (bool, string, BoundChainAlias) {
+	args := strings.SplitN(c.Text(), " ", 4)
+
+	if len(chainBinds) == 1 { //nolint:nestif
+		interacter.Logger.Debug().Msg("Single chain bound to a chat")
+
+		if len(args) == 3 { // /command address alias
+			return true, "", BoundChainAlias{
+				ChainName: chainBinds[0],
+				Value:     args[1],
+				Alias:     args[2],
+			}
+		} else { // invalid
+			return false, html.EscapeString(fmt.Sprintf(
+				"Usage: %s <address> <alias>",
+				args[0],
+			)), BoundChainAlias{}
+		}
+	} else {
+		interacter.Logger.Debug().
+			Strs("chains", chainBinds).
+			Msg("Multiple or no chain bound to a chat")
+
+		if len(args) == 4 { // /command chain address alias
+			return true, "", BoundChainAlias{
+				ChainName: args[1],
+				Value:     args[2],
+				Alias:     args[3],
+			}
+		} else { // invalid
+			return false, html.EscapeString(fmt.Sprintf(
+				"Usage: %s <chain> <address> <alias>",
+				args[0],
+			)), BoundChainAlias{}
+		}
+	}
+}
+
 type SingleChainItemArgs struct {
 	ChainName string
 	ItemID    string
