@@ -17,7 +17,7 @@ func (interacter *Interacter) HandleSingleProposal(
 	c tele.Context,
 	chainBinds []string,
 ) (string, error) {
-	valid, usage, args := interacter.SingleChainItemParser(c, chainBinds, "proposal ID")
+	valid, usage, args := interacter.SingleChainItemParser(c.Text(), chainBinds, "proposal ID")
 	if !valid {
 		return usage, constants.ErrWrongInvocation
 	}

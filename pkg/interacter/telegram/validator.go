@@ -14,7 +14,7 @@ func (interacter *Interacter) GetValidatorCommand() Command {
 }
 
 func (interacter *Interacter) HandleValidator(c tele.Context, chainBinds []string) (string, error) {
-	valid, usage, args := interacter.BoundChainSingleQueryParser(c, chainBinds)
+	valid, usage, args := interacter.BoundChainSingleQueryParser(c.Text(), chainBinds)
 	if !valid {
 		return usage, constants.ErrWrongInvocation
 	}

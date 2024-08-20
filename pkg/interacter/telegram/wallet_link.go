@@ -21,7 +21,7 @@ func (interacter *Interacter) GetWalletLinkCommand() Command {
 }
 
 func (interacter *Interacter) HandleWalletLinkCommand(c tele.Context, chainBinds []string) (string, error) {
-	valid, usage, args := interacter.BoundChainAliasParser(c, chainBinds)
+	valid, usage, args := interacter.BoundChainAliasParser(c.Text(), chainBinds)
 	if !valid {
 		return usage, constants.ErrWrongInvocation
 	}

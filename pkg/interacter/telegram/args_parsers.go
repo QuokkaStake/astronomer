@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"html"
 	"strings"
-
-	tele "gopkg.in/telebot.v3"
 )
 
 type SingleArg struct {
@@ -13,10 +11,10 @@ type SingleArg struct {
 }
 
 func (interacter *Interacter) SingleArgParser(
-	c tele.Context,
+	query string,
 	argumentName string,
 ) (bool, string, SingleArg) {
-	args := strings.Split(c.Text(), " ")
+	args := strings.Split(query, " ")
 
 	if len(args) < 2 {
 		return false, html.EscapeString(fmt.Sprintf(
@@ -41,18 +39,19 @@ type BoundChainSingleQuery struct {
 // - /command chain1,chain2,chain3 query params - if there are 0 or 2+ chains bound to a chat.
 
 func (interacter *Interacter) BoundChainSingleQueryParser(
-	c tele.Context,
+	query string,
 	chainBinds []string,
 ) (bool, string, BoundChainSingleQuery) {
-	if len(chainBinds) == 1 {
-		interacter.Logger.Debug().Msg("Single chain bound to a chat")
-	} else {
+	if len(chainBinds) > 0 {
 		interacter.Logger.Debug().
 			Strs("chains", chainBinds).
-			Msg("Multiple or no chain bound to a chat")
+			Msg("There are chains bound to this chat")
+	} else {
+		interacter.Logger.Debug().
+			Msg("No chain bound to this chat")
 	}
 
-	args := strings.SplitN(c.Text(), " ", 3)
+	args := strings.SplitN(query, " ", 3)
 
 	if len(args) == 3 {
 		return true, "", BoundChainSingleQuery{ChainNames: strings.Split(args[1], ","), Query: args[2]}
@@ -69,7 +68,7 @@ func (interacter *Interacter) BoundChainSingleQueryParser(
 // Args parser when the command is called with 2 arguments, like a wallet address and an alias.
 // How it can be called:
 // - /command wallet alias - if there is 1 chain bound to a chat
-// - /command chain1 wallet alias - if there are 0 or 2+ chains bound to a chat.
+// - /command chain wallet alias - if there are 0 or 2+ chains bound to a chat.
 
 type BoundChainAlias struct {
 	ChainName string
@@ -78,12 +77,12 @@ type BoundChainAlias struct {
 }
 
 func (interacter *Interacter) BoundChainAliasParser(
-	c tele.Context,
+	query string,
 	chainBinds []string,
 ) (bool, string, BoundChainAlias) {
-	args := strings.SplitN(c.Text(), " ", 4)
-
 	if len(chainBinds) == 1 { //nolint:nestif
+		args := strings.SplitN(query, " ", 3)
+
 		interacter.Logger.Debug().Msg("Single chain bound to a chat")
 
 		if len(args) == 3 { // /command address alias
@@ -99,9 +98,11 @@ func (interacter *Interacter) BoundChainAliasParser(
 			)), BoundChainAlias{}
 		}
 	} else {
+		args := strings.SplitN(query, " ", 4)
+
 		interacter.Logger.Debug().
 			Strs("chains", chainBinds).
-			Msg("Multiple or no chain bound to a chat")
+			Msg("Zero or multiple or no chain bound to a chat")
 
 		if len(args) == 4 { // /command chain address alias
 			return true, "", BoundChainAlias{
@@ -130,7 +131,7 @@ type SingleChainItemArgs struct {
 // - /command chain_name ID - if there's 0 or 2+ more chains bound to a chat
 
 func (interacter *Interacter) SingleChainItemParser(
-	c tele.Context,
+	query string,
 	chainBinds []string,
 	argumentName string,
 ) (bool, string, SingleChainItemArgs) {
@@ -142,7 +143,7 @@ func (interacter *Interacter) SingleChainItemParser(
 			Msg("Multiple or no chain bound to a chat")
 	}
 
-	args := strings.Split(c.Text(), " ")
+	args := strings.Split(query, " ")
 
 	if len(args) == 3 {
 		// call is like /command <chain name> <proposal ID>
@@ -171,7 +172,7 @@ type BoundChainsNoArgs struct {
 // - /command chain1,chain2 - in any case
 
 func (interacter *Interacter) BoundChainsNoArgsParser(
-	c tele.Context,
+	query string,
 	chainBinds []string,
 ) (bool, string, BoundChainsNoArgs) {
 	if len(chainBinds) == 1 {
@@ -182,7 +183,7 @@ func (interacter *Interacter) BoundChainsNoArgsParser(
 			Msg("Multiple or no chain bound to a chat")
 	}
 
-	args := strings.SplitN(c.Text(), " ", 2)
+	args := strings.SplitN(query, " ", 2)
 
 	if len(args) == 2 {
 		// call is like /command <chain name>

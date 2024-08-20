@@ -17,7 +17,7 @@ func (interacter *Interacter) GetChainUnbindCommand() Command {
 }
 
 func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []string) (string, error) {
-	valid, usage, args := interacter.SingleArgParser(c, "chain")
+	valid, usage, args := interacter.SingleArgParser(c.Text(), "chain")
 	if !valid {
 		return usage, constants.ErrWrongInvocation
 	}
