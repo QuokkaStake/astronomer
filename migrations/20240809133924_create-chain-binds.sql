@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE chain_binds (
     id SERIAL PRIMARY KEY,
     reporter TEXT NOT NULL,
@@ -7,3 +8,6 @@ CREATE TABLE chain_binds (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     UNIQUE (reporter, chat_id, chain)
 );
+
+-- +goose Down
+DROP TABLE chain_binds;

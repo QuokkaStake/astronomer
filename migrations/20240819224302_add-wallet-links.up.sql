@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE wallet_links (
     chain TEXT NOT NULL REFERENCES chains(name),
     reporter TEXT NOT NULL,
@@ -7,3 +8,6 @@ CREATE TABLE wallet_links (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (chain, reporter, user_id)
 );
+
+-- +goose Down
+DROP TABLE wallet_links;

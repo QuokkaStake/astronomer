@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE denoms (
     chain TEXT NOT NULL REFERENCES chains(name),
     denom TEXT NOT NULL,
@@ -7,3 +8,6 @@ CREATE TABLE denoms (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (chain, denom)
 );
+
+-- +goose Down
+DROP TABLE denoms;

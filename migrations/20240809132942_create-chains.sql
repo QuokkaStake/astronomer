@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE chains (
     name TEXT NOT NULL,
     pretty_name TEXT NOT NULL,
@@ -6,3 +7,6 @@ CREATE TABLE chains (
     UNIQUE (name),
     PRIMARY KEY (name)
 );
+
+-- +goose Down
+DROP TABLE chains;

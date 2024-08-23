@@ -1,1 +1,0 @@
-ALTER TABLE chains ADD COLUMN base_denom TEXT NOT NULL;

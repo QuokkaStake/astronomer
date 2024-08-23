@@ -1,3 +1,4 @@
+-- +goose Up
 CREATE TABLE explorers (
     chain TEXT NOT NULL REFERENCES chains(name),
     name TEXT NOT NULL,
@@ -8,3 +9,6 @@ CREATE TABLE explorers (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (chain, name)
 );
+
+-- +goose Down
+DROP TABLE explorers;
