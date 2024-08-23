@@ -41,10 +41,6 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 		return c.Name
 	})
 
-	fmt.Printf("wallets: %+v\n", wallets[0])
-	fmt.Printf("chains names: %+v\n", chainNames)
-	fmt.Printf("chains map: %+v\n", chainsMap)
-
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 

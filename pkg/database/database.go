@@ -3,10 +3,11 @@ package database
 import (
 	"database/sql"
 	"errors"
-	"github.com/pressly/goose/v3"
 	migrationsPkg "main/migrations"
 	"main/pkg/types"
 	"strings"
+
+	"github.com/pressly/goose/v3"
 
 	"github.com/rs/zerolog"
 )
