@@ -132,3 +132,20 @@ func (i ValidatorInfo) FormatCommission() string {
 func (i ValidatorInfo) GetVotingPowerPercent() string {
 	return fmt.Sprintf("%.2f", i.VotingPowerPercent*100)
 }
+
+type WalletsBalancesInfo struct {
+	Error error
+	Infos map[string]ChainWalletsBalancesInfo
+}
+
+type ChainWalletsBalancesInfo struct {
+	Chain        *Chain
+	Explorers    Explorers
+	BalancesInfo map[string]*WalletBalancesInfo
+}
+
+type WalletBalancesInfo struct {
+	Address       *WalletLink
+	Balances      []*Amount
+	BalancesError error
+}

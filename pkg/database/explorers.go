@@ -27,6 +27,10 @@ func (d *Database) InsertExplorer(explorer *types.Explorer) error {
 func (d *Database) GetExplorersByChains(chains []string) (types.Explorers, error) {
 	explorers := make(types.Explorers, 0)
 
+	if len(chains) == 0 {
+		return explorers, nil
+	}
+
 	rows, err := d.client.Query(
 		"SELECT chain, name, proposal_link_pattern, wallet_link_pattern, validator_link_pattern, main_link FROM explorers WHERE chain = any($1)",
 		pq.Array(chains),

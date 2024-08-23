@@ -21,6 +21,22 @@ func Map[T, V any](slice []T, f func(T) V) []V {
 	return result
 }
 
+func MapUniq[T, V comparable](slice []T, f func(T) V) []V {
+	result := make([]V, len(slice))
+	cache := map[V]bool{}
+
+	for index, value := range slice {
+		mapped := f(value)
+		if _, ok := cache[mapped]; !ok {
+			result[index] = f(value)
+		}
+
+		cache[mapped] = true
+	}
+
+	return result
+}
+
 func GroupBy[T any, V comparable](slice []T, f func(T) []V) map[V][]T {
 	result := make(map[V][]T)
 
@@ -34,6 +50,16 @@ func GroupBy[T any, V comparable](slice []T, f func(T) []V) map[V][]T {
 				result[key] = append(result[key], value)
 			}
 		}
+	}
+
+	return result
+}
+
+func GroupSingleBy[T any, V comparable](slice []T, f func(T) V) map[V]T {
+	result := make(map[V]T)
+
+	for _, value := range slice {
+		result[f(value)] = value
 	}
 
 	return result

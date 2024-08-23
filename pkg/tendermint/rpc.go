@@ -135,6 +135,22 @@ func (rpc *RPC) GetInflation() (*types.InflationResponse, types.QueryInfo, error
 	return response, info, nil
 }
 
+func (rpc *RPC) GetBalance(address string) (*types.BalancesResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/bank/v1beta1/balances/" + address
+
+	var response *types.BalancesResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.BalancesResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	var newerBlock *types.BlockResponse
 	_, err := rpc.Get(rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/latest", &newerBlock)

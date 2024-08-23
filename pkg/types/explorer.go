@@ -141,3 +141,15 @@ func (e Explorers) GetChainLinks(chainName string) []Link {
 
 	return links
 }
+
+func (e Explorers) GetWalletLinks(wallet *WalletLink) []Link {
+	links := make([]Link, 0)
+	for _, explorer := range e {
+		links = append(links, Link{
+			Text: explorer.Name,
+			Href: fmt.Sprintf(explorer.WalletLinkPattern, wallet.Address),
+		})
+	}
+
+	return links
+}

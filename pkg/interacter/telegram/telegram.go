@@ -82,6 +82,8 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/proposals", bot, interacter.GetActiveProposalsCommand())
 	interacter.AddCommand("/wallet_link", bot, interacter.GetWalletLinkCommand())
 	interacter.AddCommand("/wallet_unlink", bot, interacter.GetWalletUnlinkCommand())
+	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
+	interacter.AddCommand("/balance", bot, interacter.GetBalanceCommand())
 
 	if len(interacter.Admins) > 0 {
 		interacter.Logger.Debug().Msg("Using admins whitelist")
@@ -97,7 +99,6 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/explorer_delete", bot, interacter.GetExplorerDeleteCommand())
 	interacter.AddCommand("/denom_add", bot, interacter.GetDenomAddCommand())
 	interacter.AddCommand("/denom_delete", bot, interacter.GetDenomDeleteCommand())
-	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
 
 	interacter.TelegramBot = bot
 }

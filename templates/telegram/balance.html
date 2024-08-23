@@ -1,0 +1,27 @@
+{{- if .Error }}
+❌ Error getting wallets balances: {{ .Error }}
+{{- else if not .Infos }}
+You are not subscribed to any wallets.
+{{- else -}}
+{{- $chainsData := .Infos -}}
+{{- range .Infos }}
+{{- $chain := .Chain -}}
+{{- $explorers := .Explorers -}}
+{{- if gt (len $chainsData) 1 -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- end -}}
+{{- range .BalancesInfo }}
+🌐<i>{{ .Address.Alias.Value }}</i> {{ FormatLinks ($explorers.GetWalletLinks (.Address)) }}
+{{- if .BalancesError }}
+❌ Error querying balances: {{ .BalancesError }}
+{{ else if .Balances }}
+Balances:
+{{- range .Balances }}
+🏦{{ SerializeAmount . }}
+{{- end }}
+{{- else }}
+Wallet is empty.
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
