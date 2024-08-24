@@ -39,7 +39,7 @@ No rewards.
 {{- else if .Delegations }}
 Delegations:
 {{- range .Delegations }}
-- {{ .Validator.Address }} {{ SerializeAmount .Amount }}
+- {{ .Validator.GetName }}{{ if $explorers }} ({{ FormatLinks ($explorers.GetValidatorLinks (.Validator.Address)) }}){{ end }}: {{ SerializeAmount .Amount }}
 {{- end }}
 {{- else }}
 Delegations:

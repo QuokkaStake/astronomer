@@ -7,6 +7,7 @@ import (
 	"main/pkg/types"
 	"main/pkg/utils"
 	"main/templates"
+	"strings"
 
 	"github.com/rs/zerolog"
 )
@@ -79,13 +80,11 @@ func (m *TelegramTemplatesManager) FormatLink(link types.Link) template.HTML {
 	return template.HTML(fmt.Sprintf("<a href='%s'>%s</a>", link.Href, link.Text))
 }
 func (m *TelegramTemplatesManager) FormatLinks(links []types.Link) template.HTML {
-	text := ""
+	linksConverted := utils.Map(links, func(link types.Link) string {
+		return fmt.Sprintf("<a href='%s'>%s</a>", link.Href, link.Text)
+	})
 
-	for _, link := range links {
-		text += fmt.Sprintf("<a href='%s'>%s</a> ", link.Href, link.Text)
-	}
-
-	return template.HTML(text)
+	return template.HTML(strings.Join(linksConverted, " "))
 }
 
 func (m *TelegramTemplatesManager) SerializeAmount(amount types.Amount) string {

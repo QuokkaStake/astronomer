@@ -9,12 +9,6 @@ import (
 	"cosmossdk.io/math"
 )
 
-type ValidatorResponse struct {
-	Code      int       `json:"code"`
-	Message   string    `json:"message"`
-	Validator Validator `json:"validator"`
-}
-
 type ValidatorDescription struct {
 	Moniker         string `json:"moniker"`
 	Identity        string `json:"identity"`
@@ -71,6 +65,12 @@ type ValidatorsResponse struct {
 	Code       int          `json:"code"`
 	Message    string       `json:"message"`
 	Validators []*Validator `json:"validators"`
+}
+
+type ValidatorResponse struct {
+	Code      int       `json:"code"`
+	Message   string    `json:"message"`
+	Validator Validator `json:"validator"`
 }
 
 func (v ValidatorsResponse) GetTotalVP() math.LegacyDec {

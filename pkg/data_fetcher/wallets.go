@@ -46,6 +46,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 
 	chainInfos := map[string]types.ChainWalletsBalancesInfo{}
 	amountsWithChains := []*types.AmountWithChain{}
+	validators := []*types.ValidatorAddressWithMoniker{}
 
 	for chainName, chainWallets := range walletsByChain {
 		chain, ok := chainsMap[chainName]
@@ -157,6 +158,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 						return &types.Delegation{
 							Amount: b.Balance.ToAmount(),
 							Validator: &types.ValidatorAddressWithMoniker{
+								Chain:   chain,
 								Address: b.Delegation.ValidatorAddress,
 							},
 						}
@@ -167,6 +169,8 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 							Chain:  chain.Name,
 							Amount: delegation.Amount,
 						})
+
+						validators = append(validators, delegation.Validator)
 					}
 				}
 
@@ -178,6 +182,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 	wg.Wait()
 
 	f.PopulateDenoms(amountsWithChains)
+	f.PopulateValidators(validators)
 	response.Infos = chainInfos
 
 	// TODO: refactor

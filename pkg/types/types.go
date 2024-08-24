@@ -134,9 +134,17 @@ func (i ValidatorInfo) GetVotingPowerPercent() string {
 }
 
 type ValidatorAddressWithMoniker struct {
-	Chain   string
+	Chain   *Chain
 	Address string
 	Moniker string
+}
+
+func (v *ValidatorAddressWithMoniker) GetName() string {
+	if v.Moniker != "" {
+		return v.Moniker
+	}
+
+	return v.Address
 }
 
 type Delegation struct {
