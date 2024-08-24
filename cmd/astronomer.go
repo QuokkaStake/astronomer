@@ -114,13 +114,6 @@ func main() {
 	rootCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
 	_ = rootCmd.MarkPersistentFlagRequired("config")
 
-	validateConfigCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
-	migrateCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
-	rollbackCmd.PersistentFlags().StringVar(&ConfigPath, "config", "", "Config file path")
-	_ = validateConfigCmd.MarkPersistentFlagRequired("config")
-	_ = migrateCmd.MarkPersistentFlagRequired("config")
-	_ = rollbackCmd.MarkPersistentFlagRequired("config")
-
 	rootCmd.AddCommand(validateConfigCmd)
 	rootCmd.AddCommand(migrateCmd)
 	rootCmd.AddCommand(rollbackCmd)
