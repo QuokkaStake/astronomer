@@ -70,7 +70,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				balanceInfo, ok := chainInfos[chainName].BalancesInfo[chainWallet.Address]
+				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
 				if !ok {
 					balanceInfo = &types.WalletBalancesInfo{
 						Address: chainWallet,
