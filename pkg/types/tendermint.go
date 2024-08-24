@@ -271,3 +271,16 @@ type RewardsResponse struct {
 	Message string      `json:"message"`
 	Total   []SdkAmount `json:"total"`
 }
+
+type SdkDelegation struct {
+	Delegation struct {
+		ValidatorAddress string `json:"validator_address"`
+	} `json:"delegation"`
+	Balance SdkAmount `json:"balance"`
+}
+
+type DelegationsResponse struct {
+	Code        int             `json:"code"`
+	Message     string          `json:"message"`
+	Delegations []SdkDelegation `json:"delegation_responses"`
+}

@@ -34,6 +34,17 @@ Rewards:
 Rewards:
 No rewards.
 {{- end }}
+{{- if .DelegationsError }}
+❌ Error querying delegations: {{ .DelegationsError }}
+{{- else if .Delegations }}
+Delegations:
+{{- range .Delegations }}
+- {{ .Validator.Address }} {{ SerializeAmount .Amount }}
+{{- end }}
+{{- else }}
+Delegations:
+No delegations.
+{{- end }}
 {{ end }}
 {{ end }}
 {{ end }}

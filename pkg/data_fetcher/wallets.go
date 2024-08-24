@@ -131,6 +131,47 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 
 				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
 			}(chain, chainWallet)
+
+			// delegations
+			wg.Add(1)
+			go func(chain *types.Chain, chainWallet *types.WalletLink) {
+				defer wg.Done()
+
+				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+
+				delegations, _, err := rpc.GetDelegations(chainWallet.Address)
+				mutex.Lock()
+				defer mutex.Unlock()
+
+				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
+				if !ok {
+					balanceInfo = &types.WalletBalancesInfo{
+						Address: chainWallet,
+					}
+				}
+
+				if err != nil {
+					balanceInfo.DelegationsError = err
+				} else {
+					balanceInfo.Delegations = utils.Map(delegations.Delegations, func(b types.SdkDelegation) *types.Delegation {
+						return &types.Delegation{
+							Amount: b.Balance.ToAmount(),
+							Validator: &types.ValidatorAddressWithMoniker{
+								Address: b.Delegation.ValidatorAddress,
+							},
+						}
+					})
+
+					for _, delegation := range balanceInfo.Delegations {
+						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+							Chain:  chain.Name,
+							Amount: delegation.Amount,
+						})
+					}
+				}
+
+				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+			}(chain, chainWallet)
 		}
 	}
 
@@ -139,6 +180,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 	f.PopulateDenoms(amountsWithChains)
 	response.Infos = chainInfos
 
+	// TODO: refactor
 	for _, chainBalances := range response.Infos {
 		for _, walletBalances := range chainBalances.BalancesInfo {
 			walletBalances.Balances = utils.Filter(walletBalances.Balances, func(a *types.Amount) bool {
@@ -147,6 +189,10 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 
 			walletBalances.Rewards = utils.Filter(walletBalances.Rewards, func(a *types.Amount) bool {
 				return a.PriceUSD != nil
+			})
+
+			walletBalances.Delegations = utils.Filter(walletBalances.Delegations, func(d *types.Delegation) bool {
+				return d.Amount.PriceUSD != nil
 			})
 		}
 	}

@@ -133,6 +133,17 @@ func (i ValidatorInfo) GetVotingPowerPercent() string {
 	return fmt.Sprintf("%.2f", i.VotingPowerPercent*100)
 }
 
+type ValidatorAddressWithMoniker struct {
+	Chain   string
+	Address string
+	Moniker string
+}
+
+type Delegation struct {
+	Amount    *Amount
+	Validator *ValidatorAddressWithMoniker
+}
+
 type WalletsBalancesInfo struct {
 	Error error
 	Infos map[string]ChainWalletsBalancesInfo
@@ -145,9 +156,11 @@ type ChainWalletsBalancesInfo struct {
 }
 
 type WalletBalancesInfo struct {
-	Address       *WalletLink
-	Balances      []*Amount
-	BalancesError error
-	Rewards       []*Amount
-	RewardsError  error
+	Address          *WalletLink
+	Balances         []*Amount
+	BalancesError    error
+	Rewards          []*Amount
+	RewardsError     error
+	Delegations      []*Delegation
+	DelegationsError error
 }
