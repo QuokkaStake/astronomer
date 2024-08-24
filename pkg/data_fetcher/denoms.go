@@ -51,6 +51,7 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 			notCachedDenoms := []*types.Denom{}
 			allPrices := priceFetcher.Prices{}
 
+			mutex.Lock()
 			for _, denom := range denoms {
 				value, cached := f.Cache.Get(f.GetDenomCacheKey(denom.Chain, denom.Denom))
 				if !cached {
@@ -59,13 +60,20 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 				}
 
 				valueFloat, _ := value.(float64)
+				f.Cache.Set(f.GetDenomCacheKey(denom.Chain, denom.Denom), value)
 				allPrices.Set(denom.Chain, denom.Denom, valueFloat)
 			}
+			mutex.Unlock()
 
 			if len(notCachedDenoms) == 0 {
 				f.Logger.Debug().
 					Str("price_fetcher", string(priceFetcherName)).
 					Msg("All denoms prices are cached, not fetching")
+
+				mutex.Lock()
+				prices[priceFetcherName] = allPrices
+				mutex.Unlock()
+
 				return
 			}
 
