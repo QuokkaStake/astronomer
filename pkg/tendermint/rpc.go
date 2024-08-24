@@ -151,6 +151,22 @@ func (rpc *RPC) GetBalance(address string) (*types.BalancesResponse, types.Query
 	return response, info, nil
 }
 
+func (rpc *RPC) GetRewards(address string) (*types.RewardsResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/delegators/" + address + "/rewards"
+
+	var response *types.RewardsResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.RewardsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	var newerBlock *types.BlockResponse
 	_, err := rpc.Get(rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/latest", &newerBlock)

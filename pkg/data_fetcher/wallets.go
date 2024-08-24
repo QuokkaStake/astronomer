@@ -60,6 +60,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 		}
 
 		for _, chainWallet := range chainWallets {
+			// balances
 			wg.Add(1)
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
@@ -94,6 +95,42 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 
 				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
 			}(chain, chainWallet)
+
+			// rewards
+			wg.Add(1)
+			go func(chain *types.Chain, chainWallet *types.WalletLink) {
+				defer wg.Done()
+
+				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+
+				rewards, _, err := rpc.GetRewards(chainWallet.Address)
+				mutex.Lock()
+				defer mutex.Unlock()
+
+				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
+				if !ok {
+					balanceInfo = &types.WalletBalancesInfo{
+						Address: chainWallet,
+					}
+				}
+
+				if err != nil {
+					balanceInfo.RewardsError = err
+				} else {
+					balanceInfo.Rewards = utils.Map(rewards.Total, func(b types.SdkAmount) *types.Amount {
+						return b.ToAmount()
+					})
+
+					for _, amount := range balanceInfo.Rewards {
+						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+							Chain:  chain.Name,
+							Amount: amount,
+						})
+					}
+				}
+
+				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+			}(chain, chainWallet)
 		}
 	}
 
@@ -105,6 +142,10 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 	for _, chainBalances := range response.Infos {
 		for _, walletBalances := range chainBalances.BalancesInfo {
 			walletBalances.Balances = utils.Filter(walletBalances.Balances, func(a *types.Amount) bool {
+				return a.PriceUSD != nil
+			})
+
+			walletBalances.Rewards = utils.Filter(walletBalances.Rewards, func(a *types.Amount) bool {
 				return a.PriceUSD != nil
 			})
 		}

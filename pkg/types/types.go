@@ -148,4 +148,6 @@ type WalletBalancesInfo struct {
 	Address       *WalletLink
 	Balances      []*Amount
 	BalancesError error
+	Rewards       []*Amount
+	RewardsError  error
 }

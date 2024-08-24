@@ -14,14 +14,26 @@ You are not subscribed to any wallets.
 🌐<i>{{ .Address.Alias.Value }}</i> {{ FormatLinks ($explorers.GetWalletLinks (.Address)) }}
 {{- if .BalancesError }}
 ❌ Error querying balances: {{ .BalancesError }}
-{{ else if .Balances }}
+{{- else if .Balances }}
 Balances:
 {{- range .Balances }}
-🏦{{ SerializeAmount . }}
+- {{ SerializeAmount . }}
 {{- end }}
 {{- else }}
+Balances:
 Wallet is empty.
 {{ end }}
+{{- if .RewardsError }}
+❌ Error querying balances: {{ .RewardsError }}
+{{- else if .Rewards }}
+Rewards:
+{{- range .Rewards }}
+- {{ SerializeAmount . }}
+{{- end }}
+{{- else }}
+Rewards:
+No rewards.
+{{- end }}
 {{ end }}
 {{ end }}
 {{ end }}
