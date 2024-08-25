@@ -152,6 +152,12 @@ type Delegation struct {
 	Validator *ValidatorAddressWithMoniker
 }
 
+type Unbond struct {
+	Validator      *ValidatorAddressWithMoniker
+	Amount         *Amount
+	CompletionTime time.Time
+}
+
 type WalletsBalancesInfo struct {
 	Error error
 	Infos map[string]ChainWalletsBalancesInfo
@@ -171,4 +177,6 @@ type WalletBalancesInfo struct {
 	RewardsError     error
 	Delegations      []*Delegation
 	DelegationsError error
+	Unbonds          []*Unbond
+	UnbondsError     error
 }

@@ -30,9 +30,6 @@ Rewards:
 {{- range .Rewards }}
 - {{ SerializeAmount . }}
 {{- end }}
-{{- else }}
-Rewards:
-No rewards.
 {{- end }}
 {{- if .DelegationsError }}
 ❌ Error querying delegations: {{ .DelegationsError }}
@@ -41,9 +38,14 @@ Delegations:
 {{- range .Delegations }}
 - {{ .Validator.GetName }}{{ if $explorers }} ({{ FormatLinks ($explorers.GetValidatorLinks (.Validator.Address)) }}){{ end }}: {{ SerializeAmount .Amount }}
 {{- end }}
-{{- else }}
-Delegations:
-No delegations.
+{{- end }}
+{{- if .UnbondsError }}
+❌ Error querying delegations: {{ .UnbondsError }}
+{{- else if .Unbonds }}
+Unbonds:
+{{- range .Unbonds }}
+- {{ .Validator.GetName }}{{ if $explorers }} ({{ FormatLinks ($explorers.GetValidatorLinks (.Validator.Address)) }}){{ end }}: {{ SerializeAmount .Amount }}, ends {{ FormatSince .CompletionTime }}
+{{- end }}
 {{- end }}
 {{ end }}
 {{ end }}

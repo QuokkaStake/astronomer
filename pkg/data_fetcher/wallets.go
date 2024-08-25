@@ -176,6 +176,62 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 
 				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
 			}(chain, chainWallet)
+
+			// unbonds
+			wg.Add(1)
+			go func(chain *types.Chain, chainWallet *types.WalletLink) {
+				defer wg.Done()
+
+				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+
+				unbonds, _, err := rpc.GetUnbonds(chainWallet.Address)
+				mutex.Lock()
+				defer mutex.Unlock()
+
+				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
+				if !ok {
+					balanceInfo = &types.WalletBalancesInfo{
+						Address: chainWallet,
+					}
+				}
+
+				if err != nil {
+					balanceInfo.UnbondsError = err
+				} else {
+					balanceInfo.Unbonds = []*types.Unbond{}
+
+					for _, unbond := range unbonds.Unbonds {
+						for _, entry := range unbond.Entries {
+							fmt.Printf("unbond: %+v %+v\n", unbond, entry)
+
+							amount := &types.Amount{
+								Amount: entry.Balance,
+								Denom:  chain.BaseDenom,
+							}
+
+							validator := &types.ValidatorAddressWithMoniker{
+								Chain:   chain,
+								Address: unbond.ValidatorAddress,
+							}
+
+							amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+								Chain:  chain.Name,
+								Amount: amount,
+							})
+
+							validators = append(validators, validator)
+
+							balanceInfo.Unbonds = append(balanceInfo.Unbonds, &types.Unbond{
+								Amount:         amount,
+								Validator:      validator,
+								CompletionTime: entry.CompletionTime,
+							})
+						}
+					}
+				}
+
+				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+			}(chain, chainWallet)
 		}
 	}
 
