@@ -69,13 +69,6 @@ func (interacter *Interacter) Init() {
 
 	// bot.Handle("/start", interacter.HandleHelp)
 	// bot.Handle("/help", interacter.HandleHelp)
-	// bot.Handle("/subscribe", interacter.HandleSubscribe)
-	// bot.Handle("/unsubscribe", interacter.HandleUnsubscribe)
-	// bot.Handle("/status", interacter.HandleStatus)
-	// bot.Handle("/validators", interacter.HandleListValidators)
-	// bot.Handle("/missing", interacter.HandleMissingValidators)
-	// bot.Handle("/notifiers", interacter.HandleNotifiers)
-	// bot.Handle("/params", interacter.HandleParams)
 	interacter.AddCommand("/validator", bot, interacter.GetValidatorCommand())
 	interacter.AddCommand("/params", bot, interacter.GetParamsCommand())
 	interacter.AddCommand("/proposal", bot, interacter.GetSingleProposalCommand())
@@ -111,7 +104,23 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 			Str("command", command.Name).
 			Msg("Got query")
 
-		chainBinds, err := interacter.Database.GetAllChainBinds(strconv.FormatInt(c.Chat().ID, 10))
+		userID := strconv.FormatInt(c.Sender().ID, 10)
+
+		queryToInsert := &types.Query{
+			Reporter: interacter.Name(),
+			UserID:   userID,
+			Username: c.Sender().Username,
+			ChatID:   strconv.FormatInt(c.Chat().ID, 10),
+			Command:  command.Name,
+			Query:    c.Text(),
+		}
+
+		if err := interacter.Database.InsertQuery(queryToInsert); err != nil {
+			interacter.Logger.Error().Err(err).Msg("Error inserting query info")
+			return interacter.BotReply(c, "Internal error!")
+		}
+
+		chainBinds, err := interacter.Database.GetAllChainBinds(userID)
 		if err != nil {
 			interacter.Logger.Error().Err(err).Msg("Error getting chain binds")
 			return interacter.BotReply(c, "Internal error!")

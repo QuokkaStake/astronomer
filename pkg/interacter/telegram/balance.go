@@ -8,7 +8,7 @@ import (
 
 func (interacter *Interacter) GetBalanceCommand() Command {
 	return Command{
-		Name:    "chains",
+		Name:    "balance",
 		Execute: interacter.HandleBalanceCommand,
 	}
 }
