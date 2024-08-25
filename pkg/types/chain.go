@@ -5,10 +5,11 @@ import (
 )
 
 type Chain struct {
-	Name        string `toml:"name"`
-	PrettyName  string `toml:"pretty-name"`
-	LCDEndpoint string `toml:"lcd-endpoint"`
-	BaseDenom   string `toml:"base-denom"`
+	Name                  string `toml:"name"`
+	PrettyName            string `toml:"pretty-name"`
+	LCDEndpoint           string `toml:"lcd-endpoint"`
+	BaseDenom             string `toml:"base-denom"`
+	Bech32ValidatorPrefix string
 }
 
 func ChainFromArgs(args map[string]string) *Chain {
@@ -30,6 +31,10 @@ func ChainFromArgs(args map[string]string) *Chain {
 			chain.BaseDenom = value
 		case "base-denom":
 			chain.BaseDenom = value
+		case "bech32_validator_prefix":
+			chain.Bech32ValidatorPrefix = value
+		case "bech32-validator-prefix":
+			chain.Bech32ValidatorPrefix = value
 		}
 	}
 
@@ -47,6 +52,10 @@ func (c *Chain) Validate() error {
 
 	if c.BaseDenom == "" {
 		return fmt.Errorf("empty base denom")
+	}
+
+	if c.Bech32ValidatorPrefix == "" {
+		return fmt.Errorf("empty bech32 validator prefix")
 	}
 
 	return nil
