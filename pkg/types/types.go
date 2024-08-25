@@ -167,7 +167,7 @@ type Unbond struct {
 
 type WalletsBalancesInfo struct {
 	Error error
-	Infos map[string]ChainWalletsBalancesInfo
+	Infos map[string]*ChainWalletsBalancesInfo
 }
 
 type ChainWalletsBalancesInfo struct {
@@ -190,4 +190,68 @@ type WalletBalancesInfo struct {
 	RedelegationsError error
 	Unbonds            []*Unbond
 	UnbondsError       error
+}
+
+func (w *WalletsBalancesInfo) SetChain(chain *Chain, explorers []*Explorer) {
+	w.Infos[chain.Name] = &ChainWalletsBalancesInfo{
+		Chain:        chain,
+		Explorers:    explorers,
+		BalancesInfo: map[string]*WalletBalancesInfo{},
+	}
+}
+
+func (w *WalletsBalancesInfo) SetAddressInfo(chainName string, address *WalletLink) {
+	if _, ok := w.Infos[chainName].BalancesInfo[address.Address]; !ok {
+		w.Infos[chainName].BalancesInfo[address.Address] = &WalletBalancesInfo{
+			Address: address,
+		}
+	}
+}
+
+func (w *WalletsBalancesInfo) SetBalancesError(chainName string, address *WalletLink, err error) {
+	w.Infos[chainName].BalancesInfo[address.Address].BalancesError = err
+}
+
+func (w *WalletsBalancesInfo) SetBalances(chainName string, address *WalletLink, balances []*Amount) {
+	w.Infos[chainName].BalancesInfo[address.Address].Balances = balances
+}
+
+func (w *WalletsBalancesInfo) SetRewardsError(chainName string, address *WalletLink, err error) {
+	w.Infos[chainName].BalancesInfo[address.Address].RewardsError = err
+}
+
+func (w *WalletsBalancesInfo) SetRewards(chainName string, address *WalletLink, rewards []*Amount) {
+	w.Infos[chainName].BalancesInfo[address.Address].Rewards = rewards
+}
+
+func (w *WalletsBalancesInfo) SetCommissionsError(chainName string, address *WalletLink, err error) {
+	w.Infos[chainName].BalancesInfo[address.Address].CommissionsError = err
+}
+
+func (w *WalletsBalancesInfo) SetCommissions(chainName string, address *WalletLink, commissions []*Amount) {
+	w.Infos[chainName].BalancesInfo[address.Address].Commissions = commissions
+}
+
+func (w *WalletsBalancesInfo) SetDelegationsError(chainName string, address *WalletLink, err error) {
+	w.Infos[chainName].BalancesInfo[address.Address].DelegationsError = err
+}
+
+func (w *WalletsBalancesInfo) SetDelegations(chainName string, address *WalletLink, delegations []*Delegation) {
+	w.Infos[chainName].BalancesInfo[address.Address].Delegations = delegations
+}
+
+func (w *WalletsBalancesInfo) SetRedelegationsError(chainName string, address *WalletLink, err error) {
+	w.Infos[chainName].BalancesInfo[address.Address].RedelegationsError = err
+}
+
+func (w *WalletsBalancesInfo) SetRedelegations(chainName string, address *WalletLink, redelegations []*Redelegation) {
+	w.Infos[chainName].BalancesInfo[address.Address].Redelegations = redelegations
+}
+
+func (w *WalletsBalancesInfo) SetUnbondsError(chainName string, address *WalletLink, err error) {
+	w.Infos[chainName].BalancesInfo[address.Address].UnbondsError = err
+}
+
+func (w *WalletsBalancesInfo) SetUnbonds(chainName string, address *WalletLink, unbonds []*Unbond) {
+	w.Infos[chainName].BalancesInfo[address.Address].Unbonds = unbonds
 }

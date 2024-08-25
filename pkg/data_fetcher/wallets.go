@@ -8,8 +8,10 @@ import (
 	"sync"
 )
 
-func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalancesInfo { //nolint:gocyclo,maintidx // need to refactor this
-	response := types.WalletsBalancesInfo{}
+func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalancesInfo { //nolint:maintidx
+	response := &types.WalletsBalancesInfo{
+		Infos: map[string]*types.ChainWalletsBalancesInfo{},
+	}
 
 	wallets, err := f.Database.FindWalletLinksByUserAndReporter(userID, reporter)
 	if err != nil {
@@ -44,7 +46,6 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
-	chainInfos := map[string]types.ChainWalletsBalancesInfo{}
 	amountsWithChains := []*types.AmountWithChain{}
 	validators := []*types.ValidatorAddressWithMoniker{}
 
@@ -54,13 +55,11 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 			panic(fmt.Errorf("chain %s not found", chainName))
 		}
 
-		chainInfos[chainName] = types.ChainWalletsBalancesInfo{
-			Chain:        chain,
-			Explorers:    explorers.GetExplorersByChain(chain.Name),
-			BalancesInfo: map[string]*types.WalletBalancesInfo{},
-		}
+		response.SetChain(chain, explorers.GetExplorersByChain(chain.Name))
 
 		for _, chainWallet := range chainWallets {
+			response.SetAddressInfo(chain.Name, chainWallet)
+
 			// balances
 			wg.Add(1)
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
@@ -72,29 +71,23 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
-				if !ok {
-					balanceInfo = &types.WalletBalancesInfo{
-						Address: chainWallet,
-					}
-				}
-
 				if err != nil {
-					balanceInfo.BalancesError = err
-				} else {
-					balanceInfo.Balances = utils.Map(balances.Balances, func(b types.SdkAmount) *types.Amount {
-						return b.ToAmount()
-					})
-
-					for _, amount := range balanceInfo.Balances {
-						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
-							Chain:  chain.Name,
-							Amount: amount,
-						})
-					}
+					response.SetBalancesError(chain.Name, chainWallet, err)
+					return
 				}
 
-				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+				walletBalances := utils.Map(balances.Balances, func(b types.SdkAmount) *types.Amount {
+					return b.ToAmount()
+				})
+
+				response.SetBalances(chain.Name, chainWallet, walletBalances)
+
+				for _, amount := range walletBalances {
+					amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+						Chain:  chain.Name,
+						Amount: amount,
+					})
+				}
 			}(chain, chainWallet)
 
 			// rewards
@@ -108,29 +101,23 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
-				if !ok {
-					balanceInfo = &types.WalletBalancesInfo{
-						Address: chainWallet,
-					}
-				}
-
 				if err != nil {
-					balanceInfo.RewardsError = err
-				} else {
-					balanceInfo.Rewards = utils.Map(rewards.Total, func(b types.SdkAmount) *types.Amount {
-						return b.ToAmount()
-					})
-
-					for _, amount := range balanceInfo.Rewards {
-						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
-							Chain:  chain.Name,
-							Amount: amount,
-						})
-					}
+					response.SetRewardsError(chain.Name, chainWallet, err)
+					return
 				}
 
-				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+				walletRewards := utils.Map(rewards.Total, func(b types.SdkAmount) *types.Amount {
+					return b.ToAmount()
+				})
+
+				response.SetRewards(chain.Name, chainWallet, walletRewards)
+
+				for _, amount := range walletRewards {
+					amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+						Chain:  chain.Name,
+						Amount: amount,
+					})
+				}
 			}(chain, chainWallet)
 
 			// commission
@@ -141,16 +128,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				valoper, err := utils.ConvertBech32Prefix(chainWallet.Address, chain.Bech32ValidatorPrefix)
 				if err != nil {
 					mutex.Lock()
-					balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
-					if !ok {
-						balanceInfo = &types.WalletBalancesInfo{
-							Address: chainWallet,
-						}
-					}
-
-					balanceInfo.CommissionsError = err
-
-					chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+					response.SetCommissionsError(chain.Name, chainWallet, err)
 					mutex.Unlock()
 					return
 				}
@@ -161,29 +139,23 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
-				if !ok {
-					balanceInfo = &types.WalletBalancesInfo{
-						Address: chainWallet,
-					}
-				}
-
 				if err != nil {
-					balanceInfo.CommissionsError = err
-				} else {
-					balanceInfo.Commissions = utils.Map(rewards.Commission.Commission, func(b types.SdkAmount) *types.Amount {
-						return b.ToAmount()
-					})
-
-					for _, amount := range balanceInfo.Commissions {
-						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
-							Chain:  chain.Name,
-							Amount: amount,
-						})
-					}
+					response.SetCommissionsError(chain.Name, chainWallet, err)
+					return
 				}
 
-				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+				walletCommissions := utils.Map(rewards.Commission.Commission, func(b types.SdkAmount) *types.Amount {
+					return b.ToAmount()
+				})
+
+				response.SetCommissions(chain.Name, chainWallet, walletCommissions)
+
+				for _, amount := range walletCommissions {
+					amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+						Chain:  chain.Name,
+						Amount: amount,
+					})
+				}
 			}(chain, chainWallet)
 
 			// delegations
@@ -197,37 +169,30 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
-				if !ok {
-					balanceInfo = &types.WalletBalancesInfo{
-						Address: chainWallet,
-					}
-				}
-
 				if err != nil {
-					balanceInfo.DelegationsError = err
-				} else {
-					balanceInfo.Delegations = utils.Map(delegations.Delegations, func(b types.SdkDelegation) *types.Delegation {
-						return &types.Delegation{
-							Amount: b.Balance.ToAmount(),
-							Validator: &types.ValidatorAddressWithMoniker{
-								Chain:   chain,
-								Address: b.Delegation.ValidatorAddress,
-							},
-						}
+					response.SetDelegationsError(chain.Name, chainWallet, err)
+					return
+				}
+				walletDelegations := utils.Map(delegations.Delegations, func(b types.SdkDelegation) *types.Delegation {
+					return &types.Delegation{
+						Amount: b.Balance.ToAmount(),
+						Validator: &types.ValidatorAddressWithMoniker{
+							Chain:   chain,
+							Address: b.Delegation.ValidatorAddress,
+						},
+					}
+				})
+
+				response.SetDelegations(chain.Name, chainWallet, walletDelegations)
+
+				for _, delegation := range walletDelegations {
+					amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+						Chain:  chain.Name,
+						Amount: delegation.Amount,
 					})
 
-					for _, delegation := range balanceInfo.Delegations {
-						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
-							Chain:  chain.Name,
-							Amount: delegation.Amount,
-						})
-
-						validators = append(validators, delegation.Validator)
-					}
+					validators = append(validators, delegation.Validator)
 				}
-
-				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
 			}(chain, chainWallet)
 
 			// redelegations
@@ -241,53 +206,46 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
-				if !ok {
-					balanceInfo = &types.WalletBalancesInfo{
-						Address: chainWallet,
-					}
-				}
-
 				if err != nil {
-					balanceInfo.RedelegationsError = err
-				} else {
-					balanceInfo.Redelegations = []*types.Redelegation{}
+					response.SetRedelegationsError(chain.Name, chainWallet, err)
+					return
+				}
+				walletRedelegations := []*types.Redelegation{}
 
-					for _, redelegation := range redelegations.Redelegations {
-						for _, entry := range redelegation.Entries {
-							amount := &types.Amount{
-								Amount: entry.Balance,
-								Denom:  chain.BaseDenom,
-							}
-
-							srcValidator := &types.ValidatorAddressWithMoniker{
-								Chain:   chain,
-								Address: redelegation.Redelegation.ValidatorSrcAddress,
-							}
-
-							dstValidator := &types.ValidatorAddressWithMoniker{
-								Chain:   chain,
-								Address: redelegation.Redelegation.ValidatorDstAddress,
-							}
-
-							amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
-								Chain:  chain.Name,
-								Amount: amount,
-							})
-
-							validators = append(validators, srcValidator, dstValidator)
-
-							balanceInfo.Redelegations = append(balanceInfo.Redelegations, &types.Redelegation{
-								Amount:         amount,
-								SrcValidator:   srcValidator,
-								DstValidator:   dstValidator,
-								CompletionTime: entry.Entry.CompletionTime,
-							})
+				for _, redelegation := range redelegations.Redelegations {
+					for _, entry := range redelegation.Entries {
+						amount := &types.Amount{
+							Amount: entry.Balance,
+							Denom:  chain.BaseDenom,
 						}
+
+						srcValidator := &types.ValidatorAddressWithMoniker{
+							Chain:   chain,
+							Address: redelegation.Redelegation.ValidatorSrcAddress,
+						}
+
+						dstValidator := &types.ValidatorAddressWithMoniker{
+							Chain:   chain,
+							Address: redelegation.Redelegation.ValidatorDstAddress,
+						}
+
+						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+							Chain:  chain.Name,
+							Amount: amount,
+						})
+
+						validators = append(validators, srcValidator, dstValidator)
+
+						walletRedelegations = append(walletRedelegations, &types.Redelegation{
+							Amount:         amount,
+							SrcValidator:   srcValidator,
+							DstValidator:   dstValidator,
+							CompletionTime: entry.Entry.CompletionTime,
+						})
 					}
 				}
 
-				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+				response.SetRedelegations(chain.Name, chainWallet, walletRedelegations)
 			}(chain, chainWallet)
 
 			// unbonds
@@ -301,47 +259,41 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
-				if !ok {
-					balanceInfo = &types.WalletBalancesInfo{
-						Address: chainWallet,
-					}
-				}
-
 				if err != nil {
-					balanceInfo.UnbondsError = err
-				} else {
-					balanceInfo.Unbonds = []*types.Unbond{}
+					response.SetUnbondsError(chain.Name, chainWallet, err)
+					return
+				}
 
-					for _, unbond := range unbonds.Unbonds {
-						for _, entry := range unbond.Entries {
-							amount := &types.Amount{
-								Amount: entry.Balance,
-								Denom:  chain.BaseDenom,
-							}
+				walletUnbonds := []*types.Unbond{}
 
-							validator := &types.ValidatorAddressWithMoniker{
-								Chain:   chain,
-								Address: unbond.ValidatorAddress,
-							}
-
-							amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
-								Chain:  chain.Name,
-								Amount: amount,
-							})
-
-							validators = append(validators, validator)
-
-							balanceInfo.Unbonds = append(balanceInfo.Unbonds, &types.Unbond{
-								Amount:         amount,
-								Validator:      validator,
-								CompletionTime: entry.CompletionTime,
-							})
+				for _, unbond := range unbonds.Unbonds {
+					for _, entry := range unbond.Entries {
+						amount := &types.Amount{
+							Amount: entry.Balance,
+							Denom:  chain.BaseDenom,
 						}
+
+						validator := &types.ValidatorAddressWithMoniker{
+							Chain:   chain,
+							Address: unbond.ValidatorAddress,
+						}
+
+						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+							Chain:  chain.Name,
+							Amount: amount,
+						})
+
+						validators = append(validators, validator)
+
+						walletUnbonds = append(walletUnbonds, &types.Unbond{
+							Amount:         amount,
+							Validator:      validator,
+							CompletionTime: entry.CompletionTime,
+						})
 					}
 				}
 
-				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+				response.SetUnbonds(chain.Name, chainWallet, walletUnbonds)
 			}(chain, chainWallet)
 		}
 	}
@@ -350,7 +302,6 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 
 	f.PopulateDenoms(amountsWithChains)
 	f.PopulateValidators(validators)
-	response.Infos = chainInfos
 
 	// TODO: refactor
 	for _, chainBalances := range response.Infos {
