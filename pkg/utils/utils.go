@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	cosmosMath "cosmossdk.io/math"
+	"github.com/btcsuite/btcutil/bech32"
 )
 
 func Map[T, V any](slice []T, f func(T) V) []V {
@@ -214,4 +215,13 @@ func FormatDec(dec cosmosMath.LegacyDec) string {
 	out := strings.Join(chunks, ",")
 	floatingPart := decAsStringSplit[1]
 	return out + "." + floatingPart[:3]
+}
+
+func ConvertBech32Prefix(address, newPrefix string) (string, error) {
+	_, addressRaw, err := bech32.Decode(address)
+	if err != nil {
+		return "", err
+	}
+
+	return bech32.Encode(newPrefix, addressRaw)
 }

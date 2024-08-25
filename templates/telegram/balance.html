@@ -24,10 +24,18 @@ Balances:
 Wallet is empty.
 {{ end }}
 {{- if .RewardsError }}
-❌ Error querying balances: {{ .RewardsError }}
+❌ Error querying rewards: {{ .RewardsError }}
 {{- else if .Rewards }}
 Rewards:
 {{- range .Rewards }}
+- {{ SerializeAmount . }}
+{{- end }}
+{{- end }}
+{{- if .CommissionsError }}
+❌ Error querying commissions: {{ .CommissionsError }}
+{{- else if .Commissions }}
+Commissions:
+{{- range .Commissions }}
 - {{ SerializeAmount . }}
 {{- end }}
 {{- end }}

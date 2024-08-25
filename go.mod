@@ -5,6 +5,7 @@ go 1.21.10
 require (
 	cosmossdk.io/math v1.3.0
 	github.com/BurntSushi/toml v1.4.0
+	github.com/btcsuite/btcutil v1.0.2
 	github.com/creasty/defaults v1.7.0
 	github.com/guregu/null/v5 v5.0.0
 	github.com/lib/pq v1.10.9

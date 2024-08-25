@@ -182,6 +182,8 @@ type WalletBalancesInfo struct {
 	BalancesError      error
 	Rewards            []*Amount
 	RewardsError       error
+	Commissions        []*Amount
+	CommissionsError   error
 	Delegations        []*Delegation
 	DelegationsError   error
 	Redelegations      []*Redelegation

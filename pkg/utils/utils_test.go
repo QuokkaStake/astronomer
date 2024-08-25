@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"cosmossdk.io/math"
 
 	"github.com/stretchr/testify/assert"
@@ -172,4 +174,30 @@ func TestFormatSince(t *testing.T) {
 
 	assert.Equal(t, "in 1 minute", FormatSince(time.Now().Add(time.Minute+time.Second)))
 	assert.Equal(t, "1 minute ago", FormatSince(time.Now().Add(-time.Minute)))
+}
+
+func TestConvertBech32PrefixInvalid(t *testing.T) {
+	t.Parallel()
+
+	_, err := ConvertBech32Prefix(
+		"test",
+		"cosmosvaloper",
+	)
+	require.Error(t, err, "Error should be present!")
+}
+
+func TestConvertBech32PrefixValid(t *testing.T) {
+	t.Parallel()
+
+	address, err := ConvertBech32Prefix(
+		"cosmos1xqz9pemz5e5zycaa89kys5aw6m8rhgsvtp9lt2",
+		"cosmosvaloper",
+	)
+	require.NoError(t, err, "Error should not be present!")
+	assert.Equal(
+		t,
+		"cosmosvaloper1xqz9pemz5e5zycaa89kys5aw6m8rhgsvw4328e",
+		address,
+		"Bech addresses should not be equal!",
+	)
 }

@@ -6,6 +6,7 @@ import (
 	"main/pkg/types"
 	"main/pkg/utils"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -178,6 +179,31 @@ func (rpc *RPC) GetRewards(address string) (*types.RewardsResponse, types.QueryI
 
 	if response.Code != 0 {
 		return &types.RewardsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	}
+
+	return response, info, nil
+}
+
+func (rpc *RPC) GetCommission(address string) (*types.CommissionsResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/validators/" + address + "/commission"
+
+	var response *types.CommissionsResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		// not being a validator is acceptable
+		if strings.Contains(response.Message, "validator does not exist") {
+			return &types.CommissionsResponse{
+				Commission: types.SdkCommission{
+					Commission: make([]types.SdkAmount, 0),
+				},
+			}, info, nil
+		}
+
+		return &types.CommissionsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil

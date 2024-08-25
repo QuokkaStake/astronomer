@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalancesInfo { //nolint:maintidx
+func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalancesInfo { //nolint:gocyclo,maintidx // need to refactor this
 	response := types.WalletsBalancesInfo{}
 
 	wallets, err := f.Database.FindWalletLinksByUserAndReporter(userID, reporter)
@@ -123,6 +123,59 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 					})
 
 					for _, amount := range balanceInfo.Rewards {
+						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+							Chain:  chain.Name,
+							Amount: amount,
+						})
+					}
+				}
+
+				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+			}(chain, chainWallet)
+
+			// commission
+			wg.Add(1)
+			go func(chain *types.Chain, chainWallet *types.WalletLink) {
+				defer wg.Done()
+
+				valoper, err := utils.ConvertBech32Prefix(chainWallet.Address, chain.Bech32ValidatorPrefix)
+				if err != nil {
+					mutex.Lock()
+					balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
+					if !ok {
+						balanceInfo = &types.WalletBalancesInfo{
+							Address: chainWallet,
+						}
+					}
+
+					balanceInfo.CommissionsError = err
+
+					chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+					mutex.Unlock()
+					return
+				}
+
+				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+
+				rewards, _, err := rpc.GetCommission(valoper)
+				mutex.Lock()
+				defer mutex.Unlock()
+
+				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
+				if !ok {
+					balanceInfo = &types.WalletBalancesInfo{
+						Address: chainWallet,
+					}
+				}
+
+				if err != nil {
+					balanceInfo.CommissionsError = err
+				} else {
+					balanceInfo.Commissions = utils.Map(rewards.Commission.Commission, func(b types.SdkAmount) *types.Amount {
+						return b.ToAmount()
+					})
+
+					for _, amount := range balanceInfo.Commissions {
 						amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
 							Chain:  chain.Name,
 							Amount: amount,
@@ -307,6 +360,10 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 			})
 
 			walletBalances.Rewards = utils.Filter(walletBalances.Rewards, func(a *types.Amount) bool {
+				return a.PriceUSD != nil
+			})
+
+			walletBalances.Commissions = utils.Filter(walletBalances.Commissions, func(a *types.Amount) bool {
 				return a.PriceUSD != nil
 			})
 
