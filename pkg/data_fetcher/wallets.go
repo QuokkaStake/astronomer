@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalancesInfo {
+func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalancesInfo { //nolint:maintidx
 	response := types.WalletsBalancesInfo{}
 
 	wallets, err := f.Database.FindWalletLinksByUserAndReporter(userID, reporter)
@@ -177,6 +177,66 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
 			}(chain, chainWallet)
 
+			// redelegations
+			wg.Add(1)
+			go func(chain *types.Chain, chainWallet *types.WalletLink) {
+				defer wg.Done()
+
+				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+
+				redelegations, _, err := rpc.GetRedelegations(chainWallet.Address)
+				mutex.Lock()
+				defer mutex.Unlock()
+
+				balanceInfo, ok := chainInfos[chain.Name].BalancesInfo[chainWallet.Address]
+				if !ok {
+					balanceInfo = &types.WalletBalancesInfo{
+						Address: chainWallet,
+					}
+				}
+
+				if err != nil {
+					balanceInfo.RedelegationsError = err
+				} else {
+					balanceInfo.Redelegations = []*types.Redelegation{}
+
+					for _, redelegation := range redelegations.Redelegations {
+						for _, entry := range redelegation.Entries {
+							amount := &types.Amount{
+								Amount: entry.Balance,
+								Denom:  chain.BaseDenom,
+							}
+
+							srcValidator := &types.ValidatorAddressWithMoniker{
+								Chain:   chain,
+								Address: redelegation.Redelegation.ValidatorSrcAddress,
+							}
+
+							dstValidator := &types.ValidatorAddressWithMoniker{
+								Chain:   chain,
+								Address: redelegation.Redelegation.ValidatorDstAddress,
+							}
+
+							amountsWithChains = append(amountsWithChains, &types.AmountWithChain{
+								Chain:  chain.Name,
+								Amount: amount,
+							})
+
+							validators = append(validators, srcValidator, dstValidator)
+
+							balanceInfo.Redelegations = append(balanceInfo.Redelegations, &types.Redelegation{
+								Amount:         amount,
+								SrcValidator:   srcValidator,
+								DstValidator:   dstValidator,
+								CompletionTime: entry.Entry.CompletionTime,
+							})
+						}
+					}
+				}
+
+				chainInfos[chain.Name].BalancesInfo[chainWallet.Address] = balanceInfo
+			}(chain, chainWallet)
+
 			// unbonds
 			wg.Add(1)
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
@@ -202,8 +262,6 @@ func (f *DataFetcher) GetBalances(userID, reporter string) types.WalletsBalances
 
 					for _, unbond := range unbonds.Unbonds {
 						for _, entry := range unbond.Entries {
-							fmt.Printf("unbond: %+v %+v\n", unbond, entry)
-
 							amount := &types.Amount{
 								Amount: entry.Balance,
 								Denom:  chain.BaseDenom,

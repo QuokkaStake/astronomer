@@ -152,6 +152,13 @@ type Delegation struct {
 	Validator *ValidatorAddressWithMoniker
 }
 
+type Redelegation struct {
+	SrcValidator   *ValidatorAddressWithMoniker
+	DstValidator   *ValidatorAddressWithMoniker
+	Amount         *Amount
+	CompletionTime time.Time
+}
+
 type Unbond struct {
 	Validator      *ValidatorAddressWithMoniker
 	Amount         *Amount
@@ -170,13 +177,15 @@ type ChainWalletsBalancesInfo struct {
 }
 
 type WalletBalancesInfo struct {
-	Address          *WalletLink
-	Balances         []*Amount
-	BalancesError    error
-	Rewards          []*Amount
-	RewardsError     error
-	Delegations      []*Delegation
-	DelegationsError error
-	Unbonds          []*Unbond
-	UnbondsError     error
+	Address            *WalletLink
+	Balances           []*Amount
+	BalancesError      error
+	Rewards            []*Amount
+	RewardsError       error
+	Delegations        []*Delegation
+	DelegationsError   error
+	Redelegations      []*Redelegation
+	RedelegationsError error
+	Unbonds            []*Unbond
+	UnbondsError       error
 }

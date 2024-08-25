@@ -39,8 +39,16 @@ Delegations:
 - {{ .Validator.GetName }}{{ if $explorers }} ({{ FormatLinks ($explorers.GetValidatorLinks (.Validator.Address)) }}){{ end }}: {{ SerializeAmount .Amount }}
 {{- end }}
 {{- end }}
+{{- if .RedelegationsError }}
+❌ Error querying redelegations: {{ .RedelegationsError }}
+{{- else if .Redelegations }}
+Redelegations:
+{{- range .Redelegations }}
+- {{ .SrcValidator.GetName }}{{ if $explorers }} ({{ FormatLinks ($explorers.GetValidatorLinks (.SrcValidator.Address)) }}){{ end }} -> {{ .DstValidator.GetName }}{{ if $explorers }} ({{ FormatLinks ($explorers.GetValidatorLinks (.DstValidator.Address)) }}){{ end }}: {{ SerializeAmount .Amount }}, ends {{ FormatSince .CompletionTime }}
+{{- end }}
+{{- end }}
 {{- if .UnbondsError }}
-❌ Error querying delegations: {{ .UnbondsError }}
+❌ Error querying unbonds: {{ .UnbondsError }}
 {{- else if .Unbonds }}
 Unbonds:
 {{- range .Unbonds }}

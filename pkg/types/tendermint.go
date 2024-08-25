@@ -300,3 +300,24 @@ type UnbondsResponse struct {
 	Message string      `json:"message"`
 	Unbonds []SdkUnbond `json:"unbonding_responses"`
 }
+
+type SdkRedelegationEntry struct {
+	Entry struct {
+		CompletionTime time.Time `json:"completion_time"`
+	} `json:"redelegation_entry"`
+	Balance math.LegacyDec `json:"balance"`
+}
+
+type SdkRedelegation struct {
+	Redelegation struct {
+		ValidatorSrcAddress string `json:"validator_src_address"`
+		ValidatorDstAddress string `json:"validator_dst_address"`
+	} `json:"redelegation"`
+	Entries []SdkRedelegationEntry `json:"entries"`
+}
+
+type RedelegationsResponse struct {
+	Code          int               `json:"code"`
+	Message       string            `json:"message"`
+	Redelegations []SdkRedelegation `json:"redelegation_responses"`
+}

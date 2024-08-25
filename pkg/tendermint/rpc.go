@@ -199,8 +199,24 @@ func (rpc *RPC) GetDelegations(address string) (*types.DelegationsResponse, type
 	return response, info, nil
 }
 
+func (rpc *RPC) GetRedelegations(address string) (*types.RedelegationsResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/delegators/" + address + "/redelegations?pagination.limit=1000"
+
+	var response *types.RedelegationsResponse
+	info, err := rpc.Get(url, &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.RedelegationsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) GetUnbonds(address string) (*types.UnbondsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/delegators/" + address + "/unbonding_delegations?pagination.limit=100"
+	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/delegators/" + address + "/unbonding_delegations?pagination.limit=1000"
 
 	var response *types.UnbondsResponse
 	info, err := rpc.Get(url, &response)
