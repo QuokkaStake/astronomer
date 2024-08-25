@@ -121,14 +121,11 @@ and paste the following:
 ```
 start - Displays bot info
 help - Displays bot info
-subscribe - Subscribe to a validator's updates
-unsubscribe - Unsubscribe from a validator's updates
-status - See missing blocks of validators you are subscribed to
-validators - See missing blocks of all validators
-missing - See validators who are missing blocks
-notifiers - See notifiers for each validator
-params - See chain and config params
-config - See chain and config params
+balance - Display your wallets' balance, delegations, rewards etc.
+validator - Search for a validator
+params - Display chain(s) params
+proposals - Display all active proposals
+proposal - Display a proposal by ID
 ```
 
 Then add a Telegram config to your config file (see `config.example.toml` for reference).
