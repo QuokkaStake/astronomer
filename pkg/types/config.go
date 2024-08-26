@@ -13,7 +13,6 @@ type Config struct {
 }
 
 type TelegramConfig struct {
-	Chat   int64   `toml:"chat"`
 	Token  string  `toml:"token"`
 	Admins []int64 `default:"[]" toml:"admins"`
 }
