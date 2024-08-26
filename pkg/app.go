@@ -7,17 +7,20 @@ import (
 	interacterPkg "main/pkg/interacter"
 	"main/pkg/interacter/telegram"
 	"main/pkg/logger"
+	"main/pkg/metrics"
 	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )
 
 type App struct {
-	Logger *zerolog.Logger
-	Config *types.Config
+	Logger  *zerolog.Logger
+	Config  *types.Config
+	Version string
 
-	Interacters []interacterPkg.Interacter
-	Database    *databasePkg.Database
+	Interacters    []interacterPkg.Interacter
+	MetricsManager *metrics.Manager
+	Database       *databasePkg.Database
 
 	StopChannel chan bool
 }
@@ -40,27 +43,35 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 
 	log := logger.GetLogger(config.LogConfig)
 	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
+	metricsManager := metrics.NewManager(log, config.MetricsConfig)
 	dataFetcher := datafetcher.NewDataFetcher(*log, database)
 	interacters := []interacterPkg.Interacter{
-		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database),
+		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database, metricsManager),
 	}
 
 	return &App{
-		Logger:      log,
-		Config:      config,
-		Interacters: interacters,
-		Database:    database,
-		StopChannel: make(chan bool),
+		Logger:         log,
+		Config:         config,
+		Version:        version,
+		Interacters:    interacters,
+		Database:       database,
+		MetricsManager: metricsManager,
+		StopChannel:    make(chan bool),
 	}
 }
 
 func (a *App) Start() {
 	a.Logger.Info().Msg("Listening")
 
+	a.MetricsManager.LogAppVersion(a.Version)
+	go a.MetricsManager.Start()
+
 	a.Database.Init()
 
 	for _, interacter := range a.Interacters {
 		interacter.Init()
+
+		a.MetricsManager.LogReporterEnabled(interacter.Name(), interacter.Enabled())
 
 		if interacter.Enabled() {
 			a.Logger.Info().Str("name", interacter.Name()).Msg("Interacter is enabled")

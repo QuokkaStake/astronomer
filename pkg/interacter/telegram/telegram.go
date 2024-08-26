@@ -3,6 +3,7 @@ package telegram
 import (
 	datafetcher "main/pkg/data_fetcher"
 	databasePkg "main/pkg/database"
+	"main/pkg/metrics"
 	"main/pkg/templates"
 	"main/pkg/types"
 	"strconv"
@@ -28,6 +29,7 @@ type Interacter struct {
 	Database        *databasePkg.Database
 	Chains          types.Chains
 	TemplateManager templates.Manager
+	MetricsManager  *metrics.Manager
 }
 
 const (
@@ -40,6 +42,7 @@ func NewInteracter(
 	logger *zerolog.Logger,
 	dataFetcher *datafetcher.DataFetcher,
 	database *databasePkg.Database,
+	metricsManager *metrics.Manager,
 ) *Interacter {
 	return &Interacter{
 		Token:           config.Token,
@@ -49,6 +52,7 @@ func NewInteracter(
 		DataFetcher:     dataFetcher,
 		Database:        database,
 		TemplateManager: templates.NewTelegramTemplatesManager(logger),
+		MetricsManager:  metricsManager,
 	}
 }
 
@@ -103,6 +107,8 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 			Str("text", c.Text()).
 			Str("command", command.Name).
 			Msg("Got query")
+
+		interacter.MetricsManager.LogReporterQuery(interacter.Name(), command.Name)
 
 		userID := strconv.FormatInt(c.Sender().ID, 10)
 		chatID := strconv.FormatInt(c.Chat().ID, 10)

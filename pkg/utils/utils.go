@@ -225,3 +225,11 @@ func ConvertBech32Prefix(address, newPrefix string) (string, error) {
 
 	return bech32.Encode(newPrefix, addressRaw)
 }
+
+func BoolToFloat64(b bool) float64 {
+	if b {
+		return 1
+	}
+
+	return 0
+}

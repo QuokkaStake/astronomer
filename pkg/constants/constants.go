@@ -14,6 +14,8 @@ const (
 	CoingeckoBaseCurrency = "usd"
 
 	PriceFetcherNameCoingecko = "coingecko"
+
+	PrometheusMetricsPrefix = "astronomer_"
 )
 
 var (

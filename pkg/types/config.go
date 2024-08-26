@@ -10,6 +10,7 @@ type Config struct {
 	DatabaseConfig DatabaseConfig `toml:"database"`
 	LogConfig      LogConfig      `toml:"log"`
 	TelegramConfig TelegramConfig `toml:"telegram"`
+	MetricsConfig  MetricsConfig  `toml:"metrics"`
 }
 
 type TelegramConfig struct {

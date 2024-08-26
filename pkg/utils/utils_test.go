@@ -201,3 +201,10 @@ func TestConvertBech32PrefixValid(t *testing.T) {
 		"Bech addresses should not be equal!",
 	)
 }
+
+func TestBoolToFloat64(t *testing.T) {
+	t.Parallel()
+
+	require.InDelta(t, 1, BoolToFloat64(true), 0.01)
+	require.Zero(t, BoolToFloat64(false))
+}
