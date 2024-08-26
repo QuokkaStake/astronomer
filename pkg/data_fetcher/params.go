@@ -25,7 +25,7 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 			Chain: chain,
 		}
 
-		rpc := tendermint.NewRPC(chain, 10, f.Logger)
+		rpc := f.GetRPC(chain)
 
 		wg.Add(1)
 		go func(chain *types.Chain, rpc *tendermint.RPC) {

@@ -16,6 +16,8 @@ const (
 	PriceFetcherNameCoingecko = "coingecko"
 
 	PrometheusMetricsPrefix = "astronomer_"
+
+	RPCQueryTimeout = 10
 )
 
 var (

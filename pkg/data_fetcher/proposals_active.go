@@ -1,7 +1,6 @@
 package datafetcher
 
 import (
-	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
 )
@@ -36,7 +35,7 @@ func (f *DataFetcher) GetActiveProposals(chainNames []string) types.ActivePropos
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := tendermint.NewRPC(chain, 10, f.Logger)
+			rpc := f.GetRPC(chain)
 
 			proposals, _, err := rpc.GetActiveProposals()
 			mutex.Lock()

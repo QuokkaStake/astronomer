@@ -1,7 +1,6 @@
 package datafetcher
 
 import (
-	"main/pkg/tendermint"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"strings"
@@ -37,7 +36,7 @@ func (f *DataFetcher) FindValidator(query string, chainNames []string) types.Val
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := tendermint.NewRPC(chain, 10, f.Logger)
+			rpc := f.GetRPC(chain)
 
 			validators, _, err := rpc.GetAllValidators()
 			mutex.Lock()

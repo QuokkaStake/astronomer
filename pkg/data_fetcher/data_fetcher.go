@@ -5,6 +5,8 @@ import (
 	"main/pkg/constants"
 	"main/pkg/database"
 	priceFetcher "main/pkg/price_fetcher"
+	"main/pkg/tendermint"
+	"main/pkg/types"
 
 	"github.com/rs/zerolog"
 )
@@ -14,6 +16,7 @@ type DataFetcher struct {
 	Database      *database.Database
 	PriceFetchers map[constants.PriceFetcherName]priceFetcher.PriceFetcher
 	Cache         *cache.Cache
+	RPCs          map[string]*tendermint.RPC
 }
 
 func NewDataFetcher(logger zerolog.Logger, database *database.Database) *DataFetcher {
@@ -26,5 +29,15 @@ func NewDataFetcher(logger zerolog.Logger, database *database.Database) *DataFet
 		Database:      database,
 		PriceFetchers: priceFetchers,
 		Cache:         cache.NewCache(),
+		RPCs:          map[string]*tendermint.RPC{},
 	}
+}
+
+func (f *DataFetcher) GetRPC(chain *types.Chain) *tendermint.RPC {
+	if rpc, ok := f.RPCs[chain.Name]; ok {
+		return rpc
+	}
+
+	f.RPCs[chain.Name] = tendermint.NewRPC(chain, constants.RPCQueryTimeout, f.Logger)
+	return f.RPCs[chain.Name]
 }

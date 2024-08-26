@@ -2,7 +2,6 @@ package datafetcher
 
 import (
 	"fmt"
-	"main/pkg/tendermint"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"sync"
@@ -65,7 +64,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+				rpc := f.GetRPC(chain)
 
 				balances, _, err := rpc.GetBalance(chainWallet.Address)
 				mutex.Lock()
@@ -95,7 +94,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+				rpc := f.GetRPC(chain)
 
 				rewards, _, err := rpc.GetRewards(chainWallet.Address)
 				mutex.Lock()
@@ -133,7 +132,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					return
 				}
 
-				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+				rpc := f.GetRPC(chain)
 
 				rewards, _, err := rpc.GetCommission(valoper)
 				mutex.Lock()
@@ -163,7 +162,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+				rpc := f.GetRPC(chain)
 
 				delegations, _, err := rpc.GetDelegations(chainWallet.Address)
 				mutex.Lock()
@@ -200,7 +199,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+				rpc := f.GetRPC(chain)
 
 				redelegations, _, err := rpc.GetRedelegations(chainWallet.Address)
 				mutex.Lock()
@@ -253,7 +252,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := tendermint.NewRPC(chain, 10, f.Logger)
+				rpc := f.GetRPC(chain)
 
 				unbonds, _, err := rpc.GetUnbonds(chainWallet.Address)
 				mutex.Lock()

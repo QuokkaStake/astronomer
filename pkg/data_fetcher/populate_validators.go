@@ -1,7 +1,6 @@
 package datafetcher
 
 import (
-	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
 )
@@ -16,7 +15,7 @@ func (f *DataFetcher) PopulateValidators(validators []*types.ValidatorAddressWit
 		go func(validator *types.ValidatorAddressWithMoniker) {
 			defer wg.Done()
 
-			rpc := tendermint.NewRPC(validator.Chain, 10, f.Logger)
+			rpc := f.GetRPC(validator.Chain)
 			validatorFromChain, _, err := rpc.GetValidator(validator.Address)
 			if err != nil {
 				f.Logger.Error().Err(err).Msg("Could not get validator from chain")

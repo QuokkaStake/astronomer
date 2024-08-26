@@ -2,7 +2,6 @@ package datafetcher
 
 import (
 	"fmt"
-	"main/pkg/tendermint"
 	"main/pkg/types"
 )
 
@@ -29,7 +28,7 @@ func (f *DataFetcher) GetSingleProposal(chainName string, proposalID string) typ
 	response.Chain = chains[0]
 	response.Explorers = explorers.GetExplorersByChain(chainName)
 
-	rpc := tendermint.NewRPC(chains[0], 10, f.Logger)
+	rpc := f.GetRPC(chains[0])
 	proposal, _, err := rpc.GetSingleProposal(proposalID)
 
 	if err != nil {
