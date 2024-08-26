@@ -105,12 +105,13 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 			Msg("Got query")
 
 		userID := strconv.FormatInt(c.Sender().ID, 10)
+		chatID := strconv.FormatInt(c.Chat().ID, 10)
 
 		queryToInsert := &types.Query{
 			Reporter: interacter.Name(),
 			UserID:   userID,
 			Username: c.Sender().Username,
-			ChatID:   strconv.FormatInt(c.Chat().ID, 10),
+			ChatID:   chatID,
 			Command:  command.Name,
 			Query:    c.Text(),
 		}
@@ -120,7 +121,7 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 			return interacter.BotReply(c, "Internal error!")
 		}
 
-		chainBinds, err := interacter.Database.GetAllChainBinds(userID)
+		chainBinds, err := interacter.Database.GetAllChainBinds(chatID)
 		if err != nil {
 			interacter.Logger.Error().Err(err).Msg("Error getting chain binds")
 			return interacter.BotReply(c, "Internal error!")
