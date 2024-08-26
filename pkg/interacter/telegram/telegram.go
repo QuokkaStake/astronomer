@@ -67,8 +67,8 @@ func (interacter *Interacter) Init() {
 		return
 	}
 
-	// bot.Handle("/start", interacter.HandleHelp)
-	// bot.Handle("/help", interacter.HandleHelp)
+	interacter.AddCommand("/start", bot, interacter.GetHelpCommand())
+	interacter.AddCommand("/help", bot, interacter.GetHelpCommand())
 	interacter.AddCommand("/validator", bot, interacter.GetValidatorCommand())
 	interacter.AddCommand("/params", bot, interacter.GetParamsCommand())
 	interacter.AddCommand("/proposal", bot, interacter.GetSingleProposalCommand())
