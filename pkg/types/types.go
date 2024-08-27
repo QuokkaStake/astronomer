@@ -263,8 +263,50 @@ type SupplyInfo struct {
 }
 
 type ChainSupply struct {
-	Chain           *Chain
-	PoolError       error
-	BondedTokens    *Amount
-	NotBondedTokens *Amount
+	Chain              *Chain
+	PoolError          error
+	BondedTokens       *Amount
+	NotBondedTokens    *Amount
+	SupplyError        error
+	AllSupplies        map[string]*Amount
+	CommunityPoolError error
+	AllCommunityPool   map[string]*Amount
+}
+
+func (c ChainSupply) HasBondedSupply() bool {
+	if c.AllSupplies == nil {
+		return false
+	}
+
+	if c.BondedTokens == nil {
+		return false
+	}
+
+	_, found := c.AllSupplies[c.Chain.BaseDenom]
+	return found
+}
+
+func (c ChainSupply) BondedSupplyPercent() float64 {
+	baseDenomSupply := c.AllSupplies[c.Chain.BaseDenom]
+	return c.BondedTokens.Amount.MustFloat64() / baseDenomSupply.Amount.MustFloat64()
+}
+
+func (c ChainSupply) HasCommunityPoolSupply() bool {
+	if c.AllCommunityPool == nil || c.AllSupplies == nil {
+		return false
+	}
+
+	if _, found := c.AllCommunityPool[c.Chain.BaseDenom]; !found {
+		return false
+	}
+	if _, found := c.AllSupplies[c.Chain.BaseDenom]; !found {
+		return false
+	}
+	return true
+}
+
+func (c ChainSupply) CommunityPoolSupplyPercent() float64 {
+	baseDenomSupply := c.AllSupplies[c.Chain.BaseDenom]
+	baseDenomCommunityPool := c.AllCommunityPool[c.Chain.BaseDenom]
+	return baseDenomCommunityPool.Amount.MustFloat64() / baseDenomSupply.Amount.MustFloat64()
 }

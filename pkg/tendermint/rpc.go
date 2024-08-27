@@ -260,13 +260,45 @@ func (rpc *RPC) GetPool() (*types.PoolResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/pool"
 
 	var response *types.PoolResponse
-	info, err := rpc.Get(url, "commission", &response)
+	info, err := rpc.Get(url, "pool", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
 	if response.Code != 0 {
 		return &types.PoolResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	}
+
+	return response, info, nil
+}
+
+func (rpc *RPC) GetSupply() (*types.SupplyResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/bank/v1beta1/supply?pagination.limit=10000&pagination.offset=0"
+
+	var response *types.SupplyResponse
+	info, err := rpc.Get(url, "supply", &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.SupplyResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	}
+
+	return response, info, nil
+}
+
+func (rpc *RPC) GetCommunityPool() (*types.CommunityPoolResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/community_pool?pagination.limit=10000&pagination.offset=0"
+
+	var response *types.CommunityPoolResponse
+	info, err := rpc.Get(url, "community_pool", &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.CommunityPoolResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
 	}
 
 	return response, info, nil

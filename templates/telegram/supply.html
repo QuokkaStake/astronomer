@@ -8,11 +8,36 @@ No chains supplies
 {{- $chain := .Chain -}}
 <strong>{{ .Chain.GetName }}</strong>
 {{- if .PoolError }}
-❌ Error fetching pool: {{ .PoolError }}
+❌ Error fetching community pool: {{ .PoolError }}
 {{- else }}
 <i>🏦Staking pool</i>
 - Total bonded: {{ SerializeAmount .BondedTokens }}
 - Total not bonded: {{ SerializeAmount .NotBondedTokens }}
+{{- end }}
+{{- if .CommunityPoolError }}
+❌ Error fetching community pool: {{ .CommunityPoolError }}
+{{- else if .AllCommunityPool }}
+
+<i>🏦Community pool</i>
+{{- range .AllCommunityPool }}
+- {{ SerializeAmount . }}
+{{- end }}
+{{- end }}
+{{- if .SupplyError }}
+❌ Error fetching supply: {{ .SupplyError }}
+{{- else if .AllSupplies }}
+
+<i>🏦Supply</i>
+{{- range .AllSupplies }}
+- {{ SerializeAmount . }}
+{{- end }}
+{{- if .HasBondedSupply }}
+
+Total bonded percent: {{ FormatPercent .BondedSupplyPercent }}
+{{- end }}
+{{- if .HasCommunityPoolSupply }}
+Total community pool percent: {{ FormatPercent .CommunityPoolSupplyPercent }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{ end }}

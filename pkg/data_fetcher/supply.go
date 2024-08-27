@@ -1,7 +1,6 @@
 package datafetcher
 
 import (
-	"fmt"
 	"main/pkg/types"
 	"sync"
 )
@@ -39,8 +38,6 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 				return
 			}
 
-			fmt.Printf("set pool: %+v\n", pool)
-
 			chainsSupplies[chain.Name].BondedTokens = &types.Amount{
 				Amount: pool.Pool.BondedTokens,
 				Denom:  chain.BaseDenom,
@@ -58,6 +55,54 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 				Amount: chainsSupplies[chain.Name].NotBondedTokens,
 			})
 		}(chain)
+
+		wg.Add(1)
+		go func(chain *types.Chain) {
+			defer wg.Done()
+
+			rpc := f.GetRPC(chain)
+			supply, _, err := rpc.GetSupply()
+
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				chainsSupplies[chain.Name].SupplyError = err
+				return
+			}
+
+			chainsSupplies[chain.Name].AllSupplies = make(map[string]*types.Amount, len(supply.Supply))
+
+			for _, supply := range supply.Supply {
+				supplyAmount := supply.ToAmount()
+				amounts = append(amounts, &types.AmountWithChain{Chain: chain.Name, Amount: supplyAmount})
+				chainsSupplies[chain.Name].AllSupplies[supplyAmount.Denom] = supplyAmount
+			}
+		}(chain)
+
+		wg.Add(1)
+		go func(chain *types.Chain) {
+			defer wg.Done()
+
+			rpc := f.GetRPC(chain)
+			communityPool, _, err := rpc.GetCommunityPool()
+
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			if err != nil {
+				chainsSupplies[chain.Name].CommunityPoolError = err
+				return
+			}
+
+			chainsSupplies[chain.Name].AllCommunityPool = make(map[string]*types.Amount, len(communityPool.Pool))
+
+			for _, communityPoolEntry := range communityPool.Pool {
+				communityPoolAmount := communityPoolEntry.ToAmount()
+				amounts = append(amounts, &types.AmountWithChain{Chain: chain.Name, Amount: communityPoolAmount})
+				chainsSupplies[chain.Name].AllCommunityPool[communityPoolAmount.Denom] = communityPoolAmount
+			}
+		}(chain)
 	}
 
 	wg.Wait()
@@ -65,5 +110,21 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 	f.PopulateDenoms(amounts)
 
 	response.Supplies = chainsSupplies
+
+	// TODO: refactor
+	for _, chainSupplies := range response.Supplies {
+		for supplyKey, supply := range chainSupplies.AllSupplies {
+			if supply.PriceUSD == nil {
+				delete(chainSupplies.AllSupplies, supplyKey)
+			}
+		}
+
+		for communityPoolKey, communityPool := range chainSupplies.AllCommunityPool {
+			if communityPool.PriceUSD == nil {
+				delete(chainSupplies.AllCommunityPool, communityPoolKey)
+			}
+		}
+	}
+
 	return response
 }
