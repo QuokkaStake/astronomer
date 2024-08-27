@@ -126,6 +126,10 @@ validator - Search for a validator
 params - Display chain(s) params
 proposals - Display all active proposals
 proposal - Display a proposal by ID
+wallet_link - Link a wallet
+wallet_link - Unlink a wallet
+chains - Display all chains and the chains bound to this chat
+supply - See total chain supply, bonded ratio and community pool
 ```
 
 Then add a Telegram config to your config file (see `config.example.toml` for reference).

@@ -9,10 +9,12 @@ The bot can understand the following commands:
 - /help, or /start - display this message
 {{- if .Chains }}
 - /validator &lt;query&gt; - search for validator(s)
-- /params [chain1,chain2] - see chain params
+- /params [chain1,chain2] - see chain(s) params
+- /supply [chain1,chain2] - see chain(s) supply, bonded ratio and community pool
 {{- else }}
 - /validator &lt;chain&gt; &lt;query&gt; - search for validator(s)
-- /params &lt;chain1,chain2&gt; - see chain params
+- /params &lt;chain1,chain2&gt; - see chain(s) params
+- /supply &lt;chain1,chain2&gt; - see chain(s) supply, bonded ratio and community pool
 {{- end }}
 {{- if .HasOneChain }}
 - /proposal &lt;ID&gt; - get proposal info
