@@ -36,6 +36,10 @@ func (interacter *Interacter) HandleWalletLinkCommand(c tele.Context, chainBinds
 		)), constants.ErrChainNotFound
 	}
 
+	if err := interacter.DataFetcher.DoesWalletExist(chains[0], args.Value); err != nil {
+		return fmt.Sprintf("Error linking wallet: %s", err), err
+	}
+
 	err = interacter.Database.InsertWalletLink(&types.WalletLink{
 		Chain:    args.ChainName,
 		Reporter: interacter.Name(),
