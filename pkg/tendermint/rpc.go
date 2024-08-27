@@ -256,6 +256,22 @@ func (rpc *RPC) GetUnbonds(address string) (*types.UnbondsResponse, types.QueryI
 	return response, info, nil
 }
 
+func (rpc *RPC) GetPool() (*types.PoolResponse, types.QueryInfo, error) {
+	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/pool"
+
+	var response *types.PoolResponse
+	info, err := rpc.Get(url, "commission", &response)
+	if err != nil {
+		return nil, info, err
+	}
+
+	if response.Code != 0 {
+		return &types.PoolResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	}
+
+	return response, info, nil
+}
+
 func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	var newerBlock *types.BlockResponse
 	_, err := rpc.Get(rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)

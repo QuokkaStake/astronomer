@@ -1,0 +1,18 @@
+{{- if .Error }}
+❌ Error getting supply: {{ .Error }}
+{{- else if not .Supplies }}
+No chains supplies
+{{- else -}}
+{{- $chainsData := .Supplies -}}
+{{- range .Supplies }}
+{{- $chain := .Chain -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- if .PoolError }}
+❌ Error fetching pool: {{ .PoolError }}
+{{- else }}
+<i>🏦Staking pool</i>
+- Total bonded: {{ SerializeAmount .BondedTokens }}
+- Total not bonded: {{ SerializeAmount .NotBondedTokens }}
+{{- end }}
+{{- end }}
+{{ end }}

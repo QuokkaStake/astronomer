@@ -81,6 +81,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/wallet_unlink", bot, interacter.GetWalletUnlinkCommand())
 	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
 	interacter.AddCommand("/balance", bot, interacter.GetBalanceCommand())
+	interacter.AddCommand("/supply", bot, interacter.GetSupplyCommand())
 
 	if len(interacter.Admins) > 0 {
 		interacter.Logger.Debug().Msg("Using admins whitelist")

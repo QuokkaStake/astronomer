@@ -331,3 +331,12 @@ type CommissionsResponse struct {
 	Message    string        `json:"message"`
 	Commission SdkCommission `json:"commission"`
 }
+
+type PoolResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Pool    struct {
+		BondedTokens    math.LegacyDec `json:"bonded_tokens"`
+		NotBondedTokens math.LegacyDec `json:"not_bonded_tokens"`
+	} `json:"pool"`
+}

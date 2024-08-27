@@ -256,3 +256,15 @@ func (w *WalletsBalancesInfo) SetUnbondsError(chainName string, address *WalletL
 func (w *WalletsBalancesInfo) SetUnbonds(chainName string, address *WalletLink, unbonds []*Unbond) {
 	w.Infos[chainName].BalancesInfo[address.Address].Unbonds = unbonds
 }
+
+type SupplyInfo struct {
+	Error    error
+	Supplies map[string]*ChainSupply
+}
+
+type ChainSupply struct {
+	Chain           *Chain
+	PoolError       error
+	BondedTokens    *Amount
+	NotBondedTokens *Amount
+}
