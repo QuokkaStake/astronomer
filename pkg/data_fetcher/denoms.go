@@ -85,7 +85,10 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 				return
 			}
 
-			if fetcherPrices, denomFetchError := foundPriceFetcher.GetPrices(notCachedDenoms); denomFetchError != nil {
+			fetcherPrices, queryInfo, denomFetchError := foundPriceFetcher.GetPrices(notCachedDenoms)
+			f.MetricsManager.LogQueryInfo(queryInfo)
+
+			if denomFetchError != nil {
 				f.Logger.Err(denomFetchError).
 					Str("price_fetcher", string(priceFetcherName)).
 					Msg("Could not fetch prices")

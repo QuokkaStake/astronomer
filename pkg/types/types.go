@@ -11,6 +11,7 @@ import (
 type QueryInfo struct {
 	Chain    string
 	URL      string
+	Query    string
 	Duration time.Duration
 	Success  bool
 }

@@ -26,6 +26,7 @@ func NewClient(logger zerolog.Logger, chain string) *Client {
 
 func (c *Client) Get(
 	url string,
+	query string,
 	target interface{},
 ) (types.QueryInfo, error) {
 	client := &http.Client{
@@ -36,6 +37,7 @@ func (c *Client) Get(
 	queryInfo := types.QueryInfo{
 		Success: false,
 		Chain:   c.chain,
+		Query:   query,
 		URL:     url,
 	}
 

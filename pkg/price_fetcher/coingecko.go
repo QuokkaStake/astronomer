@@ -23,18 +23,19 @@ func NewCoingeckoPriceFetcher(logger zerolog.Logger) *CoingeckoPriceFetcher {
 	}
 }
 
-func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, error) {
+func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, types.QueryInfo, error) {
 	currenciesToFetch := utils.Map(denomInfos, func(denomInfo *types.Denom) string {
 		return denomInfo.CoingeckoCurrency.String
 	})
 
 	var coingeckoResponse map[string]map[string]float64
-	_, err := c.Client.Get(
+	query, err := c.Client.Get(
 		fmt.Sprintf(
 			"https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=%s",
 			strings.Join(currenciesToFetch, ","),
 			constants.CoingeckoBaseCurrency,
 		),
+		"fetch_prices",
 		&coingeckoResponse,
 	)
 
@@ -43,7 +44,7 @@ func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, er
 			Err(err).
 			Strs("currencies", currenciesToFetch).
 			Msg("Could not get rates, probably rate-limiting")
-		return map[string]map[string]float64{}, err
+		return map[string]map[string]float64{}, query, err
 	}
 
 	result := make(map[string]map[string]float64)
@@ -63,7 +64,7 @@ func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, er
 		}
 	}
 
-	return result, nil
+	return result, query, nil
 }
 
 func (c *CoingeckoPriceFetcher) Name() string {

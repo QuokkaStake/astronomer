@@ -44,7 +44,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	log := logger.GetLogger(config.LogConfig)
 	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
 	metricsManager := metrics.NewManager(log, config.MetricsConfig)
-	dataFetcher := datafetcher.NewDataFetcher(*log, database)
+	dataFetcher := datafetcher.NewDataFetcher(*log, database, metricsManager)
 	interacters := []interacterPkg.Interacter{
 		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database, metricsManager),
 	}

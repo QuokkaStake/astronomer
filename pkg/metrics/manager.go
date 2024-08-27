@@ -22,6 +22,9 @@ type Manager struct {
 	reporterEnabledGauge   *prometheus.GaugeVec
 	reporterQueriesCounter *prometheus.CounterVec
 
+	successQueriesCounter *prometheus.CounterVec
+	failedQueriesCounter  *prometheus.CounterVec
+
 	appVersionGauge *prometheus.GaugeVec
 	startTimeGauge  *prometheus.GaugeVec
 }
@@ -37,6 +40,17 @@ func NewManager(logger *zerolog.Logger, config types.MetricsConfig) *Manager {
 		Name: constants.PrometheusMetricsPrefix + "reporter_queries",
 		Help: "Reporters' queries count ",
 	}, []string{"name", "query"})
+
+	successQueriesCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: constants.PrometheusMetricsPrefix + "queries_successful",
+		Help: "Counter of successful queries towards the external services.",
+	}, []string{"chain", "query"})
+
+	failedQueriesCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Name: constants.PrometheusMetricsPrefix + "queries_failed",
+		Help: "Counter of failed queries towards the external services.",
+	}, []string{"chain", "query"})
+
 	appVersionGauge := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: constants.PrometheusMetricsPrefix + "version",
 		Help: "App version",
@@ -48,6 +62,8 @@ func NewManager(logger *zerolog.Logger, config types.MetricsConfig) *Manager {
 
 	registry.MustRegister(reporterEnabledGauge)
 	registry.MustRegister(reporterQueriesCounter)
+	registry.MustRegister(successQueriesCounter)
+	registry.MustRegister(failedQueriesCounter)
 	registry.MustRegister(appVersionGauge)
 	registry.MustRegister(startTimeGauge)
 
@@ -61,6 +77,8 @@ func NewManager(logger *zerolog.Logger, config types.MetricsConfig) *Manager {
 		registry:               registry,
 		reporterEnabledGauge:   reporterEnabledGauge,
 		reporterQueriesCounter: reporterQueriesCounter,
+		successQueriesCounter:  successQueriesCounter,
+		failedQueriesCounter:   failedQueriesCounter,
 		appVersionGauge:        appVersionGauge,
 		startTimeGauge:         startTimeGauge,
 	}
@@ -104,4 +122,16 @@ func (m *Manager) LogAppVersion(version string) {
 	m.appVersionGauge.
 		With(prometheus.Labels{"version": version}).
 		Set(1)
+}
+
+func (m *Manager) LogQueryInfo(queryInfo types.QueryInfo) {
+	if queryInfo.Success {
+		m.successQueriesCounter.
+			With(prometheus.Labels{"chain": queryInfo.Chain, "query": queryInfo.Query}).
+			Inc()
+	} else {
+		m.failedQueriesCounter.
+			With(prometheus.Labels{"chain": queryInfo.Chain, "query": queryInfo.Query}).
+			Inc()
+	}
 }
