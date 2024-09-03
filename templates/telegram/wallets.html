@@ -1,0 +1,17 @@
+{{- if .Error }}
+❌ Error getting wallets list: {{ .Error }}
+{{- else if not .Infos }}
+You are not subscribed to any wallets.
+{{- else -}}
+{{- $chainsData := .Infos -}}
+{{ range .Infos }}
+{{- $chain := .Chain -}}
+{{- $explorers := .Explorers -}}
+{{- if gt (len $chainsData) 1 -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- end -}}
+{{- range .Wallets }}
+- <code>{{ .Address }}</code> -> {{ .Alias.Value }} {{ FormatLinks ($explorers.GetWalletLinks (.)) }}
+{{- end }}
+{{ end }}
+{{ end }}
