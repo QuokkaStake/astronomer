@@ -310,3 +310,14 @@ func (c ChainSupply) CommunityPoolSupplyPercent() float64 {
 	baseDenomCommunityPool := c.AllCommunityPool[c.Chain.BaseDenom]
 	return baseDenomCommunityPool.Amount.MustFloat64() / baseDenomSupply.Amount.MustFloat64()
 }
+
+type WalletsList struct {
+	Error error
+	Infos map[string]*ChainWalletsList
+}
+
+type ChainWalletsList struct {
+	Chain     *Chain
+	Explorers Explorers
+	Wallets   []*WalletLink
+}
