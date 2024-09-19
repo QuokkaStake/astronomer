@@ -1,34 +1,22 @@
 package datafetcher
 
 import (
-	"fmt"
 	"main/pkg/types"
 )
 
-func (f *DataFetcher) GetSingleProposal(chainName string, proposalID string) types.SingleProposal {
+func (f *DataFetcher) GetSingleProposal(chain *types.Chain, proposalID string) types.SingleProposal {
 	response := types.SingleProposal{}
 
-	chains, err := f.Database.GetChainsByNames([]string{chainName})
+	explorers, err := f.Database.GetExplorersByChains([]string{chain.Name})
 	if err != nil {
 		response.Error = err
 		return response
 	}
 
-	explorers, err := f.Database.GetExplorersByChains([]string{chainName})
-	if err != nil {
-		response.Error = err
-		return response
-	}
+	response.Chain = chain
+	response.Explorers = explorers.GetExplorersByChain(chain.Name)
 
-	if len(chains) != 1 {
-		response.Error = fmt.Errorf("chain '%s' is not found", chainName)
-		return response
-	}
-
-	response.Chain = chains[0]
-	response.Explorers = explorers.GetExplorersByChain(chainName)
-
-	rpc := f.GetRPC(chains[0])
+	rpc := f.GetRPC(chain)
 	proposal, _, err := rpc.GetSingleProposal(proposalID)
 
 	if err != nil {

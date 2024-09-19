@@ -1,0 +1,8 @@
+Chain is not found. Available chains are:
+{{- if . }}
+{{- range . }}
+- {{ .Name }} ({{ .GetName }})
+{{- end }}
+{{- else }}
+No chains available.
+{{- end }}
