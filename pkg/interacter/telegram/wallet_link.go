@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"fmt"
-	"html"
 	"main/pkg/constants"
 	"main/pkg/types"
 	"strconv"
@@ -30,10 +29,7 @@ func (interacter *Interacter) HandleWalletLinkCommand(c tele.Context, chainBinds
 	if err != nil {
 		return "", err
 	} else if len(chains) < 1 {
-		return html.EscapeString(fmt.Sprintf(
-			"Could not find a chain with the name '%s'",
-			args.ChainName,
-		)), constants.ErrChainNotFound
+		return interacter.ChainNotFound()
 	}
 
 	if err := interacter.DataFetcher.DoesWalletExist(chains[0], args.Value); err != nil {

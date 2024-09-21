@@ -22,6 +22,13 @@ func (interacter *Interacter) HandleSingleProposal(
 		return usage, constants.ErrWrongInvocation
 	}
 
-	proposalsInfo := interacter.DataFetcher.GetSingleProposal(args.ChainName, args.ItemID)
+	chains, err := interacter.Database.GetChainsByNames([]string{args.ChainName})
+	if err != nil {
+		return "", err
+	} else if len(chains) < 1 {
+		return interacter.ChainNotFound()
+	}
+
+	proposalsInfo := interacter.DataFetcher.GetSingleProposal(chains[0], args.ItemID)
 	return interacter.TemplateManager.Render("proposal", proposalsInfo)
 }

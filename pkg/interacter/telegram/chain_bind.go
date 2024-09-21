@@ -1,8 +1,6 @@
 package telegram
 
 import (
-	"fmt"
-	"html"
 	"main/pkg/constants"
 	"strconv"
 	"strings"
@@ -27,10 +25,7 @@ func (interacter *Interacter) HandleChainBind(c tele.Context, chainBinds []strin
 	if err != nil {
 		return "", err
 	} else if len(chains) < 1 {
-		return html.EscapeString(fmt.Sprintf(
-			"Could not find a chain with the name '%s'",
-			args.Value,
-		)), constants.ErrChainNotFound
+		return interacter.ChainNotFound()
 	}
 
 	err = interacter.Database.InsertChainBind(
