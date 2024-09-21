@@ -29,8 +29,18 @@ func (c *Client) Get(
 	query string,
 	target interface{},
 ) (types.QueryInfo, error) {
+	var transport http.RoundTripper
+
+	transportRaw, ok := http.DefaultTransport.(*http.Transport)
+	if ok {
+		transport = transportRaw.Clone()
+	} else {
+		transport = http.DefaultTransport
+	}
+
 	client := &http.Client{
-		Timeout: 10 * 1000000000,
+		Timeout:   10 * time.Second,
+		Transport: transport,
 	}
 	start := time.Now()
 
