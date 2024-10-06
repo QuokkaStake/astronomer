@@ -44,5 +44,5 @@ func (interacter *Interacter) HandleAddDenom(c tele.Context, chainBinds []string
 		return "", err
 	}
 
-	return "Successfully inserted denom!", nil
+	return interacter.TemplateManager.Render("denom_add", denom)
 }

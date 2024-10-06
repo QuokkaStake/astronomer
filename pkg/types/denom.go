@@ -36,6 +36,14 @@ func (d *Denom) Validate() error {
 	return nil
 }
 
+func (d *Denom) PrintCoingeckoCurrency() string {
+	if d.CoingeckoCurrency.IsZero() {
+		return "not set"
+	}
+
+	return d.CoingeckoCurrency.String
+}
+
 func DenomFromArgs(args map[string]string) *Denom {
 	denom := &Denom{}
 
