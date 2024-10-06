@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"fmt"
 	"main/pkg/constants"
 	"main/pkg/types"
 	"strconv"
@@ -29,9 +30,9 @@ func (interacter *Interacter) HandleValidatorLinkCommand(c tele.Context, chainBi
 		return interacter.ChainNotFound()
 	}
 
-	//if err := interacter.DataFetcher.DoesWalletExist(chains[0], args.Value); err != nil {
-	//	return fmt.Sprintf("Error linking wallet: %s", err), err
-	//}
+	if err := interacter.DataFetcher.DoesValidatorExist(chains[0], args.ItemID); err != nil {
+		return fmt.Sprintf("Error linking validator: %s", err), err
+	}
 
 	err = interacter.Database.InsertValidatorLink(&types.ValidatorLink{
 		Chain:    args.ChainName,
