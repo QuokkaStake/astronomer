@@ -80,6 +80,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/wallet_link", bot, interacter.GetWalletLinkCommand())
 	interacter.AddCommand("/wallet_unlink", bot, interacter.GetWalletUnlinkCommand())
 	interacter.AddCommand("/validator_link", bot, interacter.GetValidatorLinkCommand())
+	interacter.AddCommand("/validator_unlink", bot, interacter.GetValidatorUnlinkCommand())
 	interacter.AddCommand("/wallets", bot, interacter.GetWalletsCommand())
 	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
 	interacter.AddCommand("/balance", bot, interacter.GetBalanceCommand())
