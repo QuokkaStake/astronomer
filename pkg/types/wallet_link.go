@@ -14,6 +14,14 @@ type WalletLink struct {
 	Alias    null.String
 }
 
+func (l *WalletLink) PrintAlias() string {
+	if l.Alias.IsZero() {
+		return "not set"
+	}
+
+	return l.Alias.String
+}
+
 func (l *WalletLink) Validate() error {
 	if l.Chain == "" {
 		return fmt.Errorf("empty chain name")
