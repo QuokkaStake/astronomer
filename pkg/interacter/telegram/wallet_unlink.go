@@ -20,7 +20,7 @@ func (interacter *Interacter) GetWalletUnlinkCommand() Command {
 func (interacter *Interacter) HandleWalletUnlink(c tele.Context, chainBinds []string) (string, error) {
 	args := strings.Split(c.Text(), " ")
 	if len(args) < 3 {
-		return html.EscapeString(fmt.Sprintf("Usage: %s <chain name> <denom name>", args[0])), constants.ErrWrongInvocation
+		return html.EscapeString(fmt.Sprintf("Usage: %s <chain name> <address>", args[0])), constants.ErrWrongInvocation
 	}
 
 	deleted, err := interacter.Database.DeleteWalletLink(args[1], interacter.Name(), args[2], strconv.FormatInt(c.Sender().ID, 10))
