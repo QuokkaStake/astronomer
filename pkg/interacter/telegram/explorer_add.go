@@ -45,5 +45,5 @@ func (interacter *Interacter) HandleAddExplorer(c tele.Context, chainBinds []str
 		return "", err
 	}
 
-	return "Successfully inserted explorer!", nil
+	return interacter.TemplateManager.Render("explorer_add", explorer)
 }
