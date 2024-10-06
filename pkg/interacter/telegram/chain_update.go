@@ -44,5 +44,5 @@ func (interacter *Interacter) HandleUpdateChain(c tele.Context, chainBinds []str
 		return "Chain was not found!", err
 	}
 
-	return "Successfully updated chain!", nil
+	return interacter.TemplateManager.Render("chain_update", chain)
 }
