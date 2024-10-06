@@ -74,6 +74,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/start", bot, interacter.GetHelpCommand())
 	interacter.AddCommand("/help", bot, interacter.GetHelpCommand())
 	interacter.AddCommand("/validator", bot, interacter.GetValidatorCommand())
+	interacter.AddCommand("/validators", bot, interacter.GetValidatorsCommand())
 	interacter.AddCommand("/params", bot, interacter.GetParamsCommand())
 	interacter.AddCommand("/proposal", bot, interacter.GetSingleProposalCommand())
 	interacter.AddCommand("/proposals", bot, interacter.GetActiveProposalsCommand())

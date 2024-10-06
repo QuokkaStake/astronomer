@@ -1,0 +1,36 @@
+{{- if .Error }}
+❌ Error fetching validator: {{ .Error }}
+{{- else if not .Chains }}
+No chains found.
+{{- else -}}
+{{- $chainsData := .Chains -}}
+{{- range .Chains }}
+{{- $chain := .Chain -}}
+{{- $explorers := .Explorers -}}
+<strong>{{ .Chain.GetName }}</strong>
+{{- if .Error }}
+❌ Error fetching validator: {{ .Error }}
+{{ else if .Validators }}
+{{- range .Validators }}
+{{ .Moniker }}
+{{- if .Active }}
+✅Active (#{{ .Rank }}, {{.GetVotingPowerPercent }}% voting power)
+{{- else if .Jailed }}
+❌Jailed
+{{- else }}
+😔Not active
+{{- end }}
+🏦({{ SerializeAmount .Tokens }})
+📋<i>{{ .Details }}</i>
+🤝{{ .SecurityContact }}
+🌎{{ .Website }}
+💸Commission: {{ .FormatCommission }}%
+{{- if $explorers }}
+🌐{{ FormatLinks ($explorers.GetValidatorLinks (.OperatorAddress)) }}
+{{- end }}
+{{- end }}
+{{ else }}
+You are not subscribed to any validator on this chain.
+{{ end }}
+{{ end }}
+{{ end }}

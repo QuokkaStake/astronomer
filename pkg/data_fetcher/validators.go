@@ -7,7 +7,45 @@ import (
 	"sync"
 )
 
+func (f *DataFetcher) predicateByQuery(query string) func(v *types.Validator) bool {
+	lowercaseQuery := strings.ToLower(query)
+
+	return func(v *types.Validator) bool {
+		return strings.Contains(strings.ToLower(v.Description.Moniker), lowercaseQuery)
+	}
+}
+
+func (f *DataFetcher) predicateByValidatorLinks(links []*types.ValidatorLink) func(v *types.Validator) bool {
+	return func(v *types.Validator) bool {
+		_, found := utils.Find(links, func(l *types.ValidatorLink) bool {
+			return l.Address == v.OperatorAddress
+		})
+
+		return found
+	}
+}
+
 func (f *DataFetcher) FindValidator(query string, chainNames []string) types.ValidatorsInfo {
+	return f.FindValidatorGeneric(chainNames, f.predicateByQuery(query))
+}
+
+func (f *DataFetcher) FindMyValidators(
+	chainNames []string,
+	userID string,
+	reporter string,
+) types.ValidatorsInfo {
+	validatorLinks, err := f.Database.FindValidatorLinksByUserAndReporter(userID, reporter)
+	if err != nil {
+		return types.ValidatorsInfo{Error: err}
+	}
+
+	return f.FindValidatorGeneric(chainNames, f.predicateByValidatorLinks(validatorLinks))
+}
+
+func (f *DataFetcher) FindValidatorGeneric(
+	chainNames []string,
+	searchPredicate func(v *types.Validator) bool,
+) types.ValidatorsInfo {
 	response := types.ValidatorsInfo{}
 
 	chains, err := f.Database.GetChainsByNames(chainNames)
@@ -21,8 +59,6 @@ func (f *DataFetcher) FindValidator(query string, chainNames []string) types.Val
 		response.Error = err
 		return response
 	}
-
-	lowercaseQuery := strings.ToLower(query)
 
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
@@ -50,9 +86,7 @@ func (f *DataFetcher) FindValidator(query string, chainNames []string) types.Val
 				return
 			}
 
-			foundValidators := utils.Filter(validators.Validators, func(v *types.Validator) bool {
-				return strings.Contains(strings.ToLower(v.Description.Moniker), lowercaseQuery)
-			})
+			foundValidators := utils.Filter(validators.Validators, searchPredicate)
 
 			totalVP := validators.GetTotalVP()
 
