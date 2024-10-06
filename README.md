@@ -123,11 +123,14 @@ start - Displays bot info
 help - Displays bot info
 balance - Display your wallets' balance, delegations, rewards etc.
 validator - Search for a validator
+validators - Display info on validators you are subscribed to
 params - Display chain(s) params
 proposals - Display all active proposals
 proposal - Display a proposal by ID
 wallet_link - Link a wallet
 wallet_link - Unlink a wallet
+validator_link - Link a validator
+validator_unlink - Unlink a validator
 chains - Display all chains and the chains bound to this chat
 supply - See total chain supply, bonded ratio and community pool
 ```
