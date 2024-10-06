@@ -47,5 +47,5 @@ func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []str
 		return "Chain is not bound to this chat!", constants.ErrChainNotBound
 	}
 
-	return "Successfully removed a chain bind from this chat!", nil
+	return interacter.TemplateManager.Render("chain_unbind", chains[0])
 }
