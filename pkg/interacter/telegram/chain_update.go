@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html"
 	"main/pkg/constants"
-	"main/pkg/types"
 	"main/pkg/utils"
 	"strings"
 
@@ -30,7 +29,17 @@ func (interacter *Interacter) HandleUpdateChain(c tele.Context, chainBinds []str
 		return "Invalid input syntax!", constants.ErrWrongInvocation
 	}
 
-	chain := types.ChainFromArgs(argsAsMap)
+	chainName, ok := argsAsMap["name"]
+	if !ok {
+		return "Chain name is not provided!", constants.ErrWrongInvocation
+	}
+
+	chain, err := interacter.Database.GetChainByName(chainName)
+	if err != nil {
+		return fmt.Sprintf("Error fetching chain: %s", err.Error()), err
+	}
+
+	chain.UpdateFromArgs(argsAsMap)
 	if err := chain.Validate(); err != nil {
 		return fmt.Sprintf("Invalid data provided: %s", err.Error()), err
 	}

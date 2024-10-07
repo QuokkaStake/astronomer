@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	"fmt"
 	"main/pkg/constants"
 	"main/pkg/types"
@@ -23,14 +24,14 @@ func (interacter *Interacter) HandleValidatorLinkCommand(c tele.Context, chainBi
 		return usage, constants.ErrWrongInvocation
 	}
 
-	chains, err := interacter.Database.GetChainsByNames([]string{args.ChainName})
-	if err != nil {
-		return "", err
-	} else if len(chains) < 1 {
+	chain, err := interacter.Database.GetChainByName(args.ChainName)
+	if err != nil && errors.Is(err, constants.ErrChainNotFound) {
 		return interacter.ChainNotFound()
+	} else if err != nil {
+		return "", err
 	}
 
-	validator, err := interacter.DataFetcher.DoesValidatorExist(chains[0], args.ItemID)
+	validator, err := interacter.DataFetcher.DoesValidatorExist(chain, args.ItemID)
 	if err != nil {
 		return fmt.Sprintf("Error linking validator: %s", err), err
 	}

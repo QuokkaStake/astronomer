@@ -19,26 +19,33 @@ func ChainFromArgs(args map[string]string) *Chain {
 		switch key {
 		case "name":
 			chain.Name = value
-		case "lcd_endpoint":
-			chain.LCDEndpoint = value
 		case "lcd-endpoint":
 			chain.LCDEndpoint = value
-		case "pretty_name":
-			chain.PrettyName = value
 		case "pretty-name":
 			chain.PrettyName = value
-		case "base_denom":
-			chain.BaseDenom = value
 		case "base-denom":
 			chain.BaseDenom = value
-		case "bech32_validator_prefix":
-			chain.Bech32ValidatorPrefix = value
 		case "bech32-validator-prefix":
 			chain.Bech32ValidatorPrefix = value
 		}
 	}
 
 	return chain
+}
+
+func (c *Chain) UpdateFromArgs(args map[string]string) {
+	for key, value := range args {
+		switch key {
+		case "lcd-endpoint":
+			c.LCDEndpoint = value
+		case "pretty-name":
+			c.PrettyName = value
+		case "base-denom":
+			c.BaseDenom = value
+		case "bech32-validator-prefix":
+			c.Bech32ValidatorPrefix = value
+		}
+	}
 }
 
 func (c *Chain) Validate() error {

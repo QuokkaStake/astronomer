@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	"fmt"
 	"main/pkg/constants"
 	"main/pkg/types"
@@ -25,14 +26,14 @@ func (interacter *Interacter) HandleWalletLinkCommand(c tele.Context, chainBinds
 		return usage, constants.ErrWrongInvocation
 	}
 
-	chains, err := interacter.Database.GetChainsByNames([]string{args.ChainName})
-	if err != nil {
-		return "", err
-	} else if len(chains) < 1 {
+	chain, err := interacter.Database.GetChainByName(args.ChainName)
+	if err != nil && errors.Is(err, constants.ErrChainNotFound) {
 		return interacter.ChainNotFound()
+	} else if err != nil {
+		return "", err
 	}
 
-	if err := interacter.DataFetcher.DoesWalletExist(chains[0], args.Value); err != nil {
+	if err := interacter.DataFetcher.DoesWalletExist(chain, args.Value); err != nil {
 		return fmt.Sprintf("Error linking wallet: %s", err), err
 	}
 
@@ -60,7 +61,7 @@ func (interacter *Interacter) HandleWalletLinkCommand(c tele.Context, chainBinds
 	}
 
 	return interacter.TemplateManager.Render("wallet_link", types.ChainWallet{
-		Chain:     chains[0],
+		Chain:     chain,
 		Explorers: explorers,
 		Wallet:    walletLink,
 	})
