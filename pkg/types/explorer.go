@@ -20,30 +20,67 @@ func ExplorerFromArgs(args map[string]string) *Explorer {
 
 	for key, value := range args {
 		switch key {
+		case "mintscan-prefix":
+			return MintscanExplorerFromArgs(args)
+		case "ping-prefix":
+			return PingExplorerFromArgs(args)
 		case "name":
 			explorer.Name = value
 		case "chain":
 			explorer.Chain = value
 		case "proposal-link-pattern":
 			explorer.ProposalLinkPattern = value
-		case "proposal_link_pattern":
-			explorer.ProposalLinkPattern = value
 		case "wallet-link-pattern":
-			explorer.WalletLinkPattern = value
-		case "wallet_link_pattern":
 			explorer.WalletLinkPattern = value
 		case "validator-link-pattern":
 			explorer.ValidatorLinkPattern = value
-		case "validator_link_pattern":
-			explorer.ValidatorLinkPattern = value
 		case "main-link":
-			explorer.MainLink = value
-		case "main_link":
 			explorer.MainLink = value
 		}
 	}
 
 	return explorer
+}
+
+func MintscanExplorerFromArgs(args map[string]string) *Explorer {
+	prefix := args["mintscan-prefix"]
+
+	name := args["name"]
+	if name == "" {
+		name = "Mintscan"
+	}
+
+	return &Explorer{
+		Chain:                args["chain"],
+		Name:                 name,
+		ProposalLinkPattern:  fmt.Sprintf("https://mintscan.io/%s/proposals/%%s", prefix),
+		WalletLinkPattern:    fmt.Sprintf("https://mintscan.io/%s/account/%%s", prefix),
+		ValidatorLinkPattern: fmt.Sprintf("https://mintscan.io/%s/validators/%%s", prefix),
+		MainLink:             fmt.Sprintf("https://mintscan.io/%s", prefix),
+	}
+}
+
+func PingExplorerFromArgs(args map[string]string) *Explorer {
+	prefix := args["ping-prefix"]
+
+	name := args["name"]
+	if name == "" {
+		name = "Ping"
+	}
+
+	host := args["ping-host"]
+	if host == "" {
+		host = "https://ping.pub"
+	}
+
+	return &Explorer{
+		Chain:                args["chain"],
+		Name:                 name,
+		ProposalLinkPattern:  fmt.Sprintf("%s/%s/gov/%%s", host, prefix),
+		WalletLinkPattern:    fmt.Sprintf("%s/%s/account/%%s", host, prefix),
+		ValidatorLinkPattern: fmt.Sprintf("%s/%s/staking/%%s", host, prefix),
+		MainLink:             fmt.Sprintf("%s/%s", host, prefix),
+	}
 }
 
 func (e *Explorer) Validate() error {
