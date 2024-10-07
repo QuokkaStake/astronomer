@@ -44,5 +44,5 @@ func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string
 		return "", err
 	}
 
-	return "Successfully inserted chain!", nil
+	return interacter.TemplateManager.Render("chain_add", chain)
 }

@@ -43,5 +43,5 @@ func (interacter *Interacter) HandleChainBind(c tele.Context, chainBinds []strin
 		return "", err
 	}
 
-	return "Successfully added a chain bind to this chat!", nil
+	return interacter.TemplateManager.Render("chain_bind", chains[0])
 }

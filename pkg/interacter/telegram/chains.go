@@ -26,7 +26,7 @@ func (interacter *Interacter) HandleChainsList(c tele.Context, chainBinds []stri
 
 	explorers, err := interacter.Database.GetExplorersByChains(chainNames)
 	if err != nil {
-		return "Error fetching chains!", err
+		return "Error fetching explorers!", err
 	}
 
 	return interacter.TemplateManager.Render("chains", ChainsInfo{

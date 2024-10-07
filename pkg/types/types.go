@@ -321,3 +321,9 @@ type ChainWalletsList struct {
 	Explorers Explorers
 	Wallets   []*WalletLink
 }
+
+type ChainWallet struct {
+	Chain     *Chain
+	Explorers Explorers
+	Wallet    *WalletLink
+}

@@ -30,7 +30,8 @@ func (interacter *Interacter) HandleValidatorLinkCommand(c tele.Context, chainBi
 		return interacter.ChainNotFound()
 	}
 
-	if err := interacter.DataFetcher.DoesValidatorExist(chains[0], args.ItemID); err != nil {
+	validator, err := interacter.DataFetcher.DoesValidatorExist(chains[0], args.ItemID)
+	if err != nil {
 		return fmt.Sprintf("Error linking validator: %s", err), err
 	}
 
@@ -49,5 +50,5 @@ func (interacter *Interacter) HandleValidatorLinkCommand(c tele.Context, chainBi
 		return "", err
 	}
 
-	return "Successfully linked a validator!", nil
+	return interacter.TemplateManager.Render("validator_link", validator)
 }

@@ -4,13 +4,13 @@ import (
 	"main/pkg/types"
 )
 
-func (f *DataFetcher) DoesValidatorExist(chain *types.Chain, address string) error {
+func (f *DataFetcher) DoesValidatorExist(chain *types.Chain, address string) (*types.Validator, error) {
 	rpc := f.GetRPC(chain)
 
-	_, _, err := rpc.GetValidator(address)
+	validator, _, err := rpc.GetValidator(address)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &validator.Validator, nil
 }
