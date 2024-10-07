@@ -63,8 +63,8 @@ func (f *DataFetcher) FindValidatorGeneric(
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
-	chainValidators := map[string]types.ChainValidatorsInfo{}
-	denoms := []*types.AmountWithChain{}
+	validatorsResponses := map[string]*types.ValidatorsResponse{}
+	validatorsErrors := map[string]error{}
 
 	for _, chain := range chains {
 		wg.Add(1)
@@ -76,68 +76,75 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 			validators, _, err := rpc.GetAllValidators()
 			mutex.Lock()
-			defer mutex.Unlock()
-
-			if err != nil {
-				chainValidators[chain.Name] = types.ChainValidatorsInfo{
-					Chain: chain,
-					Error: err,
-				}
-				return
-			}
-
-			foundValidators := utils.Filter(validators.Validators, searchPredicate)
-
-			totalVP := validators.GetTotalVP()
-
-			info := types.ChainValidatorsInfo{
-				Chain:      chain,
-				Explorers:  explorers.GetExplorersByChain(chain.Name),
-				Error:      nil,
-				Validators: make([]types.ValidatorInfo, len(foundValidators)),
-			}
-
-			for index, validator := range foundValidators {
-				validatorTokens := &types.Amount{
-					Amount: validator.DelegatorShares,
-					Denom:  chain.BaseDenom,
-				}
-
-				validatorInfo := types.ValidatorInfo{
-					OperatorAddress:         validator.OperatorAddress,
-					Jailed:                  validator.Jailed,
-					Status:                  validator.Status,
-					Tokens:                  validatorTokens,
-					Moniker:                 validator.Description.Moniker,
-					Details:                 validator.Description.Details,
-					Identity:                validator.Description.Identity,
-					Website:                 validator.Description.Website,
-					SecurityContact:         validator.Description.SecurityContact,
-					Commission:              validator.Commission.CommissionRates.Rate.MustFloat64(),
-					CommissionMax:           validator.Commission.CommissionRates.MaxRate.MustFloat64(),
-					CommissionMaxChangeRate: validator.Commission.CommissionRates.MaxChangeRate.MustFloat64(),
-					VotingPowerPercent:      validator.DelegatorShares.Quo(totalVP).MustFloat64(),
-				}
-
-				if validator.Active() {
-					validatorInfo.Rank = validators.FindValidatorRank(validator.OperatorAddress)
-				}
-
-				info.Validators[index] = validatorInfo
-				denoms = append(denoms, &types.AmountWithChain{
-					Chain:  chain.Name,
-					Amount: validatorTokens,
-				})
-			}
-
-			chainValidators[chain.Name] = info
+			validatorsResponses[chain.Name] = validators
+			validatorsErrors[chain.Name] = err
+			mutex.Unlock()
 		}(chain)
 	}
 
 	wg.Wait()
 
+	validatorsInfos := map[string]types.ChainValidatorsInfo{}
+	denoms := []*types.AmountWithChain{}
+
+	for _, chain := range chains {
+		if chainErr, ok := validatorsErrors[chain.Name]; ok {
+			validatorsInfos[chain.Name] = types.ChainValidatorsInfo{
+				Chain: chain,
+				Error: chainErr,
+			}
+			continue
+		}
+
+		validatorsResponse := validatorsResponses[chain.Name]
+		foundValidators := utils.Filter(validatorsResponse.Validators, searchPredicate)
+		totalVP := validatorsResponse.GetTotalVP()
+
+		info := types.ChainValidatorsInfo{
+			Chain:      chain,
+			Explorers:  explorers.GetExplorersByChain(chain.Name),
+			Error:      nil,
+			Validators: make([]types.ValidatorInfo, len(foundValidators)),
+		}
+
+		for index, validator := range foundValidators {
+			validatorTokens := &types.Amount{
+				Amount: validator.DelegatorShares,
+				Denom:  chain.BaseDenom,
+			}
+
+			validatorInfo := types.ValidatorInfo{
+				OperatorAddress:         validator.OperatorAddress,
+				Jailed:                  validator.Jailed,
+				Status:                  validator.Status,
+				Tokens:                  validatorTokens,
+				Moniker:                 validator.Description.Moniker,
+				Details:                 validator.Description.Details,
+				Identity:                validator.Description.Identity,
+				Website:                 validator.Description.Website,
+				SecurityContact:         validator.Description.SecurityContact,
+				Commission:              validator.Commission.CommissionRates.Rate.MustFloat64(),
+				CommissionMax:           validator.Commission.CommissionRates.MaxRate.MustFloat64(),
+				CommissionMaxChangeRate: validator.Commission.CommissionRates.MaxChangeRate.MustFloat64(),
+				VotingPowerPercent:      validator.DelegatorShares.Quo(totalVP).MustFloat64(),
+			}
+
+			if validator.Active() {
+				validatorInfo.Rank = validatorsResponse.FindValidatorRank(validator.OperatorAddress)
+			}
+
+			info.Validators[index] = validatorInfo
+			denoms = append(denoms, &types.AmountWithChain{
+				Chain:  chain.Name,
+				Amount: validatorTokens,
+			})
+
+			validatorsInfos[chain.Name] = info
+		}
+	}
+
 	f.PopulateDenoms(denoms)
 
-	response.Chains = chainValidators
+	response.Chains = validatorsInfos
 	return response
 }
