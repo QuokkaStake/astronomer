@@ -1,6 +1,9 @@
 package database
 
 import (
+	"database/sql"
+	"errors"
+	"main/pkg/constants"
 	"main/pkg/types"
 
 	"github.com/lib/pq"
@@ -27,7 +30,7 @@ func (d *Database) GetChainsByNames(names []string) ([]*types.Chain, error) {
 
 		err = rows.Scan(&chain.Name, &chain.PrettyName, &chain.LCDEndpoint, &chain.BaseDenom, &chain.Bech32ValidatorPrefix)
 		if err != nil {
-			d.logger.Error().Err(err).Msg("Error getting chain bind")
+			d.logger.Error().Err(err).Msg("Error getting chains by names")
 			return chains, err
 		}
 
@@ -35,6 +38,32 @@ func (d *Database) GetChainsByNames(names []string) ([]*types.Chain, error) {
 	}
 
 	return chains, nil
+}
+
+func (d *Database) GetChainByName(name string) (*types.Chain, error) {
+	chain := &types.Chain{}
+	row := d.client.QueryRow(
+		"SELECT name, pretty_name, lcd_endpoint, base_denom, bech32_validator_prefix FROM chains WHERE name = $1 LIMIT 1",
+		name,
+	)
+
+	err := row.Scan(
+		&chain.Name,
+		&chain.PrettyName,
+		&chain.LCDEndpoint,
+		&chain.BaseDenom,
+		&chain.Bech32ValidatorPrefix,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, constants.ErrChainNotFound
+		}
+
+		d.logger.Error().Err(err).Msg("Error getting chain by name")
+		return nil, err
+	}
+
+	return chain, nil
 }
 
 func (d *Database) GetAllChains() ([]*types.Chain, error) {

@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	"main/pkg/constants"
 
 	tele "gopkg.in/telebot.v3"
@@ -22,13 +23,13 @@ func (interacter *Interacter) HandleSingleProposal(
 		return usage, constants.ErrWrongInvocation
 	}
 
-	chains, err := interacter.Database.GetChainsByNames([]string{args.ChainName})
-	if err != nil {
-		return "", err
-	} else if len(chains) < 1 {
+	chain, err := interacter.Database.GetChainByName(args.ChainName)
+	if err != nil && errors.Is(err, constants.ErrChainNotFound) {
 		return interacter.ChainNotFound()
+	} else if err != nil {
+		return "", err
 	}
 
-	proposalsInfo := interacter.DataFetcher.GetSingleProposal(chains[0], args.ItemID)
+	proposalsInfo := interacter.DataFetcher.GetSingleProposal(chain, args.ItemID)
 	return interacter.TemplateManager.Render("proposal", proposalsInfo)
 }

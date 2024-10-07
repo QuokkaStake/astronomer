@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"errors"
 	"main/pkg/constants"
 	"strconv"
 	"strings"
@@ -21,18 +22,18 @@ func (interacter *Interacter) HandleChainBind(c tele.Context, chainBinds []strin
 		return usage, constants.ErrWrongInvocation
 	}
 
-	chains, err := interacter.Database.GetChainsByNames([]string{args.Value})
-	if err != nil {
-		return "", err
-	} else if len(chains) < 1 {
+	chain, err := interacter.Database.GetChainByName(args.Value)
+	if err != nil && errors.Is(err, constants.ErrChainNotFound) {
 		return interacter.ChainNotFound()
+	} else if err != nil {
+		return "", err
 	}
 
 	err = interacter.Database.InsertChainBind(
 		interacter.Name(),
 		strconv.FormatInt(c.Chat().ID, 10),
 		c.Chat().Title,
-		chains[0].Name,
+		chain.Name,
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value") {
@@ -43,5 +44,5 @@ func (interacter *Interacter) HandleChainBind(c tele.Context, chainBinds []strin
 		return "", err
 	}
 
-	return interacter.TemplateManager.Render("chain_bind", chains[0])
+	return interacter.TemplateManager.Render("chain_bind", chain)
 }

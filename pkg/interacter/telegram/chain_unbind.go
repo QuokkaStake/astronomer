@@ -1,8 +1,7 @@
 package telegram
 
 import (
-	"fmt"
-	"html"
+	"errors"
 	"main/pkg/constants"
 	"strconv"
 
@@ -22,20 +21,17 @@ func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []str
 		return usage, constants.ErrWrongInvocation
 	}
 
-	chains, err := interacter.Database.GetChainsByNames([]string{args.Value})
-	if err != nil {
+	chain, err := interacter.Database.GetChainByName(args.Value)
+	if err != nil && errors.Is(err, constants.ErrChainNotFound) {
+		return interacter.ChainNotFound()
+	} else if err != nil {
 		return "", err
-	} else if len(chains) < 1 {
-		return html.EscapeString(fmt.Sprintf(
-			"Could not find a chain with the name '%s'",
-			args.Value,
-		)), constants.ErrChainNotFound
 	}
 
 	deleted, err := interacter.Database.DeleteChainBind(
 		interacter.Name(),
 		strconv.FormatInt(c.Chat().ID, 10),
-		chains[0].Name,
+		chain.Name,
 	)
 	if err != nil {
 		interacter.Logger.Error().Err(err).Msg("Error inserting chain bind")
@@ -47,5 +43,5 @@ func (interacter *Interacter) HandleChainUnbind(c tele.Context, chainBinds []str
 		return "Chain is not bound to this chat!", constants.ErrChainNotBound
 	}
 
-	return interacter.TemplateManager.Render("chain_unbind", chains[0])
+	return interacter.TemplateManager.Render("chain_unbind", chain)
 }
