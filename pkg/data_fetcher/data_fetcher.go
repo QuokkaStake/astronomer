@@ -8,6 +8,7 @@ import (
 	priceFetcher "main/pkg/price_fetcher"
 	"main/pkg/tendermint"
 	"main/pkg/types"
+	"sync"
 
 	"github.com/rs/zerolog"
 
@@ -25,6 +26,7 @@ type DataFetcher struct {
 	RPCs           map[string]*tendermint.RPC
 	registry       codecTypes.InterfaceRegistry
 	parseCodec     *codec.ProtoCodec
+	mutex          sync.Mutex
 }
 
 func NewDataFetcher(
@@ -53,6 +55,9 @@ func NewDataFetcher(
 }
 
 func (f *DataFetcher) GetRPC(chain *types.Chain) *tendermint.RPC {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
 	if rpc, ok := f.RPCs[chain.Name]; ok {
 		return rpc
 	}
