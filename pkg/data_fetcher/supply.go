@@ -98,7 +98,7 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 			chainsSupplies[chain.Name].AllCommunityPool = make(map[string]*types.Amount, len(communityPool.Pool))
 
 			for _, communityPoolEntry := range communityPool.Pool {
-				communityPoolAmount := communityPoolEntry.ToAmount()
+				communityPoolAmount := types.AmountFromDec(communityPoolEntry)
 				amounts = append(amounts, &types.AmountWithChain{Chain: chain.Name, Amount: communityPoolAmount})
 				chainsSupplies[chain.Name].AllCommunityPool[communityPoolAmount.Denom] = communityPoolAmount
 			}

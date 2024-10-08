@@ -265,20 +265,16 @@ func (rpc *RPC) GetSupply() (*bankTypes.QueryTotalSupplyResponse, types.QueryInf
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetCommunityPool() (*types.CommunityPoolResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetCommunityPool() (*distributionTypes.QueryCommunityPoolResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/community_pool?pagination.limit=10000&pagination.offset=0"
 
-	var response *types.CommunityPoolResponse
-	info, err := rpc.GetOld(url, "community_pool", &response)
+	var response distributionTypes.QueryCommunityPoolResponse
+	info, err := rpc.Get(url, "community_pool", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.CommunityPoolResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetBlockTime() (time.Duration, error) {

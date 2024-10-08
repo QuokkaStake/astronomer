@@ -2,8 +2,6 @@ package types
 
 import (
 	"time"
-
-	"cosmossdk.io/math"
 )
 
 type BlockResponse struct {
@@ -81,24 +79,6 @@ func (p *ProposalV1Beta1) ToProposal() Proposal {
 		Title:           p.Content.Title,
 		Summary:         p.Content.Description,
 	}
-}
-
-type SdkAmount struct {
-	Amount math.LegacyDec `json:"amount"`
-	Denom  string         `json:"denom"`
-}
-
-func (s SdkAmount) ToAmount() *Amount {
-	return &Amount{
-		Amount: s.Amount,
-		Denom:  s.Denom,
-	}
-}
-
-type CommunityPoolResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Pool    []SdkAmount `json:"pool"`
 }
 
 type LCDError struct {
