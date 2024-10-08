@@ -95,12 +95,6 @@ func (s SdkAmount) ToAmount() *Amount {
 	}
 }
 
-type BalancesResponse struct {
-	Code     int         `json:"code"`
-	Message  string      `json:"message"`
-	Balances []SdkAmount `json:"balances"`
-}
-
 type RewardsResponse struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`

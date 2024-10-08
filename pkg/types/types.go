@@ -2,16 +2,16 @@ package types
 
 import (
 	"fmt"
+
+	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
+
 	"main/pkg/constants"
 	"time"
 
-	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-
-	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
+	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"cosmossdk.io/math"
 )
@@ -29,6 +29,13 @@ type Amount struct {
 	Denom     string
 	BaseDenom string
 	PriceUSD  *math.LegacyDec
+}
+
+func AmountFrom(coin cosmosTypes.Coin) *Amount {
+	return &Amount{
+		Amount: coin.Amount.ToLegacyDec(),
+		Denom:  coin.Denom,
+	}
 }
 
 type Proposal struct {

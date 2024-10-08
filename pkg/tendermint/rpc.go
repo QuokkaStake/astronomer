@@ -15,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
+	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
@@ -156,20 +157,16 @@ func (rpc *RPC) GetInflation() (*mintTypes.QueryInflationResponse, types.QueryIn
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetBalance(address string) (*types.BalancesResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetBalance(address string) (*bankTypes.QueryAllBalancesResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/bank/v1beta1/balances/" + address
 
-	var response *types.BalancesResponse
-	info, err := rpc.GetOld(url, "balance", &response)
+	var response bankTypes.QueryAllBalancesResponse
+	info, err := rpc.Get(url, "balance", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.BalancesResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetRewards(address string) (*types.RewardsResponse, types.QueryInfo, error) {
