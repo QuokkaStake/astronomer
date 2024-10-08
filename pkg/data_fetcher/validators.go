@@ -1,11 +1,12 @@
 package datafetcher
 
 import (
-	"fmt"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"strings"
 	"sync"
+
+	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 )
 
 func (f *DataFetcher) predicateByQuery(query string) func(v *types.Validator) bool {
@@ -66,7 +67,7 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 	validatorsResponses := map[string]*types.ValidatorsResponse{}
 	validatorsErrors := map[string]error{}
-	signingInfosResponses := map[string]*types.SigningInfosResponse{}
+	signingInfosResponses := map[string]*slashingTypes.QuerySigningInfosResponse{}
 
 	for _, chain := range chains {
 		wg.Add(2)
@@ -97,14 +98,10 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 	wg.Wait()
 
-	fmt.Printf("finished\n")
-
 	validatorsInfos := map[string]types.ChainValidatorsInfo{}
 	denoms := []*types.AmountWithChain{}
 
 	for _, chain := range chains {
-		fmt.Printf("chain %s\n", chain.Name)
-
 		if chainErr, ok := validatorsErrors[chain.Name]; ok && chainErr != nil {
 			validatorsInfos[chain.Name] = types.ChainValidatorsInfo{
 				Chain: chain,
@@ -112,8 +109,6 @@ func (f *DataFetcher) FindValidatorGeneric(
 			}
 			continue
 		}
-
-		fmt.Printf("validators: %+v\n", validatorsResponses)
 
 		validatorsResponse := validatorsResponses[chain.Name]
 		foundValidators := utils.Filter(validatorsResponse.Validators, searchPredicate)
@@ -165,8 +160,8 @@ func (f *DataFetcher) FindValidatorGeneric(
 			continue
 		}
 
-		for index, _ := range foundValidators {
-			signingInfo, found := utils.Find(signingInfos.Info, func(i types.SigningInfo) bool {
+		for index := range foundValidators {
+			signingInfo, found := utils.Find(signingInfos.Info, func(i slashingTypes.ValidatorSigningInfo) bool {
 				return false
 			})
 
@@ -176,6 +171,8 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 			info.Validators[index].SigningInfo = &signingInfo
 		}
+
+		validatorsInfos[chain.Name] = info
 	}
 
 	f.PopulateDenoms(denoms)

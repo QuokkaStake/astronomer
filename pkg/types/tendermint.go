@@ -353,14 +353,7 @@ type CommunityPoolResponse struct {
 	Pool    []SdkAmount `json:"pool"`
 }
 
-type SigningInfo struct {
-	Address             string `json:"address"`
-	Tombstoned          bool   `json:"tombstoned"`
-	MissedBlocksCounter int64  `json:"missed_blocks_counter,string"`
-}
-
-type SigningInfosResponse struct {
-	Code    int           `json:"code"`
-	Message string        `json:"message"`
-	Info    []SigningInfo `json:"info"`
+type LCDError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }

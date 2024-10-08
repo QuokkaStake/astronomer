@@ -5,6 +5,8 @@ import (
 	"main/pkg/constants"
 	"time"
 
+	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
+
 	"cosmossdk.io/math"
 )
 
@@ -121,7 +123,7 @@ type ValidatorInfo struct {
 	VotingPowerPercent      float64
 	Rank                    int
 
-	SigningInfo *SigningInfo
+	SigningInfo *slashingTypes.ValidatorSigningInfo
 }
 
 func (i ValidatorInfo) Active() bool {

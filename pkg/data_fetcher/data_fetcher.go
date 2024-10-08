@@ -10,6 +10,10 @@ import (
 	"main/pkg/types"
 
 	"github.com/rs/zerolog"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/std"
 )
 
 type DataFetcher struct {
@@ -19,6 +23,8 @@ type DataFetcher struct {
 	PriceFetchers  map[constants.PriceFetcherName]priceFetcher.PriceFetcher
 	Cache          *cache.Cache
 	RPCs           map[string]*tendermint.RPC
+	registry       codecTypes.InterfaceRegistry
+	parseCodec     *codec.ProtoCodec
 }
 
 func NewDataFetcher(
@@ -26,6 +32,10 @@ func NewDataFetcher(
 	database *database.Database,
 	metricsManager *metrics.Manager,
 ) *DataFetcher {
+	interfaceRegistry := codecTypes.NewInterfaceRegistry()
+	std.RegisterInterfaces(interfaceRegistry)
+	parseCodec := codec.NewProtoCodec(interfaceRegistry)
+
 	priceFetchers := map[constants.PriceFetcherName]priceFetcher.PriceFetcher{
 		constants.PriceFetcherNameCoingecko: priceFetcher.NewCoingeckoPriceFetcher(logger),
 	}
@@ -37,6 +47,8 @@ func NewDataFetcher(
 		PriceFetchers:  priceFetchers,
 		Cache:          cache.NewCache(),
 		RPCs:           map[string]*tendermint.RPC{},
+		registry:       interfaceRegistry,
+		parseCodec:     parseCodec,
 	}
 }
 
