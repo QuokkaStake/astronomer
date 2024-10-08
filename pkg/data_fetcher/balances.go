@@ -207,10 +207,10 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 				}
 				walletRedelegations := []*types.Redelegation{}
 
-				for _, redelegation := range redelegations.Redelegations {
+				for _, redelegation := range redelegations.RedelegationResponses {
 					for _, entry := range redelegation.Entries {
 						amount := &types.Amount{
-							Amount: entry.Balance,
+							Amount: entry.Balance.ToLegacyDec(),
 							Denom:  chain.BaseDenom,
 						}
 
@@ -235,7 +235,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 							Amount:         amount,
 							SrcValidator:   srcValidator,
 							DstValidator:   dstValidator,
-							CompletionTime: entry.Entry.CompletionTime,
+							CompletionTime: entry.RedelegationEntry.CompletionTime,
 						})
 					}
 				}
