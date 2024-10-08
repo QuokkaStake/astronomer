@@ -6,16 +6,6 @@ import (
 	"cosmossdk.io/math"
 )
 
-type PaginationResponse struct {
-	Code       int        `json:"code"`
-	Message    string     `json:"message"`
-	Pagination Pagination `json:"pagination"`
-}
-
-type Pagination struct {
-	Total uint64 `json:"total,string"`
-}
-
 type BlockResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
@@ -25,12 +15,6 @@ type BlockResponse struct {
 			Height int64     `json:"height,string"`
 		} `json:"header"`
 	} `json:"block"`
-}
-
-type InflationResponse struct {
-	Code      int     `json:"code"`
-	Message   string  `json:"message"`
-	Inflation float64 `json:"inflation,string"`
 }
 
 type ProposalsV1Response struct {

@@ -25,7 +25,7 @@ No chains params
 - Inflation: 🔻min {{ FormatPercentDec .MintParams.InflationMin }},🔺max {{ FormatPercentDec .MintParams.InflationMax }}
 {{- end }}
 {{- if not .InflationError }}
-<i>💸Current inflation: </i> {{ FormatPercent .Inflation }}
+<i>💸Current inflation: </i> {{ FormatPercentDec .Inflation }}
 {{- end }}
 {{- if not .BlockTimeError }}
 <i>⏱️Block time:</i> {{ FormatFloat .BlockTime.Seconds }} seconds

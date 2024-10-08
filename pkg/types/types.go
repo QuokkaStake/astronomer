@@ -78,7 +78,7 @@ type ChainParams struct {
 	MintParams      mintTypes.Params
 	MintParamsError error
 
-	Inflation      float64
+	Inflation      math.LegacyDec
 	InflationError error
 }
 

@@ -144,20 +144,16 @@ func (rpc *RPC) GetMintParams() (*mintTypes.QueryParamsResponse, types.QueryInfo
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetInflation() (*types.InflationResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetInflation() (*mintTypes.QueryInflationResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/mint/v1beta1/inflation"
 
-	var response *types.InflationResponse
-	info, err := rpc.GetOld(url, "inflation", &response)
+	var response mintTypes.QueryInflationResponse
+	info, err := rpc.Get(url, "inflation", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.InflationResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetBalance(address string) (*types.BalancesResponse, types.QueryInfo, error) {
