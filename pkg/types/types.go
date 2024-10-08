@@ -120,6 +120,8 @@ type ValidatorInfo struct {
 	CommissionMaxChangeRate float64
 	VotingPowerPercent      float64
 	Rank                    int
+
+	SigningInfo *SigningInfo
 }
 
 func (i ValidatorInfo) Active() bool {

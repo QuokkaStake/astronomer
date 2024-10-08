@@ -1,6 +1,7 @@
 package datafetcher
 
 import (
+	"fmt"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"strings"
@@ -65,9 +66,10 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 	validatorsResponses := map[string]*types.ValidatorsResponse{}
 	validatorsErrors := map[string]error{}
+	signingInfosResponses := map[string]*types.SigningInfosResponse{}
 
 	for _, chain := range chains {
-		wg.Add(1)
+		wg.Add(2)
 
 		go func(chain *types.Chain) {
 			defer wg.Done()
@@ -80,21 +82,38 @@ func (f *DataFetcher) FindValidatorGeneric(
 			validatorsErrors[chain.Name] = err
 			mutex.Unlock()
 		}(chain)
+
+		go func(chain *types.Chain) {
+			defer wg.Done()
+
+			rpc := f.GetRPC(chain)
+
+			signingInfos, _, _ := rpc.GetAllSigningInfos()
+			mutex.Lock()
+			signingInfosResponses[chain.Name] = signingInfos
+			mutex.Unlock()
+		}(chain)
 	}
 
 	wg.Wait()
+
+	fmt.Printf("finished\n")
 
 	validatorsInfos := map[string]types.ChainValidatorsInfo{}
 	denoms := []*types.AmountWithChain{}
 
 	for _, chain := range chains {
-		if chainErr, ok := validatorsErrors[chain.Name]; ok {
+		fmt.Printf("chain %s\n", chain.Name)
+
+		if chainErr, ok := validatorsErrors[chain.Name]; ok && chainErr != nil {
 			validatorsInfos[chain.Name] = types.ChainValidatorsInfo{
 				Chain: chain,
 				Error: chainErr,
 			}
 			continue
 		}
+
+		fmt.Printf("validators: %+v\n", validatorsResponses)
 
 		validatorsResponse := validatorsResponses[chain.Name]
 		foundValidators := utils.Filter(validatorsResponse.Validators, searchPredicate)
@@ -138,8 +157,24 @@ func (f *DataFetcher) FindValidatorGeneric(
 				Chain:  chain.Name,
 				Amount: validatorTokens,
 			})
+		}
 
+		signingInfos, ok := signingInfosResponses[chain.Name]
+		if !ok {
 			validatorsInfos[chain.Name] = info
+			continue
+		}
+
+		for index, _ := range foundValidators {
+			signingInfo, found := utils.Find(signingInfos.Info, func(i types.SigningInfo) bool {
+				return false
+			})
+
+			if !found {
+				continue
+			}
+
+			info.Validators[index].SigningInfo = &signingInfo
 		}
 	}
 
