@@ -16,6 +16,8 @@ import (
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	"github.com/cosmos/gogoproto/proto"
 
 	"github.com/rs/zerolog"
@@ -56,20 +58,16 @@ func NewRPC(
 	}
 }
 
-func (rpc *RPC) GetAllValidators() (*types.ValidatorsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetAllValidators() (*stakingTypes.QueryValidatorsResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/validators?pagination.count_total=true&pagination.limit=1000"
 
-	var response *types.ValidatorsResponse
-	info, err := rpc.GetOld(url, "validators", &response)
+	var response stakingTypes.QueryValidatorsResponse
+	info, err := rpc.Get(url, "validators", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.ValidatorsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetAllSigningInfos() (*slashingTypes.QuerySigningInfosResponse, types.QueryInfo, error) {
@@ -493,8 +491,8 @@ func (rpc *RPC) Get(
 	}
 
 	if decodeErr := rpc.parseCodec.UnmarshalJSON(bytes, target); decodeErr != nil {
-		rpc.Logger.Warn().Str("url", url).Err(err).Msg("JSON unmarshalling failed")
-		return queryInfo, err
+		rpc.Logger.Warn().Str("url", url).Err(decodeErr).Msg("JSON unmarshalling failed")
+		return queryInfo, decodeErr
 	}
 
 	return queryInfo, nil

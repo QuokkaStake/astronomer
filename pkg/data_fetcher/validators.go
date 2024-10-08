@@ -6,19 +6,21 @@ import (
 	"strings"
 	"sync"
 
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 )
 
-func (f *DataFetcher) predicateByQuery(query string) func(v *types.Validator) bool {
+func (f *DataFetcher) predicateByQuery(query string) func(v stakingTypes.Validator) bool {
 	lowercaseQuery := strings.ToLower(query)
 
-	return func(v *types.Validator) bool {
+	return func(v stakingTypes.Validator) bool {
 		return strings.Contains(strings.ToLower(v.Description.Moniker), lowercaseQuery)
 	}
 }
 
-func (f *DataFetcher) predicateByValidatorLinks(links []*types.ValidatorLink) func(v *types.Validator) bool {
-	return func(v *types.Validator) bool {
+func (f *DataFetcher) predicateByValidatorLinks(links []*types.ValidatorLink) func(v stakingTypes.Validator) bool {
+	return func(v stakingTypes.Validator) bool {
 		_, found := utils.Find(links, func(l *types.ValidatorLink) bool {
 			return l.Address == v.OperatorAddress
 		})
@@ -46,7 +48,7 @@ func (f *DataFetcher) FindMyValidators(
 
 func (f *DataFetcher) FindValidatorGeneric(
 	chainNames []string,
-	searchPredicate func(v *types.Validator) bool,
+	searchPredicate func(v stakingTypes.Validator) bool,
 ) types.ValidatorsInfo {
 	response := types.ValidatorsInfo{}
 
@@ -65,7 +67,7 @@ func (f *DataFetcher) FindValidatorGeneric(
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
 
-	validatorsResponses := map[string]*types.ValidatorsResponse{}
+	validatorsResponses := map[string]*stakingTypes.QueryValidatorsResponse{}
 	validatorsErrors := map[string]error{}
 	signingInfosResponses := map[string]*slashingTypes.QuerySigningInfosResponse{}
 
@@ -112,7 +114,7 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 		validatorsResponse := validatorsResponses[chain.Name]
 		foundValidators := utils.Filter(validatorsResponse.Validators, searchPredicate)
-		totalVP := validatorsResponse.GetTotalVP()
+		// totalVP := validatorsResponse.GetTotalVP()
 
 		info := types.ChainValidatorsInfo{
 			Chain:      chain,
@@ -130,7 +132,7 @@ func (f *DataFetcher) FindValidatorGeneric(
 			validatorInfo := types.ValidatorInfo{
 				OperatorAddress:         validator.OperatorAddress,
 				Jailed:                  validator.Jailed,
-				Status:                  validator.Status,
+				Status:                  validator.Status.String(),
 				Tokens:                  validatorTokens,
 				Moniker:                 validator.Description.Moniker,
 				Details:                 validator.Description.Details,
@@ -140,12 +142,12 @@ func (f *DataFetcher) FindValidatorGeneric(
 				Commission:              validator.Commission.CommissionRates.Rate.MustFloat64(),
 				CommissionMax:           validator.Commission.CommissionRates.MaxRate.MustFloat64(),
 				CommissionMaxChangeRate: validator.Commission.CommissionRates.MaxChangeRate.MustFloat64(),
-				VotingPowerPercent:      validator.DelegatorShares.Quo(totalVP).MustFloat64(),
+				//VotingPowerPercent:      validator.DelegatorShares.Quo(totalVP).MustFloat64(),
 			}
 
-			if validator.Active() {
-				validatorInfo.Rank = validatorsResponse.FindValidatorRank(validator.OperatorAddress)
-			}
+			// if validator.Active() {
+			//	validatorInfo.Rank = validatorsResponse.FindValidatorRank(validator.OperatorAddress)
+			//}
 
 			info.Validators[index] = validatorInfo
 			denoms = append(denoms, &types.AmountWithChain{
