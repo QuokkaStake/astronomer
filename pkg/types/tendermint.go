@@ -16,20 +16,6 @@ type Pagination struct {
 	Total uint64 `json:"total,string"`
 }
 
-type SlashingParamsResponse struct {
-	Code    int            `json:"code"`
-	Message string         `json:"message"`
-	Params  SlashingParams `json:"params"`
-}
-
-type SlashingParams struct {
-	SignedBlocksWindow      int      `json:"signed_blocks_window,string"`
-	MinSignedPerWindow      float64  `json:"min_signed_per_window,string"`
-	DowntimeJailDuration    Duration `json:"downtime_jail_duration"`
-	SlashFractionDowntime   float64  `json:"slash_fraction_downtime,string"`
-	SlashFractionDoubleSign float64  `json:"slash_fraction_double_sign,string"`
-}
-
 type GovParamsResponse struct {
 	Code          int           `json:"code"`
 	Message       string        `json:"message"`

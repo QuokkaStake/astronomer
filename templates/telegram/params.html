@@ -14,10 +14,10 @@ No chains params
 {{- end }}
 {{- if not .SlashingParamsError }}
 <i>🔪Slashing params</i>
-- Min signed per window: {{ FormatPercent .SlashingParams.MinSignedPerWindow }}
+- Min signed per window: {{ FormatPercentDec .SlashingParams.MinSignedPerWindow }}
 - Signed blocks window: {{ .SlashingParams.SignedBlocksWindow }}
-- Downtime jail duration: {{ FormatDuration .SlashingParams.DowntimeJailDuration.Duration }}
-- Slashing percent: downtime {{ FormatPercent .SlashingParams.SlashFractionDowntime }}, double sign {{ FormatPercent .SlashingParams.SlashFractionDoubleSign }}
+- Downtime jail duration: {{ FormatDuration .SlashingParams.DowntimeJailDuration }}
+- Slashing percent: downtime {{ FormatPercentDec .SlashingParams.SlashFractionDowntime }}, double sign {{ FormatPercentDec .SlashingParams.SlashFractionDoubleSign }}
 {{- end }}
 {{- if not .MintParamsError }}
 <i>💸Mint params</i>

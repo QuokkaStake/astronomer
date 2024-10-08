@@ -58,7 +58,7 @@ type ChainParams struct {
 	Chain               *Chain
 	StakingParams       stakingTypes.Params
 	StakingParamsError  error
-	SlashingParams      SlashingParams
+	SlashingParams      slashingTypes.Params
 	SlashingParamsError error
 
 	VotingParams       VotingParams
