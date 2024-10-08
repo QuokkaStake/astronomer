@@ -38,6 +38,13 @@ func AmountFrom(coin cosmosTypes.Coin) *Amount {
 	}
 }
 
+func AmountFromDec(coin cosmosTypes.DecCoin) *Amount {
+	return &Amount{
+		Amount: coin.Amount,
+		Denom:  coin.Denom,
+	}
+}
+
 type Proposal struct {
 	ID              string    `json:"id"`
 	Status          string    `json:"status"`

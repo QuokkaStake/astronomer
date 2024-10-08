@@ -95,12 +95,6 @@ func (s SdkAmount) ToAmount() *Amount {
 	}
 }
 
-type RewardsResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Total   []SdkAmount `json:"total"`
-}
-
 type SdkDelegation struct {
 	Delegation struct {
 		ValidatorAddress string `json:"validator_address"`

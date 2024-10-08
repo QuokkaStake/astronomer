@@ -103,9 +103,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					return
 				}
 
-				walletRewards := utils.Map(rewards.Total, func(b types.SdkAmount) *types.Amount {
-					return b.ToAmount()
-				})
+				walletRewards := utils.Map(rewards.Total, types.AmountFromDec)
 
 				response.SetRewards(chain.Name, chainWallet, walletRewards)
 
