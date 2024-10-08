@@ -3,7 +3,6 @@ package tendermint
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"main/pkg/http"
 	"main/pkg/metrics"
 	"main/pkg/types"
@@ -15,6 +14,7 @@ import (
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 
 	upgradeTypes "cosmossdk.io/x/upgrade/types"
+	cmtservice "github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
@@ -286,30 +286,22 @@ func (rpc *RPC) GetCommunityPool() (*distributionTypes.QueryCommunityPoolRespons
 }
 
 func (rpc *RPC) GetBlockTime() (time.Duration, error) {
-	var newerBlock *types.BlockResponse
-	_, err := rpc.GetOld(rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
+	var newerBlock cmtservice.GetLatestBlockResponse
+	_, err := rpc.Get(rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
 	if err != nil {
 		return 0, err
 	}
 
-	if newerBlock.Code != 0 {
-		return 0, fmt.Errorf("expected code 0, but got %d: %s", newerBlock.Code, newerBlock.Message)
-	}
-
 	newerHeight := newerBlock.Block.Header.Height - 1000
 
-	var olderBlock *types.BlockResponse
-	_, err = rpc.GetOld(
+	var olderBlock cmtservice.GetBlockByHeightResponse
+	_, err = rpc.Get(
 		rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/"+strconv.FormatInt(newerHeight, 10),
 		"block",
 		&olderBlock,
 	)
 	if err != nil {
 		return 0, err
-	}
-
-	if olderBlock.Code != 0 {
-		return 0, fmt.Errorf("expected code 0, but got %d: %s", olderBlock.Code, olderBlock.Message)
 	}
 
 	timeDiff := olderBlock.Block.Header.Time.Sub(newerBlock.Block.Header.Time)
