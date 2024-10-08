@@ -2,8 +2,6 @@ package types
 
 import (
 	"main/pkg/constants"
-	"main/pkg/utils"
-	"sort"
 	"time"
 
 	"cosmossdk.io/math"
@@ -61,46 +59,10 @@ type Pagination struct {
 	Total uint64 `json:"total,string"`
 }
 
-type ValidatorsResponse struct {
-	Code       int          `json:"code"`
-	Message    string       `json:"message"`
-	Validators []*Validator `json:"validators"`
-}
-
 type ValidatorResponse struct {
 	Code      int       `json:"code"`
 	Message   string    `json:"message"`
 	Validator Validator `json:"validator"`
-}
-
-func (v ValidatorsResponse) GetTotalVP() math.LegacyDec {
-	vp := math.LegacyNewDec(0)
-
-	for _, validator := range v.Validators {
-		if validator.Active() {
-			vp = vp.Add(validator.DelegatorShares)
-		}
-	}
-
-	return vp
-}
-
-func (v ValidatorsResponse) FindValidatorRank(valoper string) int {
-	valsActive := utils.Filter(v.Validators, func(v *Validator) bool {
-		return v.Active()
-	})
-
-	sort.SliceStable(valsActive, func(i, j int) bool {
-		return valsActive[i].DelegatorShares.GT(valsActive[j].DelegatorShares)
-	})
-
-	for index, validator := range valsActive {
-		if validator.OperatorAddress == valoper {
-			return index + 1
-		}
-	}
-
-	return 0
 }
 
 type StakingParamsResponse struct {

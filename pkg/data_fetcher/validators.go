@@ -114,7 +114,7 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 		validatorsResponse := validatorsResponses[chain.Name]
 		foundValidators := utils.Filter(validatorsResponse.Validators, searchPredicate)
-		// totalVP := validatorsResponse.GetTotalVP()
+		totalVP := utils.GetTotalVP(validatorsResponse.Validators)
 
 		info := types.ChainValidatorsInfo{
 			Chain:      chain,
@@ -142,12 +142,12 @@ func (f *DataFetcher) FindValidatorGeneric(
 				Commission:              validator.Commission.CommissionRates.Rate.MustFloat64(),
 				CommissionMax:           validator.Commission.CommissionRates.MaxRate.MustFloat64(),
 				CommissionMaxChangeRate: validator.Commission.CommissionRates.MaxChangeRate.MustFloat64(),
-				//VotingPowerPercent:      validator.DelegatorShares.Quo(totalVP).MustFloat64(),
+				VotingPowerPercent:      validator.DelegatorShares.Quo(totalVP).MustFloat64(),
 			}
 
-			// if validator.Active() {
-			//	validatorInfo.Rank = validatorsResponse.FindValidatorRank(validator.OperatorAddress)
-			//}
+			if validator.Status == stakingTypes.Bonded {
+				validatorInfo.Rank = utils.FindValidatorRank(validatorsResponse.Validators, validator.OperatorAddress)
+			}
 
 			info.Validators[index] = validatorInfo
 			denoms = append(denoms, &types.AmountWithChain{
