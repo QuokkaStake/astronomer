@@ -128,7 +128,7 @@ type ActiveProposals struct {
 type ChainActiveProposals struct {
 	Chain          *Chain
 	Explorers      Explorers
-	Proposals      []Proposal
+	Proposals      []*Proposal
 	ProposalsError error
 }
 

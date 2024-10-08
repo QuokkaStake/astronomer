@@ -318,42 +318,36 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	return time.Duration(float64(timeDiff.Nanoseconds()) / float64(heightDiff)), nil
 }
 
-func (rpc *RPC) GetActiveProposals() ([]types.Proposal, types.QueryInfo, error) {
+func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
 
-	var response *types.ProposalsV1Response
-	info, err := rpc.GetOld(url, "proposals_v1", &response)
+	var response govV1Types.QueryProposalsResponse
+	info, err := rpc.Get(url, "proposals_v1", &response)
+	if err == nil {
+		return utils.Map(response.Proposals, types.ProposalFromV1), info, nil
+	}
+
+	if !strings.Contains(err.Error(), "Not Implemented") {
+		return nil, info, err
+	}
+
+	rpc.Logger.Warn().Msg("v1 proposals are not supported, falling back to v1beta1")
+
+	url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=2"
+
+	var responsev1beta1 govV1beta1Types.QueryProposalsResponse
+	infov1beta1, err := rpc.Get(url, "proposals_v1beta1", &responsev1beta1)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code == 12 { // Not implemented, falling back to v1beta1
-		rpc.Logger.Warn().Msg("v1 proposals are not supported, falling back to v1")
-
-		url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=2"
-
-		var response *types.ProposalsV1Beta1Response
-		info, err := rpc.GetOld(url, "proposals_v1beta1", &response)
-		if err != nil {
+	for _, proposal := range responsev1beta1.Proposals {
+		if err := proposal.UnpackInterfaces(rpc.registry); err != nil {
 			return nil, info, err
 		}
-
-		if response.Code != 0 {
-			return []types.Proposal{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-		}
-
-		return utils.Map(response.Proposals, func(p types.ProposalV1Beta1) types.Proposal {
-			return p.ToProposal()
-		}), info, nil
 	}
 
-	if response.Code != 0 {
-		return []types.Proposal{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return utils.Map(response.Proposals, func(p types.ProposalV1) types.Proposal {
-		return p.ToProposal()
-	}), info, nil
+	return utils.Map(responsev1beta1.Proposals, types.ProposalFromV1beta1), infov1beta1, nil
 }
 
 func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.QueryInfo, error) {
