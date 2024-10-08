@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
@@ -182,29 +184,25 @@ func (rpc *RPC) GetRewards(address string) (*distributionTypes.QueryDelegationTo
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetCommission(address string) (*types.CommissionsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetCommission(address string) (*distributionTypes.QueryValidatorCommissionResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/validators/" + address + "/commission"
 
-	var response *types.CommissionsResponse
-	info, err := rpc.GetOld(url, "commission", &response)
+	var response distributionTypes.QueryValidatorCommissionResponse
+	info, err := rpc.Get(url, "commission", &response)
 	if err != nil {
-		return nil, info, err
-	}
-
-	if response.Code != 0 {
 		// not being a validator is acceptable
-		if strings.Contains(response.Message, "validator does not exist") {
-			return &types.CommissionsResponse{
-				Commission: types.SdkCommission{
-					Commission: make([]types.SdkAmount, 0),
+		if strings.Contains(err.Error(), "validator does not exist") {
+			return &distributionTypes.QueryValidatorCommissionResponse{
+				Commission: distributionTypes.ValidatorAccumulatedCommission{
+					Commission: make(cosmosTypes.DecCoins, 0),
 				},
 			}, info, nil
 		}
 
-		return &types.CommissionsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+		return nil, info, err
 	}
 
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetDelegations(address string) (*types.DelegationsResponse, types.QueryInfo, error) {

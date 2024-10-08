@@ -139,9 +139,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					return
 				}
 
-				walletCommissions := utils.Map(rewards.Commission.Commission, func(b types.SdkAmount) *types.Amount {
-					return b.ToAmount()
-				})
+				walletCommissions := utils.Map(rewards.Commission.Commission, types.AmountFromDec)
 
 				response.SetCommissions(chain.Name, chainWallet, walletCommissions)
 

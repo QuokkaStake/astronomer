@@ -145,16 +145,6 @@ type RedelegationsResponse struct {
 	Redelegations []SdkRedelegation `json:"redelegation_responses"`
 }
 
-type SdkCommission struct {
-	Commission []SdkAmount `json:"commission"`
-}
-
-type CommissionsResponse struct {
-	Code       int           `json:"code"`
-	Message    string        `json:"message"`
-	Commission SdkCommission `json:"commission"`
-}
-
 type PoolResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
