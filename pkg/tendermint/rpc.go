@@ -253,20 +253,16 @@ func (rpc *RPC) GetPool() (*stakingTypes.QueryPoolResponse, types.QueryInfo, err
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetSupply() (*types.SupplyResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetSupply() (*bankTypes.QueryTotalSupplyResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/bank/v1beta1/supply?pagination.limit=10000&pagination.offset=0"
 
-	var response *types.SupplyResponse
-	info, err := rpc.GetOld(url, "supply", &response)
+	var response bankTypes.QueryTotalSupplyResponse
+	info, err := rpc.Get(url, "supply", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.SupplyResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetCommunityPool() (*types.CommunityPoolResponse, types.QueryInfo, error) {

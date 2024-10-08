@@ -95,12 +95,6 @@ func (s SdkAmount) ToAmount() *Amount {
 	}
 }
 
-type SupplyResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Supply  []SdkAmount `json:"supply"`
-}
-
 type CommunityPoolResponse struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
