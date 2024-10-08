@@ -95,22 +95,6 @@ func (s SdkAmount) ToAmount() *Amount {
 	}
 }
 
-type SdkUnbondEntry struct {
-	CompletionTime time.Time      `json:"completion_time"`
-	Balance        math.LegacyDec `json:"balance"`
-}
-
-type SdkUnbond struct {
-	ValidatorAddress string           `json:"validator_address"`
-	Entries          []SdkUnbondEntry `json:"entries"`
-}
-
-type UnbondsResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Unbonds []SdkUnbond `json:"unbonding_responses"`
-}
-
 type PoolResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`

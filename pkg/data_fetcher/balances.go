@@ -261,10 +261,10 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 
 				walletUnbonds := []*types.Unbond{}
 
-				for _, unbond := range unbonds.Unbonds {
+				for _, unbond := range unbonds.UnbondingResponses {
 					for _, entry := range unbond.Entries {
 						amount := &types.Amount{
-							Amount: entry.Balance,
+							Amount: entry.Balance.ToLegacyDec(),
 							Denom:  chain.BaseDenom,
 						}
 
