@@ -39,11 +39,11 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 			}
 
 			chainsSupplies[chain.Name].BondedTokens = &types.Amount{
-				Amount: pool.Pool.BondedTokens,
+				Amount: pool.Pool.BondedTokens.ToLegacyDec(),
 				Denom:  chain.BaseDenom,
 			}
 			chainsSupplies[chain.Name].NotBondedTokens = &types.Amount{
-				Amount: pool.Pool.NotBondedTokens,
+				Amount: pool.Pool.NotBondedTokens.ToLegacyDec(),
 				Denom:  chain.BaseDenom,
 			}
 

@@ -241,20 +241,16 @@ func (rpc *RPC) GetUnbonds(address string) (*stakingTypes.QueryDelegatorUnbondin
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetPool() (*types.PoolResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetPool() (*stakingTypes.QueryPoolResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/pool"
 
-	var response *types.PoolResponse
-	info, err := rpc.GetOld(url, "pool", &response)
+	var response stakingTypes.QueryPoolResponse
+	info, err := rpc.Get(url, "pool", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.PoolResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetSupply() (*types.SupplyResponse, types.QueryInfo, error) {
