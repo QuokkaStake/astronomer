@@ -16,28 +16,6 @@ type Pagination struct {
 	Total uint64 `json:"total,string"`
 }
 
-type GovParamsResponse struct {
-	Code          int           `json:"code"`
-	Message       string        `json:"message"`
-	VotingParams  VotingParams  `json:"voting_params"`
-	DepositParams DepositParams `json:"deposit_params"`
-	TallyParams   TallyParams   `json:"tally_params"`
-}
-
-type VotingParams struct {
-	VotingPeriod Duration `json:"voting_period"`
-}
-
-type DepositParams struct {
-	MaxDepositPeriod Duration `json:"max_deposit_period"`
-}
-
-type TallyParams struct {
-	Quorum        float64 `json:"quorum,string"`
-	Threshold     float64 `json:"threshold,string"`
-	VetoThreshold float64 `json:"veto_threshold,string"`
-}
-
 type BlockResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`

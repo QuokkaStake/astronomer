@@ -5,6 +5,8 @@ import (
 	"main/pkg/constants"
 	"time"
 
+	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
@@ -61,11 +63,11 @@ type ChainParams struct {
 	SlashingParams      slashingTypes.Params
 	SlashingParamsError error
 
-	VotingParams       VotingParams
+	VotingParams       govV1beta1Types.VotingParams
 	VotingParamsError  error
-	DepositParams      DepositParams
+	DepositParams      govV1beta1Types.DepositParams
 	DepositParamsError error
-	TallyParams        TallyParams
+	TallyParams        govV1beta1Types.TallyParams
 	TallyParamsError   error
 
 	BlockTime      time.Duration

@@ -33,15 +33,15 @@ No chains params
 {{- if and (not .VotingParamsError) (not .DepositParamsError) (not .TallyParamsError) }}
 <i>🗳️Voting params</i>
 {{- if not .VotingParamsError }}
-- Voting period: {{ FormatDuration .VotingParams.VotingPeriod.Duration }}
+- Voting period: {{ FormatDuration .VotingParams.VotingPeriod }}
 {{- end }}
 {{- if not .DepositParamsError }}
-- Max deposit period: {{ FormatDuration .DepositParams.MaxDepositPeriod.Duration }}
+- Max deposit period: {{ FormatDuration .DepositParams.MaxDepositPeriod }}
 {{- end }}
 {{- if not .TallyParamsError }}
-- Quorum: {{ FormatPercent .TallyParams.Quorum }}
-- Threshold: {{ FormatPercent .TallyParams.Threshold }}
-- Veto threshold: {{ FormatPercent .TallyParams.VetoThreshold }}
+- Quorum: {{ FormatPercentDec .TallyParams.Quorum }}
+- Threshold: {{ FormatPercentDec .TallyParams.Threshold }}
+- Veto threshold: {{ FormatPercentDec .TallyParams.VetoThreshold }}
 {{- end }}
 {{- end }}
 {{ if .StakingParamsError }}❌ Error fetching staking params: {{ .StakingParamsError }}

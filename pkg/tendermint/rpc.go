@@ -15,6 +15,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
+	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -118,20 +119,16 @@ func (rpc *RPC) GetSlashingParams() (*slashingTypes.QueryParamsResponse, types.Q
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetGovParams(paramsType string) (*types.GovParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetGovParams(paramsType string) (*govV1beta1Types.QueryParamsResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/params/" + paramsType
 
-	var response *types.GovParamsResponse
-	info, err := rpc.GetOld(url, "gov_params_"+paramsType, &response)
+	var response govV1beta1Types.QueryParamsResponse
+	info, err := rpc.Get(url, "gov_params_"+paramsType, &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.GovParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetMintParams() (*types.MintParamsResponse, types.QueryInfo, error) {
