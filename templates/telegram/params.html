@@ -10,7 +10,7 @@ No chains params
 {{- if not .StakingParamsError }}
 <i>🏦Staking params</i>
 - Max validators: {{ .StakingParams.MaxValidators }}
-- Unbonding time: {{ FormatDuration .StakingParams.UnbondingTime.Duration }}
+- Unbonding time: {{ FormatDuration .StakingParams.UnbondingTime }}
 {{- end }}
 {{- if not .SlashingParamsError }}
 <i>🔪Slashing params</i>

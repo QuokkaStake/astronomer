@@ -5,6 +5,8 @@ import (
 	"main/pkg/constants"
 	"time"
 
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 
 	"cosmossdk.io/math"
@@ -54,7 +56,7 @@ type ChainsParams struct {
 
 type ChainParams struct {
 	Chain               *Chain
-	StakingParams       StakingParams
+	StakingParams       stakingTypes.Params
 	StakingParamsError  error
 	SlashingParams      SlashingParams
 	SlashingParamsError error

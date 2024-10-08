@@ -94,20 +94,16 @@ func (rpc *RPC) GetValidator(address string) (*stakingTypes.QueryValidatorRespon
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetStakingParams() (*types.StakingParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetStakingParams() (*stakingTypes.QueryParamsResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/params"
 
-	var response *types.StakingParamsResponse
-	info, err := rpc.GetOld(url, "staking_params", &response)
+	var response stakingTypes.QueryParamsResponse
+	info, err := rpc.Get(url, "staking_params", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.StakingParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetSlashingParams() (*types.SlashingParamsResponse, types.QueryInfo, error) {

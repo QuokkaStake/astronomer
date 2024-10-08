@@ -16,18 +16,6 @@ type Pagination struct {
 	Total uint64 `json:"total,string"`
 }
 
-type StakingParamsResponse struct {
-	Code    int           `json:"code"`
-	Message string        `json:"message"`
-	Params  StakingParams `json:"params"`
-}
-
-type StakingParams struct {
-	UnbondingTime Duration `json:"unbonding_time"`
-	Message       string   `json:"message"`
-	MaxValidators int      `json:"max_validators"`
-}
-
 type SlashingParamsResponse struct {
 	Code    int            `json:"code"`
 	Message string         `json:"message"`

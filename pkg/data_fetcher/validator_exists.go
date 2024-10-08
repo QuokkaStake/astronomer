@@ -1,8 +1,9 @@
 package datafetcher
 
 import (
-	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"main/pkg/types"
+
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 func (f *DataFetcher) DoesValidatorExist(chain *types.Chain, address string) (*stakingTypes.Validator, error) {
