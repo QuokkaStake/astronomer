@@ -14,13 +14,16 @@ import (
 
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 
+	upgradeTypes "cosmossdk.io/x/upgrade/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributionTypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	govV1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	paramsProposalTypes "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -48,6 +51,11 @@ func NewRPC(
 ) *RPC {
 	interfaceRegistry := codecTypes.NewInterfaceRegistry()
 	std.RegisterInterfaces(interfaceRegistry)
+	govV1Types.RegisterInterfaces(interfaceRegistry)
+	govV1beta1Types.RegisterInterfaces(interfaceRegistry)
+	paramsProposalTypes.RegisterInterfaces(interfaceRegistry)
+	upgradeTypes.RegisterInterfaces(interfaceRegistry)
+
 	parseCodec := codec.NewProtoCodec(interfaceRegistry)
 
 	return &RPC{
@@ -351,45 +359,40 @@ func (rpc *RPC) GetActiveProposals() ([]types.Proposal, types.QueryInfo, error) 
 func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1/proposals/" + proposalID
 
-	var response *types.ProposalV1Response
-	info, err := rpc.GetOld(url, "proposal_v1", &response)
-	if err != nil {
-		return nil, info, err
+	var response govV1Types.QueryProposalResponse
+	info, err := rpc.Get(url, "proposal_v1", &response)
+	if err == nil {
+		return types.ProposalFromV1(response.Proposal), info, nil
 	}
 
-	if response.Code == 5 { // proposal xxx doesn't exist
+	// failed cases
+	if strings.Contains(err.Error(), "doesn't exist") {
 		return nil, info, nil
 	}
 
-	if response.Code == 12 { // Not implemented, falling back to v1beta1
-		rpc.Logger.Warn().Msg("v1 proposal are not supported, falling back to v1")
+	if !strings.Contains(err.Error(), "Not Implemented") {
+		return nil, info, err
+	}
 
-		url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals/" + proposalID
+	rpc.Logger.Warn().Msg("v1 proposal are not supported, falling back to v1")
 
-		var response *types.ProposalV1Beta1Response
-		info, err := rpc.GetOld(url, "proposal_v1beta1", &response)
-		if err != nil {
-			return nil, info, err
-		}
+	url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals/" + proposalID
 
-		if response.Code == 5 { // proposal xxx doesn't exist
+	var responsev1beta1 govV1beta1Types.QueryProposalResponse
+	infov1beta1, err := rpc.Get(url, "proposal_v1beta1", &responsev1beta1)
+	if err != nil {
+		if strings.Contains(err.Error(), "doesn't exist") {
 			return nil, info, nil
 		}
 
-		if response.Code != 0 {
-			return nil, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-		}
-
-		proposal := response.Proposal.ToProposal()
-		return &proposal, info, nil
+		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return nil, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
+	if err := responsev1beta1.Proposal.UnpackInterfaces(rpc.registry); err != nil {
+		return nil, info, err
 	}
 
-	proposal := response.Proposal.ToProposal()
-	return &proposal, info, nil
+	return types.ProposalFromV1beta1(responsev1beta1.Proposal), infov1beta1, nil
 }
 
 func (rpc *RPC) GetOld(

@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	govV1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 
 	"main/pkg/constants"
@@ -52,6 +54,28 @@ type Proposal struct {
 	VotingEndTime   time.Time `json:"voting_end_time"`
 	Title           string    `json:"title"`
 	Summary         string    `json:"summary"`
+}
+
+func ProposalFromV1(p *govV1Types.Proposal) *Proposal {
+	return &Proposal{
+		ID:              fmt.Sprintf("%d", p.Id),
+		Status:          p.Status.String(),
+		VotingStartTime: *p.VotingStartTime,
+		VotingEndTime:   *p.VotingEndTime,
+		Title:           p.Title,
+		Summary:         p.Summary,
+	}
+}
+
+func ProposalFromV1beta1(p govV1beta1Types.Proposal) *Proposal {
+	return &Proposal{
+		ID:              fmt.Sprintf("%d", p.ProposalId),
+		Status:          p.Status.String(),
+		VotingStartTime: p.VotingStartTime,
+		VotingEndTime:   p.VotingEndTime,
+		Title:           p.GetTitle(),
+		Summary:         p.GetContent().GetDescription(),
+	}
 }
 
 func (p Proposal) FormatStatus() string {
