@@ -5,6 +5,8 @@ import (
 	"main/pkg/constants"
 	"time"
 
+	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -73,7 +75,7 @@ type ChainParams struct {
 	BlockTime      time.Duration
 	BlockTimeError error
 
-	MintParams      MintParams
+	MintParams      mintTypes.Params
 	MintParamsError error
 
 	Inflation      float64

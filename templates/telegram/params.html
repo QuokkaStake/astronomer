@@ -21,8 +21,8 @@ No chains params
 {{- end }}
 {{- if not .MintParamsError }}
 <i>💸Mint params</i>
-- Goal bonded: {{ FormatPercent .MintParams.GoalBonded }}
-- Inflation: 🔻min {{ FormatPercent .MintParams.InflationMin }},🔺max {{ FormatPercent .MintParams.InflationMax }}
+- Goal bonded: {{ FormatPercentDec .MintParams.GoalBonded }}
+- Inflation: 🔻min {{ FormatPercentDec .MintParams.InflationMin }},🔺max {{ FormatPercentDec .MintParams.InflationMax }}
 {{- end }}
 {{- if not .InflationError }}
 <i>💸Current inflation: </i> {{ FormatPercent .Inflation }}

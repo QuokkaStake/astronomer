@@ -16,6 +16,7 @@ import (
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -131,20 +132,16 @@ func (rpc *RPC) GetGovParams(paramsType string) (*govV1beta1Types.QueryParamsRes
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetMintParams() (*types.MintParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetMintParams() (*mintTypes.QueryParamsResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/mint/v1beta1/params"
 
-	var response *types.MintParamsResponse
-	info, err := rpc.GetOld(url, "mint_params", &response)
+	var response mintTypes.QueryParamsResponse
+	info, err := rpc.Get(url, "mint_params", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.MintParamsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetInflation() (*types.InflationResponse, types.QueryInfo, error) {

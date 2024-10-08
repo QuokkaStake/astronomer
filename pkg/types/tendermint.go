@@ -27,20 +27,6 @@ type BlockResponse struct {
 	} `json:"block"`
 }
 
-type MintParamsResponse struct {
-	Code    int        `json:"code"`
-	Message string     `json:"message"`
-	Params  MintParams `json:"params"`
-}
-
-type MintParams struct {
-	InflationRateChange float64 `json:"inflation_rate_change,string"`
-	InflationMax        float64 `json:"inflation_max,string"`
-	InflationMin        float64 `json:"inflation_min,string"`
-	GoalBonded          float64 `json:"goal_bonded,string"`
-	BlocksPerYear       int64   `json:"blocks_per_year,string"`
-}
-
 type InflationResponse struct {
 	Code      int     `json:"code"`
 	Message   string  `json:"message"`
