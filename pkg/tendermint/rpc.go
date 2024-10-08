@@ -205,20 +205,16 @@ func (rpc *RPC) GetCommission(address string) (*distributionTypes.QueryValidator
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetDelegations(address string) (*types.DelegationsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetDelegations(address string) (*stakingTypes.QueryDelegatorDelegationsResponse, types.QueryInfo, error) {
 	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/delegations/" + address + "?pagination.limit=1000"
 
-	var response *types.DelegationsResponse
-	info, err := rpc.GetOld(url, "delegations", &response)
+	var response stakingTypes.QueryDelegatorDelegationsResponse
+	info, err := rpc.Get(url, "delegations", &response)
 	if err != nil {
 		return nil, info, err
 	}
 
-	if response.Code != 0 {
-		return &types.DelegationsResponse{}, info, fmt.Errorf("expected code 0, but got %d: %s", response.Code, response.Message)
-	}
-
-	return response, info, nil
+	return &response, info, nil
 }
 
 func (rpc *RPC) GetRedelegations(address string) (*types.RedelegationsResponse, types.QueryInfo, error) {

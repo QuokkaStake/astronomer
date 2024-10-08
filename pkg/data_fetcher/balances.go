@@ -5,6 +5,8 @@ import (
 	"main/pkg/types"
 	"main/pkg/utils"
 	"sync"
+
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalancesInfo { //nolint:maintidx
@@ -166,9 +168,9 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					response.SetDelegationsError(chain.Name, chainWallet, err)
 					return
 				}
-				walletDelegations := utils.Map(delegations.Delegations, func(b types.SdkDelegation) *types.Delegation {
+				walletDelegations := utils.Map(delegations.DelegationResponses, func(b stakingTypes.DelegationResponse) *types.Delegation {
 					return &types.Delegation{
-						Amount: b.Balance.ToAmount(),
+						Amount: types.AmountFrom(b.Balance),
 						Validator: &types.ValidatorAddressWithMoniker{
 							Chain:   chain,
 							Address: b.Delegation.ValidatorAddress,
