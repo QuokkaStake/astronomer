@@ -162,9 +162,10 @@ func (f *DataFetcher) FindValidatorGeneric(
 			continue
 		}
 
-		for index := range foundValidators {
+		for index, validator := range foundValidators {
 			signingInfo, found := utils.Find(signingInfos.Info, func(i slashingTypes.ValidatorSigningInfo) bool {
-				return false
+				consAddr := f.Converter.GetValidatorConsAddr(validator)
+				return consAddr == i.Address
 			})
 
 			if !found {

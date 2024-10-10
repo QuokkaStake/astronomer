@@ -5,9 +5,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
+	sdkTypes "github.com/cosmos/cosmos-sdk/types"
 	govV1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	paramsProposalTypes "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/gogoproto/proto"
 )
 
@@ -38,4 +40,17 @@ func (c *Converter) UnmarshalJSON(bytes []byte, target proto.Message) error {
 
 func (c *Converter) UnpackProposal(proposal govV1beta1Types.Proposal) error {
 	return proposal.UnpackInterfaces(c.parseCodec)
+}
+
+func (c *Converter) GetValidatorConsAddr(validator stakingTypes.Validator) string {
+	if err := validator.UnpackInterfaces(c.parseCodec); err != nil {
+		panic(err)
+	}
+
+	addr, err := validator.GetConsAddr()
+	if err != nil {
+		panic(err)
+	}
+
+	return sdkTypes.ConsAddress(addr).String()
 }

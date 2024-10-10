@@ -151,6 +151,22 @@ type ChainValidatorsInfo struct {
 	Validators []ValidatorInfo
 }
 
+func (i ChainValidatorsInfo) FormatValidatorUptime(validator ValidatorInfo) string {
+	if validator.SigningInfo == nil {
+		return "Validator uptime unknown"
+	}
+
+	if validator.SigningInfo.Tombstoned {
+		return "🪦Validator is tombstoned"
+	}
+
+	if validator.SigningInfo.MissedBlocksCounter == 0 {
+		return "🟢No missed blocks"
+	}
+
+	return fmt.Sprintf("🔴%d missed blocks", validator.SigningInfo.MissedBlocksCounter)
+}
+
 type ValidatorInfo struct {
 	OperatorAddress         string
 	Jailed                  bool
