@@ -2,6 +2,7 @@ package converter
 
 import (
 	"bytes"
+
 	upgradeTypes "cosmossdk.io/x/upgrade/types"
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/codec"
