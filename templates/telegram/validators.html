@@ -23,7 +23,9 @@ No chains found.
 {{- end }}
 🏦{{ SerializeAmount .Tokens }}
 📋<i>{{ .Details }}</i>
+{{- if .SecurityContact }}
 🤝{{ .SecurityContact }}
+{{- end }}
 🌎{{ .Website }}
 💸Commission: {{ .FormatCommission }}%
 {{ $chainInfo.FormatValidatorUptime . }}
