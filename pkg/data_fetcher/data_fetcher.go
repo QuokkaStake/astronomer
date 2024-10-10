@@ -3,6 +3,7 @@ package datafetcher
 import (
 	"main/pkg/cache"
 	"main/pkg/constants"
+	converterPkg "main/pkg/converter"
 	"main/pkg/database"
 	"main/pkg/metrics"
 	priceFetcher "main/pkg/price_fetcher"
@@ -11,33 +12,25 @@ import (
 	"sync"
 
 	"github.com/rs/zerolog"
-
-	"github.com/cosmos/cosmos-sdk/codec"
-	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/std"
 )
 
 type DataFetcher struct {
 	Logger         zerolog.Logger
 	Database       *database.Database
+	Converter      *converterPkg.Converter
 	MetricsManager *metrics.Manager
 	PriceFetchers  map[constants.PriceFetcherName]priceFetcher.PriceFetcher
 	Cache          *cache.Cache
 	RPCs           map[string]*tendermint.RPC
-	registry       codecTypes.InterfaceRegistry
-	parseCodec     *codec.ProtoCodec
 	mutex          sync.Mutex
 }
 
 func NewDataFetcher(
 	logger zerolog.Logger,
 	database *database.Database,
+	converter *converterPkg.Converter,
 	metricsManager *metrics.Manager,
 ) *DataFetcher {
-	interfaceRegistry := codecTypes.NewInterfaceRegistry()
-	std.RegisterInterfaces(interfaceRegistry)
-	parseCodec := codec.NewProtoCodec(interfaceRegistry)
-
 	priceFetchers := map[constants.PriceFetcherName]priceFetcher.PriceFetcher{
 		constants.PriceFetcherNameCoingecko: priceFetcher.NewCoingeckoPriceFetcher(logger),
 	}
@@ -45,12 +38,11 @@ func NewDataFetcher(
 	return &DataFetcher{
 		Logger:         logger.With().Str("component", "data_fetcher").Logger(),
 		Database:       database,
+		Converter:      converter,
 		MetricsManager: metricsManager,
 		PriceFetchers:  priceFetchers,
 		Cache:          cache.NewCache(),
 		RPCs:           map[string]*tendermint.RPC{},
-		registry:       interfaceRegistry,
-		parseCodec:     parseCodec,
 	}
 }
 
@@ -62,6 +54,6 @@ func (f *DataFetcher) GetRPC(chain *types.Chain) *tendermint.RPC {
 		return rpc
 	}
 
-	f.RPCs[chain.Name] = tendermint.NewRPC(chain, constants.RPCQueryTimeout, f.Logger, f.MetricsManager)
+	f.RPCs[chain.Name] = tendermint.NewRPC(chain, constants.RPCQueryTimeout, f.Logger, f.Converter, f.MetricsManager)
 	return f.RPCs[chain.Name]
 }

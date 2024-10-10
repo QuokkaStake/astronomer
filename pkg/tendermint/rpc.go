@@ -3,6 +3,7 @@ package tendermint
 import (
 	"encoding/json"
 	"errors"
+	converterPkg "main/pkg/converter"
 	"main/pkg/http"
 	"main/pkg/metrics"
 	"main/pkg/types"
@@ -13,17 +14,12 @@ import (
 
 	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
 
-	upgradeTypes "cosmossdk.io/x/upgrade/types"
 	cmtservice "github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
-	"github.com/cosmos/cosmos-sdk/codec"
-	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/cosmos/cosmos-sdk/std"
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributionTypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govV1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	paramsProposalTypes "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
@@ -38,26 +34,16 @@ type RPC struct {
 	Timeout        int
 	Logger         zerolog.Logger
 	MetricsManager *metrics.Manager
-
-	registry   codecTypes.InterfaceRegistry
-	parseCodec *codec.ProtoCodec
+	Converter      *converterPkg.Converter
 }
 
 func NewRPC(
 	chain *types.Chain,
 	timeout int,
 	logger zerolog.Logger,
+	converter *converterPkg.Converter,
 	metricsManager *metrics.Manager,
 ) *RPC {
-	interfaceRegistry := codecTypes.NewInterfaceRegistry()
-	std.RegisterInterfaces(interfaceRegistry)
-	govV1Types.RegisterInterfaces(interfaceRegistry)
-	govV1beta1Types.RegisterInterfaces(interfaceRegistry)
-	paramsProposalTypes.RegisterInterfaces(interfaceRegistry)
-	upgradeTypes.RegisterInterfaces(interfaceRegistry)
-
-	parseCodec := codec.NewProtoCodec(interfaceRegistry)
-
 	return &RPC{
 		Chain:   chain,
 		Client:  http.NewClient(logger, chain.Name),
@@ -66,9 +52,8 @@ func NewRPC(
 			Str("component", "rpc").
 			Str("chain", chain.Name).
 			Logger(),
+		Converter:      converter,
 		MetricsManager: metricsManager,
-		registry:       interfaceRegistry,
-		parseCodec:     parseCodec,
 	}
 }
 
@@ -292,7 +277,7 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 		return 0, err
 	}
 
-	newerHeight := newerBlock.Block.Header.Height - 1000
+	newerHeight := newerBlock.Block.Header.Height - 1000 //nolint:staticcheck
 
 	var olderBlock cmtservice.GetBlockByHeightResponse
 	_, err = rpc.Get(
@@ -304,8 +289,8 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 		return 0, err
 	}
 
-	timeDiff := olderBlock.Block.Header.Time.Sub(newerBlock.Block.Header.Time)
-	heightDiff := olderBlock.Block.Header.Height - newerBlock.Block.Header.Height
+	timeDiff := olderBlock.Block.Header.Time.Sub(newerBlock.Block.Header.Time)    //nolint:staticcheck
+	heightDiff := olderBlock.Block.Header.Height - newerBlock.Block.Header.Height //nolint:staticcheck
 
 	return time.Duration(float64(timeDiff.Nanoseconds()) / float64(heightDiff)), nil
 }
@@ -334,7 +319,7 @@ func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error)
 	}
 
 	for _, proposal := range responsev1beta1.Proposals {
-		if err := proposal.UnpackInterfaces(rpc.registry); err != nil {
+		if err := rpc.Converter.UnpackProposal(proposal); err != nil {
 			return nil, info, err
 		}
 	}
@@ -374,7 +359,7 @@ func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.Que
 		return nil, info, err
 	}
 
-	if err := responsev1beta1.Proposal.UnpackInterfaces(rpc.registry); err != nil {
+	if err := rpc.Converter.UnpackProposal(responsev1beta1.Proposal); err != nil {
 		return nil, info, err
 	}
 
@@ -425,7 +410,7 @@ func (rpc *RPC) Get(
 		}
 	}
 
-	if decodeErr := rpc.parseCodec.UnmarshalJSON(bytes, target); decodeErr != nil {
+	if decodeErr := rpc.Converter.UnmarshalJSON(bytes, target); decodeErr != nil {
 		rpc.Logger.Warn().Str("url", url).Err(decodeErr).Msg("JSON unmarshalling failed")
 		return queryInfo, decodeErr
 	}
