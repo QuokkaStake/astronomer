@@ -1,7 +1,9 @@
 package converter
 
 import (
+	"bytes"
 	upgradeTypes "cosmossdk.io/x/upgrade/types"
+	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codecTypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/std"
@@ -53,4 +55,18 @@ func (c *Converter) GetValidatorConsAddr(validator stakingTypes.Validator) strin
 	}
 
 	return sdkTypes.ConsAddress(addr).String()
+}
+
+func (c *Converter) CompareTwoBech32(first, second string) (bool, error) {
+	_, firstBytes, firstErr := bech32.Decode(first)
+	if firstErr != nil {
+		return false, firstErr
+	}
+
+	_, secondBytes, secondErr := bech32.Decode(second)
+	if secondErr != nil {
+		return false, secondErr
+	}
+
+	return bytes.Equal(firstBytes, secondBytes), nil
 }
