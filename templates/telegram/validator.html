@@ -22,11 +22,17 @@ No chains found.
 😔Not active
 {{- end }}
 🏦{{ SerializeAmount .Tokens }}
+{{- if .Details }}
 📋<i>{{ .Details }}</i>
+{{- else }}
+📋No details provided
+{{- end }}
 {{- if .SecurityContact }}
 🤝{{ .SecurityContact }}
 {{- end }}
+{{- if .Website }}
 🌎{{ .Website }}
+{{- end }}
 💸Commission: {{ .FormatCommission }}%
 {{ $chainInfo.FormatValidatorUptime . }}
 {{- if $explorers }}
