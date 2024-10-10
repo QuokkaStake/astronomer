@@ -410,7 +410,7 @@ func (rpc *RPC) Get(
 		}
 	}
 
-	if decodeErr := rpc.Converter.UnmarshalJSON(bytes, target); decodeErr != nil {
+	if decodeErr := rpc.Converter.Unmarshal(bytes, target); decodeErr != nil {
 		rpc.Logger.Warn().Str("url", url).Err(decodeErr).Msg("JSON unmarshalling failed")
 		return queryInfo, decodeErr
 	}

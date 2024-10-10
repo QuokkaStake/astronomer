@@ -34,7 +34,7 @@ func NewConverter() *Converter {
 	}
 }
 
-func (c *Converter) UnmarshalJSON(bytes []byte, target proto.Message) error {
+func (c *Converter) Unmarshal(bytes []byte, target proto.Message) error {
 	return c.parseCodec.UnmarshalJSON(bytes, target)
 }
 
