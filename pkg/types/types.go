@@ -145,15 +145,16 @@ type ValidatorsInfo struct {
 }
 
 type ChainValidatorsInfo struct {
-	Chain      *Chain
-	Explorers  Explorers
-	Error      error
-	Validators []ValidatorInfo
+	Chain          *Chain
+	Explorers      Explorers
+	Error          error
+	Validators     []ValidatorInfo
+	SlashingParams *slashingTypes.Params
 }
 
 func (i ChainValidatorsInfo) FormatValidatorUptime(validator ValidatorInfo) string {
 	if validator.SigningInfo == nil {
-		return "Validator uptime unknown"
+		return "🟡 Validator uptime unknown"
 	}
 
 	if validator.SigningInfo.Tombstoned {
@@ -164,7 +165,19 @@ func (i ChainValidatorsInfo) FormatValidatorUptime(validator ValidatorInfo) stri
 		return "🟢No missed blocks"
 	}
 
-	return fmt.Sprintf("🔴%d missed blocks", validator.SigningInfo.MissedBlocksCounter)
+	if i.SlashingParams == nil {
+		return fmt.Sprintf("🔴%d missed blocks", validator.SigningInfo.MissedBlocksCounter)
+
+	}
+
+	percent := float64(validator.SigningInfo.MissedBlocksCounter) / float64(i.SlashingParams.SignedBlocksWindow) * 100
+
+	return fmt.Sprintf(
+		"🔴%d/%d missed blocks (%.2f%%)",
+		validator.SigningInfo.MissedBlocksCounter,
+		i.SlashingParams.SignedBlocksWindow,
+		percent,
+	)
 }
 
 type ValidatorInfo struct {

@@ -70,9 +70,10 @@ func (f *DataFetcher) FindValidatorGeneric(
 	validatorsResponses := map[string]*stakingTypes.QueryValidatorsResponse{}
 	validatorsErrors := map[string]error{}
 	signingInfosResponses := map[string]*slashingTypes.QuerySigningInfosResponse{}
+	slashingParamsResponses := map[string]*slashingTypes.QueryParamsResponse{}
 
 	for _, chain := range chains {
-		wg.Add(2)
+		wg.Add(3)
 
 		go func(chain *types.Chain) {
 			defer wg.Done()
@@ -94,6 +95,17 @@ func (f *DataFetcher) FindValidatorGeneric(
 			signingInfos, _, _ := rpc.GetAllSigningInfos()
 			mutex.Lock()
 			signingInfosResponses[chain.Name] = signingInfos
+			mutex.Unlock()
+		}(chain)
+
+		go func(chain *types.Chain) {
+			defer wg.Done()
+
+			rpc := f.GetRPC(chain)
+
+			slashingParams, _, _ := rpc.GetSlashingParams()
+			mutex.Lock()
+			slashingParamsResponses[chain.Name] = slashingParams
 			mutex.Unlock()
 		}(chain)
 	}
@@ -121,6 +133,10 @@ func (f *DataFetcher) FindValidatorGeneric(
 			Explorers:  explorers.GetExplorersByChain(chain.Name),
 			Error:      nil,
 			Validators: make([]types.ValidatorInfo, len(foundValidators)),
+		}
+
+		if chainSlashingParams, ok := slashingParamsResponses[chain.Name]; ok {
+			info.SlashingParams = &chainSlashingParams.Params
 		}
 
 		for index, validator := range foundValidators {
