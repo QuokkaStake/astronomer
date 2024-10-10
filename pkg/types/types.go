@@ -167,7 +167,6 @@ func (i ChainValidatorsInfo) FormatValidatorUptime(validator ValidatorInfo) stri
 
 	if i.SlashingParams == nil {
 		return fmt.Sprintf("🔴%d missed blocks", validator.SigningInfo.MissedBlocksCounter)
-
 	}
 
 	percent := float64(validator.SigningInfo.MissedBlocksCounter) / float64(i.SlashingParams.SignedBlocksWindow) * 100
