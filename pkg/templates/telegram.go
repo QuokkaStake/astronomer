@@ -59,13 +59,14 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 	filename := templateName + ".html"
 
 	t, err := template.New(filename).Funcs(template.FuncMap{
-		"FormatDuration":  utils.FormatDuration,
-		"FormatPercent":   utils.FormatPercent,
-		"FormatFloat":     utils.FormatFloat,
-		"FormatSince":     utils.FormatSince,
-		"FormatLink":      m.FormatLink,
-		"FormatLinks":     m.FormatLinks,
-		"SerializeAmount": m.SerializeAmount,
+		"FormatDuration":   utils.FormatDuration,
+		"FormatPercent":    utils.FormatPercent,
+		"FormatPercentDec": utils.FormatPercentDec,
+		"FormatFloat":      utils.FormatFloat,
+		"FormatSince":      utils.FormatSince,
+		"FormatLink":       m.FormatLink,
+		"FormatLinks":      m.FormatLinks,
+		"SerializeAmount":  m.SerializeAmount,
 	}).ParseFS(templates.TemplatesFs, "telegram/"+filename)
 	if err != nil {
 		return nil, err

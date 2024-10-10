@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	converterPkg "main/pkg/converter"
 	datafetcher "main/pkg/data_fetcher"
 	databasePkg "main/pkg/database"
 	"main/pkg/fs"
@@ -21,6 +22,7 @@ type App struct {
 	Interacters    []interacterPkg.Interacter
 	MetricsManager *metrics.Manager
 	Database       *databasePkg.Database
+	Converter      *converterPkg.Converter
 
 	StopChannel chan bool
 }
@@ -42,9 +44,10 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	}
 
 	log := logger.GetLogger(config.LogConfig)
+	converter := converterPkg.NewConverter()
 	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
 	metricsManager := metrics.NewManager(log, config.MetricsConfig)
-	dataFetcher := datafetcher.NewDataFetcher(*log, database, metricsManager)
+	dataFetcher := datafetcher.NewDataFetcher(*log, database, converter, metricsManager)
 	interacters := []interacterPkg.Interacter{
 		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database, metricsManager),
 	}

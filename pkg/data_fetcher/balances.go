@@ -5,6 +5,8 @@ import (
 	"main/pkg/types"
 	"main/pkg/utils"
 	"sync"
+
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalancesInfo { //nolint:maintidx
@@ -75,9 +77,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					return
 				}
 
-				walletBalances := utils.Map(balances.Balances, func(b types.SdkAmount) *types.Amount {
-					return b.ToAmount()
-				})
+				walletBalances := utils.Map(balances.Balances, types.AmountFrom)
 
 				response.SetBalances(chain.Name, chainWallet, walletBalances)
 
@@ -105,9 +105,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					return
 				}
 
-				walletRewards := utils.Map(rewards.Total, func(b types.SdkAmount) *types.Amount {
-					return b.ToAmount()
-				})
+				walletRewards := utils.Map(rewards.Total, types.AmountFromDec)
 
 				response.SetRewards(chain.Name, chainWallet, walletRewards)
 
@@ -143,9 +141,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					return
 				}
 
-				walletCommissions := utils.Map(rewards.Commission.Commission, func(b types.SdkAmount) *types.Amount {
-					return b.ToAmount()
-				})
+				walletCommissions := utils.Map(rewards.Commission.Commission, types.AmountFromDec)
 
 				response.SetCommissions(chain.Name, chainWallet, walletCommissions)
 
@@ -172,9 +168,9 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					response.SetDelegationsError(chain.Name, chainWallet, err)
 					return
 				}
-				walletDelegations := utils.Map(delegations.Delegations, func(b types.SdkDelegation) *types.Delegation {
+				walletDelegations := utils.Map(delegations.DelegationResponses, func(b stakingTypes.DelegationResponse) *types.Delegation {
 					return &types.Delegation{
-						Amount: b.Balance.ToAmount(),
+						Amount: types.AmountFrom(b.Balance),
 						Validator: &types.ValidatorAddressWithMoniker{
 							Chain:   chain,
 							Address: b.Delegation.ValidatorAddress,
@@ -211,10 +207,10 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 				}
 				walletRedelegations := []*types.Redelegation{}
 
-				for _, redelegation := range redelegations.Redelegations {
+				for _, redelegation := range redelegations.RedelegationResponses {
 					for _, entry := range redelegation.Entries {
 						amount := &types.Amount{
-							Amount: entry.Balance,
+							Amount: entry.Balance.ToLegacyDec(),
 							Denom:  chain.BaseDenom,
 						}
 
@@ -239,7 +235,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 							Amount:         amount,
 							SrcValidator:   srcValidator,
 							DstValidator:   dstValidator,
-							CompletionTime: entry.Entry.CompletionTime,
+							CompletionTime: entry.RedelegationEntry.CompletionTime,
 						})
 					}
 				}
@@ -265,10 +261,10 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 
 				walletUnbonds := []*types.Unbond{}
 
-				for _, unbond := range unbonds.Unbonds {
+				for _, unbond := range unbonds.UnbondingResponses {
 					for _, entry := range unbond.Entries {
 						amount := &types.Amount{
-							Amount: entry.Balance,
+							Amount: entry.Balance.ToLegacyDec(),
 							Denom:  chain.BaseDenom,
 						}
 

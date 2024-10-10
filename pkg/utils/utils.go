@@ -185,6 +185,10 @@ func FormatPercent(percent float64) string {
 	return fmt.Sprintf("%.2f%%", percent*100)
 }
 
+func FormatPercentDec(percent cosmosMath.LegacyDec) string {
+	return fmt.Sprintf("%.2f%%", percent.MustFloat64()*100)
+}
+
 func FormatFloat(value float64) string {
 	return fmt.Sprintf("%.2f", value)
 }

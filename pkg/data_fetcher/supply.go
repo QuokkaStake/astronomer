@@ -39,11 +39,11 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 			}
 
 			chainsSupplies[chain.Name].BondedTokens = &types.Amount{
-				Amount: pool.Pool.BondedTokens,
+				Amount: pool.Pool.BondedTokens.ToLegacyDec(),
 				Denom:  chain.BaseDenom,
 			}
 			chainsSupplies[chain.Name].NotBondedTokens = &types.Amount{
-				Amount: pool.Pool.NotBondedTokens,
+				Amount: pool.Pool.NotBondedTokens.ToLegacyDec(),
 				Denom:  chain.BaseDenom,
 			}
 
@@ -74,7 +74,7 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 			chainsSupplies[chain.Name].AllSupplies = make(map[string]*types.Amount, len(supply.Supply))
 
 			for _, supply := range supply.Supply {
-				supplyAmount := supply.ToAmount()
+				supplyAmount := types.AmountFrom(supply)
 				amounts = append(amounts, &types.AmountWithChain{Chain: chain.Name, Amount: supplyAmount})
 				chainsSupplies[chain.Name].AllSupplies[supplyAmount.Denom] = supplyAmount
 			}
@@ -98,7 +98,7 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 			chainsSupplies[chain.Name].AllCommunityPool = make(map[string]*types.Amount, len(communityPool.Pool))
 
 			for _, communityPoolEntry := range communityPool.Pool {
-				communityPoolAmount := communityPoolEntry.ToAmount()
+				communityPoolAmount := types.AmountFromDec(communityPoolEntry)
 				amounts = append(amounts, &types.AmountWithChain{Chain: chain.Name, Amount: communityPoolAmount})
 				chainsSupplies[chain.Name].AllCommunityPool[communityPoolAmount.Denom] = communityPoolAmount
 			}

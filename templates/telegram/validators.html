@@ -5,6 +5,7 @@ No chains found.
 {{- else -}}
 {{- $chainsData := .Chains -}}
 {{- range .Chains }}
+{{- $chainInfo := . }}
 {{- $chain := .Chain -}}
 {{- $explorers := .Explorers -}}
 <strong>{{ .Chain.GetName }}</strong>
@@ -20,15 +21,24 @@ No chains found.
 {{- else }}
 😔Not active
 {{- end }}
-🏦({{ SerializeAmount .Tokens }})
+🏦{{ SerializeAmount .Tokens }}
+{{- if .Details }}
 📋<i>{{ .Details }}</i>
+{{- else }}
+📋No details provided
+{{- end }}
+{{- if .SecurityContact }}
 🤝{{ .SecurityContact }}
+{{- end }}
+{{- if .Website }}
 🌎{{ .Website }}
+{{- end }}
 💸Commission: {{ .FormatCommission }}%
+{{ $chainInfo.FormatValidatorUptime . }}
 {{- if $explorers }}
 🌐{{ FormatLinks ($explorers.GetValidatorLinks (.OperatorAddress)) }}
 {{- end }}
-{{- end }}
+{{ end }}
 {{ else }}
 You are not subscribed to any validator on this chain.
 {{ end }}

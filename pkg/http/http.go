@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"io"
 	"main/pkg/types"
 	"net/http"
 	"time"
@@ -24,11 +25,10 @@ func NewClient(logger zerolog.Logger, chain string) *Client {
 	}
 }
 
-func (c *Client) Get(
+func (c *Client) GetInternal(
 	url string,
 	query string,
-	target interface{},
-) (types.QueryInfo, error) {
+) (io.ReadCloser, types.QueryInfo, error) {
 	var transport http.RoundTripper
 
 	transportRaw, ok := http.DefaultTransport.(*http.Transport)
@@ -53,7 +53,7 @@ func (c *Client) Get(
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return queryInfo, err
+		return nil, queryInfo, err
 	}
 
 	req.Header.Set("User-Agent", "astronomer")
@@ -64,14 +64,45 @@ func (c *Client) Get(
 	queryInfo.Duration = time.Since(start)
 	if err != nil {
 		c.logger.Warn().Str("url", url).Err(err).Msg("Query failed")
-		return queryInfo, err
+		return nil, queryInfo, err
 	}
-	defer res.Body.Close()
 
 	c.logger.Debug().Str("url", url).Dur("duration", time.Since(start)).Msg("Query is finished")
 
-	err = json.NewDecoder(res.Body).Decode(target)
-	queryInfo.Success = err == nil
+	return res.Body, queryInfo, err
+}
 
-	return queryInfo, err
+func (c *Client) GetPlain(
+	url string,
+	query string,
+) ([]byte, types.QueryInfo, error) {
+	body, queryInfo, err := c.GetInternal(url, query)
+	if err != nil {
+		return nil, queryInfo, err
+	}
+
+	bytes, err := io.ReadAll(body)
+	if err != nil {
+		return nil, queryInfo, err
+	}
+
+	return bytes, queryInfo, nil
+}
+
+func (c *Client) Get(
+	url string,
+	query string,
+	target interface{},
+) (types.QueryInfo, error) {
+	body, queryInfo, err := c.GetInternal(url, query)
+	if err != nil {
+		return queryInfo, err
+	}
+
+	if jsonErr := json.NewDecoder(body).Decode(target); jsonErr != nil {
+		c.logger.Warn().Str("url", url).Err(jsonErr).Msg("Error decoding JSON from response")
+		return queryInfo, jsonErr
+	}
+
+	return queryInfo, body.Close()
 }

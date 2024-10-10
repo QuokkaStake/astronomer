@@ -2,8 +2,18 @@ package types
 
 import (
 	"fmt"
+
+	govV1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+
+	cosmosTypes "github.com/cosmos/cosmos-sdk/types"
+
 	"main/pkg/constants"
 	"time"
+
+	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"cosmossdk.io/math"
 )
@@ -23,6 +33,20 @@ type Amount struct {
 	PriceUSD  *math.LegacyDec
 }
 
+func AmountFrom(coin cosmosTypes.Coin) *Amount {
+	return &Amount{
+		Amount: coin.Amount.ToLegacyDec(),
+		Denom:  coin.Denom,
+	}
+}
+
+func AmountFromDec(coin cosmosTypes.DecCoin) *Amount {
+	return &Amount{
+		Amount: coin.Amount,
+		Denom:  coin.Denom,
+	}
+}
+
 type Proposal struct {
 	ID              string    `json:"id"`
 	Status          string    `json:"status"`
@@ -30,6 +54,28 @@ type Proposal struct {
 	VotingEndTime   time.Time `json:"voting_end_time"`
 	Title           string    `json:"title"`
 	Summary         string    `json:"summary"`
+}
+
+func ProposalFromV1(p *govV1Types.Proposal) *Proposal {
+	return &Proposal{
+		ID:              fmt.Sprintf("%d", p.Id),
+		Status:          p.Status.String(),
+		VotingStartTime: *p.VotingStartTime,
+		VotingEndTime:   *p.VotingEndTime,
+		Title:           p.Title,
+		Summary:         p.Summary,
+	}
+}
+
+func ProposalFromV1beta1(p govV1beta1Types.Proposal) *Proposal {
+	return &Proposal{
+		ID:              fmt.Sprintf("%d", p.ProposalId),
+		Status:          p.Status.String(),
+		VotingStartTime: p.VotingStartTime,
+		VotingEndTime:   p.VotingEndTime,
+		Title:           p.GetTitle(),
+		Summary:         p.GetContent().GetDescription(),
+	}
 }
 
 func (p Proposal) FormatStatus() string {
@@ -52,25 +98,25 @@ type ChainsParams struct {
 
 type ChainParams struct {
 	Chain               *Chain
-	StakingParams       StakingParams
+	StakingParams       stakingTypes.Params
 	StakingParamsError  error
-	SlashingParams      SlashingParams
+	SlashingParams      slashingTypes.Params
 	SlashingParamsError error
 
-	VotingParams       VotingParams
+	VotingParams       govV1beta1Types.VotingParams
 	VotingParamsError  error
-	DepositParams      DepositParams
+	DepositParams      govV1beta1Types.DepositParams
 	DepositParamsError error
-	TallyParams        TallyParams
+	TallyParams        govV1beta1Types.TallyParams
 	TallyParamsError   error
 
 	BlockTime      time.Duration
 	BlockTimeError error
 
-	MintParams      MintParams
+	MintParams      mintTypes.Params
 	MintParamsError error
 
-	Inflation      float64
+	Inflation      math.LegacyDec
 	InflationError error
 }
 
@@ -82,7 +128,7 @@ type ActiveProposals struct {
 type ChainActiveProposals struct {
 	Chain          *Chain
 	Explorers      Explorers
-	Proposals      []Proposal
+	Proposals      []*Proposal
 	ProposalsError error
 }
 
@@ -99,10 +145,38 @@ type ValidatorsInfo struct {
 }
 
 type ChainValidatorsInfo struct {
-	Chain      *Chain
-	Explorers  Explorers
-	Error      error
-	Validators []ValidatorInfo
+	Chain          *Chain
+	Explorers      Explorers
+	Error          error
+	Validators     []ValidatorInfo
+	SlashingParams *slashingTypes.Params
+}
+
+func (i ChainValidatorsInfo) FormatValidatorUptime(validator ValidatorInfo) string {
+	if validator.SigningInfo == nil {
+		return "🟡 Validator uptime unknown"
+	}
+
+	if validator.SigningInfo.Tombstoned {
+		return "🪦Validator is tombstoned"
+	}
+
+	if validator.SigningInfo.MissedBlocksCounter == 0 {
+		return "🟢No missed blocks"
+	}
+
+	if i.SlashingParams == nil {
+		return fmt.Sprintf("🔴%d missed blocks", validator.SigningInfo.MissedBlocksCounter)
+	}
+
+	percent := float64(validator.SigningInfo.MissedBlocksCounter) / float64(i.SlashingParams.SignedBlocksWindow) * 100
+
+	return fmt.Sprintf(
+		"🔴%d/%d missed blocks (%.2f%%)",
+		validator.SigningInfo.MissedBlocksCounter,
+		i.SlashingParams.SignedBlocksWindow,
+		percent,
+	)
 }
 
 type ValidatorInfo struct {
@@ -120,6 +194,8 @@ type ValidatorInfo struct {
 	CommissionMaxChangeRate float64
 	VotingPowerPercent      float64
 	Rank                    int
+
+	SigningInfo *slashingTypes.ValidatorSigningInfo
 }
 
 func (i ValidatorInfo) Active() bool {
