@@ -3,6 +3,8 @@ package converter
 import (
 	"bytes"
 
+	distributionTypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
 	upgradeTypes "cosmossdk.io/x/upgrade/types"
 	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -28,6 +30,7 @@ func NewConverter() *Converter {
 	govV1beta1Types.RegisterInterfaces(interfaceRegistry)
 	paramsProposalTypes.RegisterInterfaces(interfaceRegistry)
 	upgradeTypes.RegisterInterfaces(interfaceRegistry)
+	distributionTypes.RegisterInterfaces(interfaceRegistry)
 
 	parseCodec := codec.NewProtoCodec(interfaceRegistry)
 
