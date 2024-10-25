@@ -13,7 +13,7 @@ astronomer is your pocket Telegram cosmos-sdk multichain explorer and wallet!
 - Allows you to fetch proposals, chain params, wallet balances, validators info and many more without leaving Telegram
 - Allows working with it in both chats and in private DMs
 - Allows binding specific chains for a specific chat
-- (TODO) Comes with Prometheus metrics, so you can observe if something is wrong
+- Comes with Prometheus metrics, so you can observe if something is wrong
 - (TODO) Includes authz-based non-custodial wallet that allows you to interact with the blockchain while owning your wallet keys
 
 ## How can I set it up?

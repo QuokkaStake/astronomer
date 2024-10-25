@@ -298,7 +298,6 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 	f.PopulateDenoms(amountsWithChains)
 	f.PopulateValidators(validators)
 
-	// TODO: refactor
 	for _, chainBalances := range response.Infos {
 		for _, walletBalances := range chainBalances.BalancesInfo {
 			walletBalances.Balances = utils.Filter(walletBalances.Balances, func(a *types.Amount) bool {

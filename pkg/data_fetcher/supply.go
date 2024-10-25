@@ -111,7 +111,6 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 
 	response.Supplies = chainsSupplies
 
-	// TODO: refactor
 	for _, chainSupplies := range response.Supplies {
 		for supplyKey, supply := range chainSupplies.AllSupplies {
 			if supply.IsIgnored() {
