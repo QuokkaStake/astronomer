@@ -13,6 +13,7 @@ type Denom struct {
 	Denom             string
 	DisplayDenom      string
 	DenomExponent     int `default:"6"`
+	Ignored           bool
 	CoingeckoCurrency null.String
 }
 
@@ -53,19 +54,17 @@ func DenomFromArgs(args map[string]string) *Denom {
 			denom.Denom = value
 		case "chain":
 			denom.Chain = value
-		case "display-denom":
+		case "display-denom", "display_denom":
 			denom.DisplayDenom = value
-		case "display_denom":
-			denom.DisplayDenom = value
-		case "denom-exponent":
-			fallthrough
-		case "denom_exponent":
+		case "ignore", "ignored":
+			if ignored, err := strconv.ParseBool(value); err == nil {
+				denom.Ignored = ignored
+			}
+		case "denom-exponent", "denom_exponent":
 			if exponent, err := strconv.Atoi(value); err == nil {
 				denom.DenomExponent = exponent
 			}
-		case "coingecko-currency":
-			denom.CoingeckoCurrency = null.StringFrom(value)
-		case "coingecko_currency":
+		case "coingecko-currency", "coingecko_currency":
 			denom.CoingeckoCurrency = null.StringFrom(value)
 		}
 	}
@@ -88,6 +87,16 @@ func (denoms Denoms) ToMap() map[string]map[string]*Denom {
 	}
 
 	return m
+}
+
+func (denoms Denoms) Find(amount *AmountWithChain) (*Denom, bool) {
+	for _, denom := range denoms {
+		if denom.Chain == amount.Chain && denom.Denom == amount.Amount.Denom {
+			return denom, true
+		}
+	}
+
+	return nil, false
 }
 
 type ChainWithDenom struct {

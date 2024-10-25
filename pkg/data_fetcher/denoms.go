@@ -30,6 +30,13 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 		return
 	}
 
+	// adding denom infos, so we can later filter it out
+	for _, amount := range amounts {
+		if denom, found := foundDenoms.Find(amount); found {
+			amount.Amount.DenomInfo = denom
+		}
+	}
+
 	denomsByPriceFetcher := utils.GroupBy(foundDenoms, func(d *types.Denom) []constants.PriceFetcherName {
 		if d.CoingeckoCurrency.IsZero() {
 			return []constants.PriceFetcherName{}
