@@ -302,19 +302,19 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 	for _, chainBalances := range response.Infos {
 		for _, walletBalances := range chainBalances.BalancesInfo {
 			walletBalances.Balances = utils.Filter(walletBalances.Balances, func(a *types.Amount) bool {
-				return a.IsIgnored()
+				return !a.IsIgnored()
 			})
 
 			walletBalances.Rewards = utils.Filter(walletBalances.Rewards, func(a *types.Amount) bool {
-				return a.IsIgnored()
+				return !a.IsIgnored()
 			})
 
 			walletBalances.Commissions = utils.Filter(walletBalances.Commissions, func(a *types.Amount) bool {
-				return a.IsIgnored()
+				return !a.IsIgnored()
 			})
 
 			walletBalances.Delegations = utils.Filter(walletBalances.Delegations, func(d *types.Delegation) bool {
-				return d.Amount.IsIgnored()
+				return !d.Amount.IsIgnored()
 			})
 		}
 	}
