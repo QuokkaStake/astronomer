@@ -30,7 +30,12 @@ type Amount struct {
 	Amount    math.LegacyDec
 	Denom     string
 	BaseDenom string
+	DenomInfo *Denom
 	PriceUSD  *math.LegacyDec
+}
+
+func (a *Amount) IsIgnored() bool {
+	return a.DenomInfo == nil || a.DenomInfo.Ignored
 }
 
 func AmountFrom(coin cosmosTypes.Coin) *Amount {

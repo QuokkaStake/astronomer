@@ -111,16 +111,15 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 
 	response.Supplies = chainsSupplies
 
-	// TODO: refactor
 	for _, chainSupplies := range response.Supplies {
 		for supplyKey, supply := range chainSupplies.AllSupplies {
-			if supply.PriceUSD == nil {
+			if supply.IsIgnored() {
 				delete(chainSupplies.AllSupplies, supplyKey)
 			}
 		}
 
 		for communityPoolKey, communityPool := range chainSupplies.AllCommunityPool {
-			if communityPool.PriceUSD == nil {
+			if communityPool.IsIgnored() {
 				delete(chainSupplies.AllCommunityPool, communityPoolKey)
 			}
 		}
