@@ -64,6 +64,7 @@ func (d *Database) Init() {
 		Msg("PostgreSQL database connected")
 
 	d.client = db
+	d.Migrate()
 }
 
 func (d *Database) Migrate() {
