@@ -238,11 +238,11 @@ func (rpc *RPC) GetUnbonds(address string, hosts []string) (*stakingTypes.QueryD
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetPool() (*stakingTypes.QueryPoolResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetPool(hosts []string) (*stakingTypes.QueryPoolResponse, types.QueryInfo, error) {
 	url := "/cosmos/staking/v1beta1/pool"
 
 	var response stakingTypes.QueryPoolResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "pool", &response)
+	info, err := rpc.Get(hosts, url, "pool", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -250,11 +250,11 @@ func (rpc *RPC) GetPool() (*stakingTypes.QueryPoolResponse, types.QueryInfo, err
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetSupply() (*bankTypes.QueryTotalSupplyResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetSupply(hosts []string) (*bankTypes.QueryTotalSupplyResponse, types.QueryInfo, error) {
 	url := "/cosmos/bank/v1beta1/supply?pagination.limit=10000&pagination.offset=0"
 
 	var response bankTypes.QueryTotalSupplyResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "supply", &response)
+	info, err := rpc.Get(hosts, url, "supply", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -262,11 +262,11 @@ func (rpc *RPC) GetSupply() (*bankTypes.QueryTotalSupplyResponse, types.QueryInf
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetCommunityPool() (*distributionTypes.QueryCommunityPoolResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetCommunityPool(hosts []string) (*distributionTypes.QueryCommunityPoolResponse, types.QueryInfo, error) {
 	url := "/cosmos/distribution/v1beta1/community_pool?pagination.limit=10000&pagination.offset=0"
 
 	var response distributionTypes.QueryCommunityPoolResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "community_pool", &response)
+	info, err := rpc.Get(hosts, url, "community_pool", &response)
 	if err != nil {
 		return nil, info, err
 	}

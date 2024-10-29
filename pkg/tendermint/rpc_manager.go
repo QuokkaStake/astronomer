@@ -197,3 +197,36 @@ func (manager *NodeManager) GetUnbonds(chain *types.Chain, address string) (*sta
 	response, _, err := rpc.GetUnbonds(address, hosts)
 	return response, err
 }
+
+func (manager *NodeManager) GetPool(chain *types.Chain) (*stakingTypes.QueryPoolResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetPool(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetSupply(chain *types.Chain) (*bankTypes.QueryTotalSupplyResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetSupply(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetCommunityPool(chain *types.Chain) (*distributionTypes.QueryCommunityPoolResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetCommunityPool(hosts)
+	return response, err
+}
