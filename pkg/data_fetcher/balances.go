@@ -66,14 +66,12 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := f.GetRPC(chain)
-
-				balances, _, err := rpc.GetBalance(chainWallet.Address)
+				balances, balancesErr := f.NodesManager.GetBalance(chain, chainWallet.Address)
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				if err != nil {
-					response.SetBalancesError(chain.Name, chainWallet, err)
+				if balancesErr != nil {
+					response.SetBalancesError(chain.Name, chainWallet, balancesErr)
 					return
 				}
 

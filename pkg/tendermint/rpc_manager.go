@@ -8,6 +8,8 @@ import (
 	"main/pkg/types"
 	"sync"
 
+	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
@@ -125,5 +127,16 @@ func (manager *NodeManager) GetInflation(chain *types.Chain) (*mintTypes.QueryIn
 
 	rpc := manager.GetRPC(chain)
 	response, _, err := rpc.GetInflation(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetBalance(chain *types.Chain, address string) (*bankTypes.QueryAllBalancesResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetBalance(address, hosts)
 	return response, err
 }

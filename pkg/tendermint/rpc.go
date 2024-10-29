@@ -157,11 +157,11 @@ func (rpc *RPC) GetInflation(hosts []string) (*mintTypes.QueryInflationResponse,
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetBalance(address string) (*bankTypes.QueryAllBalancesResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetBalance(address string, hosts []string) (*bankTypes.QueryAllBalancesResponse, types.QueryInfo, error) {
 	url := "/cosmos/bank/v1beta1/balances/" + address
 
 	var response bankTypes.QueryAllBalancesResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "balance", &response)
+	info, err := rpc.Get(hosts, url, "balance", &response)
 	if err != nil {
 		return nil, info, err
 	}
