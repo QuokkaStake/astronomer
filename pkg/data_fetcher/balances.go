@@ -92,13 +92,11 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := f.GetRPC(chain)
-
-				rewards, _, err := rpc.GetRewards(chainWallet.Address)
+				rewards, rewardsErr := f.NodesManager.GetRewards(chain, chainWallet.Address)
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				if err != nil {
+				if rewardsErr != nil {
 					response.SetRewardsError(chain.Name, chainWallet, err)
 					return
 				}
@@ -128,9 +126,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 					return
 				}
 
-				rpc := f.GetRPC(chain)
-
-				rewards, _, err := rpc.GetCommission(valoper)
+				rewards, err := f.NodesManager.GetCommission(chain, valoper)
 				mutex.Lock()
 				defer mutex.Unlock()
 

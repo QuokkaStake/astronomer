@@ -8,6 +8,8 @@ import (
 	"main/pkg/types"
 	"sync"
 
+	distributionTypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
 	bankTypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
 	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
@@ -138,5 +140,27 @@ func (manager *NodeManager) GetBalance(chain *types.Chain, address string) (*ban
 
 	rpc := manager.GetRPC(chain)
 	response, _, err := rpc.GetBalance(address, hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetRewards(chain *types.Chain, address string) (*distributionTypes.QueryDelegationTotalRewardsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetRewards(address, hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetCommission(chain *types.Chain, address string) (*distributionTypes.QueryValidatorCommissionResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetCommission(address, hosts)
 	return response, err
 }

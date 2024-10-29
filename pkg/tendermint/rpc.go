@@ -169,11 +169,11 @@ func (rpc *RPC) GetBalance(address string, hosts []string) (*bankTypes.QueryAllB
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetRewards(address string) (*distributionTypes.QueryDelegationTotalRewardsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetRewards(address string, hosts []string) (*distributionTypes.QueryDelegationTotalRewardsResponse, types.QueryInfo, error) {
 	url := "/cosmos/distribution/v1beta1/delegators/" + address + "/rewards"
 
 	var response distributionTypes.QueryDelegationTotalRewardsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "rewards", &response)
+	info, err := rpc.Get(hosts, url, "rewards", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -181,11 +181,11 @@ func (rpc *RPC) GetRewards(address string) (*distributionTypes.QueryDelegationTo
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetCommission(address string) (*distributionTypes.QueryValidatorCommissionResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetCommission(address string, hosts []string) (*distributionTypes.QueryValidatorCommissionResponse, types.QueryInfo, error) {
 	url := "/cosmos/distribution/v1beta1/validators/" + address + "/commission"
 
 	var response distributionTypes.QueryValidatorCommissionResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "commission", &response)
+	info, err := rpc.Get(hosts, url, "commission", &response)
 	if err != nil {
 		// not being a validator is acceptable
 		if strings.Contains(err.Error(), "validator does not exist") {
