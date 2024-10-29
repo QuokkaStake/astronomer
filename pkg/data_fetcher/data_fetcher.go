@@ -8,7 +8,6 @@ import (
 	"main/pkg/metrics"
 	priceFetcher "main/pkg/price_fetcher"
 	"main/pkg/tendermint"
-	"main/pkg/types"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -48,16 +47,4 @@ func NewDataFetcher(
 		RPCs:           map[string]*tendermint.RPC{},
 		NodesManager:   nodesManager,
 	}
-}
-
-func (f *DataFetcher) GetRPC(chain *types.Chain) *tendermint.RPC {
-	f.mutex.Lock()
-	defer f.mutex.Unlock()
-
-	if rpc, ok := f.RPCs[chain.Name]; ok {
-		return rpc
-	}
-
-	f.RPCs[chain.Name] = tendermint.NewRPC(chain, constants.RPCQueryTimeout, &f.Logger, f.Converter, f.MetricsManager)
-	return f.RPCs[chain.Name]
 }

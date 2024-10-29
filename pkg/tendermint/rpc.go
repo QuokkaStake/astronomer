@@ -85,11 +85,11 @@ func (rpc *RPC) GetAllSigningInfos(hosts []string) (*slashingTypes.QuerySigningI
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetValidator(address string) (*stakingTypes.QueryValidatorResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetValidator(address string, hosts []string) (*stakingTypes.QueryValidatorResponse, types.QueryInfo, error) {
 	url := "/cosmos/staking/v1beta1/validators/" + address
 
 	var response stakingTypes.QueryValidatorResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "validator", &response)
+	info, err := rpc.Get(hosts, url, "validator", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -97,11 +97,11 @@ func (rpc *RPC) GetValidator(address string) (*stakingTypes.QueryValidatorRespon
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetStakingParams() (*stakingTypes.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetStakingParams(hosts []string) (*stakingTypes.QueryParamsResponse, types.QueryInfo, error) {
 	url := "/cosmos/staking/v1beta1/params"
 
 	var response stakingTypes.QueryParamsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "staking_params", &response)
+	info, err := rpc.Get(hosts, url, "staking_params", &response)
 	if err != nil {
 		return nil, info, err
 	}

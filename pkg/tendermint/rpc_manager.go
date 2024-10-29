@@ -89,6 +89,28 @@ func (manager *NodeManager) GetAllSigningInfos(chain *types.Chain) (*slashingTyp
 	return response, err
 }
 
+func (manager *NodeManager) GetValidator(chain *types.Chain, address string) (*stakingTypes.QueryValidatorResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetValidator(address, hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetStakingParams(chain *types.Chain) (*stakingTypes.QueryParamsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetStakingParams(hosts)
+	return response, err
+}
+
 func (manager *NodeManager) GetSlashingParams(chain *types.Chain) (*slashingTypes.QueryParamsResponse, error) {
 	hosts, err := manager.Database.GetLCDHosts(chain)
 	if err != nil {

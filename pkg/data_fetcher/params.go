@@ -1,7 +1,6 @@
 package datafetcher
 
 import (
-	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
 )
@@ -25,22 +24,20 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 			Chain: chain,
 		}
 
-		rpc := f.GetRPC(chain)
-
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetStakingParams()
+			params, paramsErr := f.NodesManager.GetStakingParams(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].StakingParamsError = err
+			if paramsErr != nil {
+				chainsParams[chain.Name].StakingParamsError = paramsErr
 			} else {
 				chainsParams[chain.Name].StakingParams = params.Params
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
 		go func(chain *types.Chain) {
