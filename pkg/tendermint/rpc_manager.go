@@ -8,6 +8,9 @@ import (
 	"main/pkg/types"
 	"sync"
 
+	govV1beta1Types "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	mintTypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+
 	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -89,5 +92,27 @@ func (manager *NodeManager) GetSlashingParams(chain *types.Chain) (*slashingType
 
 	rpc := manager.GetRPC(chain)
 	response, _, err := rpc.GetSlashingParams(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetGovParams(chain *types.Chain, paramsType string) (*govV1beta1Types.QueryParamsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetGovParams(paramsType, hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetMintParams(chain *types.Chain) (*mintTypes.QueryParamsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetMintParams(hosts)
 	return response, err
 }

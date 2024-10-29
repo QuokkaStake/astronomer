@@ -121,11 +121,11 @@ func (rpc *RPC) GetSlashingParams(hosts []string) (*slashingTypes.QueryParamsRes
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetGovParams(paramsType string) (*govV1beta1Types.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetGovParams(paramsType string, hosts []string) (*govV1beta1Types.QueryParamsResponse, types.QueryInfo, error) {
 	url := "/cosmos/gov/v1beta1/params/" + paramsType
 
 	var response govV1beta1Types.QueryParamsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "gov_params_"+paramsType, &response)
+	info, err := rpc.Get(hosts, url, "gov_params_"+paramsType, &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -133,11 +133,11 @@ func (rpc *RPC) GetGovParams(paramsType string) (*govV1beta1Types.QueryParamsRes
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetMintParams() (*mintTypes.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetMintParams(hosts []string) (*mintTypes.QueryParamsResponse, types.QueryInfo, error) {
 	url := "/cosmos/mint/v1beta1/params"
 
 	var response mintTypes.QueryParamsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "mint_params", &response)
+	info, err := rpc.Get(hosts, url, "mint_params", &response)
 	if err != nil {
 		return nil, info, err
 	}
