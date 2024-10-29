@@ -106,12 +106,12 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 		go func(chain *types.Chain, rpc *tendermint.RPC) {
 			defer wg.Done()
 
-			blockTime, err := rpc.GetBlockTime()
+			blockTime, blockTimeErr := f.NodesManager.GetBlockTime(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].BlockTimeError = err
+			if blockTimeErr != nil {
+				chainsParams[chain.Name].BlockTimeError = blockTimeErr
 			} else {
 				chainsParams[chain.Name].BlockTime = blockTime
 			}

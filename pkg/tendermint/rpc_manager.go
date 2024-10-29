@@ -7,6 +7,7 @@ import (
 	"main/pkg/metrics"
 	"main/pkg/types"
 	"sync"
+	"time"
 
 	distributionTypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
@@ -228,5 +229,16 @@ func (manager *NodeManager) GetCommunityPool(chain *types.Chain) (*distributionT
 
 	rpc := manager.GetRPC(chain)
 	response, _, err := rpc.GetCommunityPool(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetBlockTime(chain *types.Chain) (time.Duration, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return 0, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, err := rpc.GetBlockTime(hosts)
 	return response, err
 }

@@ -274,9 +274,9 @@ func (rpc *RPC) GetCommunityPool(hosts []string) (*distributionTypes.QueryCommun
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetBlockTime() (time.Duration, error) {
+func (rpc *RPC) GetBlockTime(hosts []string) (time.Duration, error) {
 	var newerBlock cmtservice.GetLatestBlockResponse
-	_, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, "/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
+	_, err := rpc.Get(hosts, "/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
 	if err != nil {
 		return 0, err
 	}
@@ -285,7 +285,7 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 
 	var olderBlock cmtservice.GetBlockByHeightResponse
 	_, err = rpc.Get(
-		[]string{rpc.Chain.LCDEndpoint},
+		hosts,
 		"/cosmos/base/tendermint/v1beta1/blocks/"+strconv.FormatInt(newerHeight, 10),
 		"block",
 		&olderBlock,
