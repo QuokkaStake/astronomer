@@ -1,6 +1,6 @@
 module main
 
-go 1.21.10
+go 1.22
 
 require (
 	cosmossdk.io/math v1.3.0

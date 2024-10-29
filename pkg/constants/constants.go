@@ -18,6 +18,7 @@ const (
 	PrometheusMetricsPrefix = "astronomer_"
 
 	RPCQueryTimeout = 10
+	RetriesCount    = 3
 )
 
 var (

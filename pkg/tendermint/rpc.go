@@ -3,11 +3,14 @@ package tendermint
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"main/pkg/constants"
 	converterPkg "main/pkg/converter"
 	"main/pkg/http"
 	"main/pkg/metrics"
 	"main/pkg/types"
 	"main/pkg/utils"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +33,7 @@ import (
 
 type RPC struct {
 	Chain          *types.Chain
+	Host           string
 	Client         *http.Client
 	Timeout        int
 	Logger         zerolog.Logger
@@ -58,10 +62,10 @@ func NewRPC(
 }
 
 func (rpc *RPC) GetAllValidators() (*stakingTypes.QueryValidatorsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/validators?pagination.count_total=true&pagination.limit=1000"
+	url := "/cosmos/staking/v1beta1/validators?pagination.count_total=true&pagination.limit=1000"
 
 	var response stakingTypes.QueryValidatorsResponse
-	info, err := rpc.Get(url, "validators", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "validators", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -70,10 +74,10 @@ func (rpc *RPC) GetAllValidators() (*stakingTypes.QueryValidatorsResponse, types
 }
 
 func (rpc *RPC) GetAllSigningInfos() (*slashingTypes.QuerySigningInfosResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/slashing/v1beta1/signing_infos?pagination.limit=1000"
+	url := "/cosmos/slashing/v1beta1/signing_infos?pagination.limit=1000"
 
 	var response slashingTypes.QuerySigningInfosResponse
-	info, err := rpc.Get(url, "signing_infos", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "signing_infos", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -82,10 +86,10 @@ func (rpc *RPC) GetAllSigningInfos() (*slashingTypes.QuerySigningInfosResponse, 
 }
 
 func (rpc *RPC) GetValidator(address string) (*stakingTypes.QueryValidatorResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/validators/" + address
+	url := "/cosmos/staking/v1beta1/validators/" + address
 
 	var response stakingTypes.QueryValidatorResponse
-	info, err := rpc.Get(url, "validator", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "validator", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -94,10 +98,10 @@ func (rpc *RPC) GetValidator(address string) (*stakingTypes.QueryValidatorRespon
 }
 
 func (rpc *RPC) GetStakingParams() (*stakingTypes.QueryParamsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/params"
+	url := "/cosmos/staking/v1beta1/params"
 
 	var response stakingTypes.QueryParamsResponse
-	info, err := rpc.Get(url, "staking_params", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "staking_params", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -106,10 +110,10 @@ func (rpc *RPC) GetStakingParams() (*stakingTypes.QueryParamsResponse, types.Que
 }
 
 func (rpc *RPC) GetSlashingParams() (*slashingTypes.QueryParamsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/slashing/v1beta1/params"
+	url := "/cosmos/slashing/v1beta1/params"
 
 	var response slashingTypes.QueryParamsResponse
-	info, err := rpc.Get(url, "slashing_params", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "slashing_params", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -118,10 +122,10 @@ func (rpc *RPC) GetSlashingParams() (*slashingTypes.QueryParamsResponse, types.Q
 }
 
 func (rpc *RPC) GetGovParams(paramsType string) (*govV1beta1Types.QueryParamsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/params/" + paramsType
+	url := "/cosmos/gov/v1beta1/params/" + paramsType
 
 	var response govV1beta1Types.QueryParamsResponse
-	info, err := rpc.Get(url, "gov_params_"+paramsType, &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "gov_params_"+paramsType, &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -130,10 +134,10 @@ func (rpc *RPC) GetGovParams(paramsType string) (*govV1beta1Types.QueryParamsRes
 }
 
 func (rpc *RPC) GetMintParams() (*mintTypes.QueryParamsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/mint/v1beta1/params"
+	url := "/cosmos/mint/v1beta1/params"
 
 	var response mintTypes.QueryParamsResponse
-	info, err := rpc.Get(url, "mint_params", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "mint_params", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -142,10 +146,10 @@ func (rpc *RPC) GetMintParams() (*mintTypes.QueryParamsResponse, types.QueryInfo
 }
 
 func (rpc *RPC) GetInflation() (*mintTypes.QueryInflationResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/mint/v1beta1/inflation"
+	url := "/cosmos/mint/v1beta1/inflation"
 
 	var response mintTypes.QueryInflationResponse
-	info, err := rpc.Get(url, "inflation", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "inflation", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -154,10 +158,10 @@ func (rpc *RPC) GetInflation() (*mintTypes.QueryInflationResponse, types.QueryIn
 }
 
 func (rpc *RPC) GetBalance(address string) (*bankTypes.QueryAllBalancesResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/bank/v1beta1/balances/" + address
+	url := "/cosmos/bank/v1beta1/balances/" + address
 
 	var response bankTypes.QueryAllBalancesResponse
-	info, err := rpc.Get(url, "balance", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "balance", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -166,10 +170,10 @@ func (rpc *RPC) GetBalance(address string) (*bankTypes.QueryAllBalancesResponse,
 }
 
 func (rpc *RPC) GetRewards(address string) (*distributionTypes.QueryDelegationTotalRewardsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/delegators/" + address + "/rewards"
+	url := "/cosmos/distribution/v1beta1/delegators/" + address + "/rewards"
 
 	var response distributionTypes.QueryDelegationTotalRewardsResponse
-	info, err := rpc.Get(url, "rewards", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "rewards", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -178,10 +182,10 @@ func (rpc *RPC) GetRewards(address string) (*distributionTypes.QueryDelegationTo
 }
 
 func (rpc *RPC) GetCommission(address string) (*distributionTypes.QueryValidatorCommissionResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/validators/" + address + "/commission"
+	url := "/cosmos/distribution/v1beta1/validators/" + address + "/commission"
 
 	var response distributionTypes.QueryValidatorCommissionResponse
-	info, err := rpc.Get(url, "commission", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "commission", &response)
 	if err != nil {
 		// not being a validator is acceptable
 		if strings.Contains(err.Error(), "validator does not exist") {
@@ -199,10 +203,10 @@ func (rpc *RPC) GetCommission(address string) (*distributionTypes.QueryValidator
 }
 
 func (rpc *RPC) GetDelegations(address string) (*stakingTypes.QueryDelegatorDelegationsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/delegations/" + address + "?pagination.limit=1000"
+	url := "/cosmos/staking/v1beta1/delegations/" + address + "?pagination.limit=1000"
 
 	var response stakingTypes.QueryDelegatorDelegationsResponse
-	info, err := rpc.Get(url, "delegations", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "delegations", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -211,10 +215,10 @@ func (rpc *RPC) GetDelegations(address string) (*stakingTypes.QueryDelegatorDele
 }
 
 func (rpc *RPC) GetRedelegations(address string) (*stakingTypes.QueryRedelegationsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/delegators/" + address + "/redelegations?pagination.limit=1000"
+	url := "/cosmos/staking/v1beta1/delegators/" + address + "/redelegations?pagination.limit=1000"
 
 	var response stakingTypes.QueryRedelegationsResponse
-	info, err := rpc.Get(url, "commission", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "commission", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -223,10 +227,10 @@ func (rpc *RPC) GetRedelegations(address string) (*stakingTypes.QueryRedelegatio
 }
 
 func (rpc *RPC) GetUnbonds(address string) (*stakingTypes.QueryDelegatorUnbondingDelegationsResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/delegators/" + address + "/unbonding_delegations?pagination.limit=1000"
+	url := "/cosmos/staking/v1beta1/delegators/" + address + "/unbonding_delegations?pagination.limit=1000"
 
 	var response stakingTypes.QueryDelegatorUnbondingDelegationsResponse
-	info, err := rpc.Get(url, "unbonds", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "unbonds", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -235,10 +239,10 @@ func (rpc *RPC) GetUnbonds(address string) (*stakingTypes.QueryDelegatorUnbondin
 }
 
 func (rpc *RPC) GetPool() (*stakingTypes.QueryPoolResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/staking/v1beta1/pool"
+	url := "/cosmos/staking/v1beta1/pool"
 
 	var response stakingTypes.QueryPoolResponse
-	info, err := rpc.Get(url, "pool", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "pool", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -247,10 +251,10 @@ func (rpc *RPC) GetPool() (*stakingTypes.QueryPoolResponse, types.QueryInfo, err
 }
 
 func (rpc *RPC) GetSupply() (*bankTypes.QueryTotalSupplyResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/bank/v1beta1/supply?pagination.limit=10000&pagination.offset=0"
+	url := "/cosmos/bank/v1beta1/supply?pagination.limit=10000&pagination.offset=0"
 
 	var response bankTypes.QueryTotalSupplyResponse
-	info, err := rpc.Get(url, "supply", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "supply", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -259,10 +263,10 @@ func (rpc *RPC) GetSupply() (*bankTypes.QueryTotalSupplyResponse, types.QueryInf
 }
 
 func (rpc *RPC) GetCommunityPool() (*distributionTypes.QueryCommunityPoolResponse, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/distribution/v1beta1/community_pool?pagination.limit=10000&pagination.offset=0"
+	url := "/cosmos/distribution/v1beta1/community_pool?pagination.limit=10000&pagination.offset=0"
 
 	var response distributionTypes.QueryCommunityPoolResponse
-	info, err := rpc.Get(url, "community_pool", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "community_pool", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -272,7 +276,7 @@ func (rpc *RPC) GetCommunityPool() (*distributionTypes.QueryCommunityPoolRespons
 
 func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 	var newerBlock cmtservice.GetLatestBlockResponse
-	_, err := rpc.Get(rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
+	_, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, "/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
 	if err != nil {
 		return 0, err
 	}
@@ -281,7 +285,8 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 
 	var olderBlock cmtservice.GetBlockByHeightResponse
 	_, err = rpc.Get(
-		rpc.Chain.LCDEndpoint+"/cosmos/base/tendermint/v1beta1/blocks/"+strconv.FormatInt(newerHeight, 10),
+		[]string{rpc.Chain.LCDEndpoint},
+		"/cosmos/base/tendermint/v1beta1/blocks/"+strconv.FormatInt(newerHeight, 10),
 		"block",
 		&olderBlock,
 	)
@@ -296,10 +301,10 @@ func (rpc *RPC) GetBlockTime() (time.Duration, error) {
 }
 
 func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
+	url := "/cosmos/gov/v1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
 
 	var response govV1Types.QueryProposalsResponse
-	info, err := rpc.Get(url, "proposals_v1", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposals_v1", &response)
 	if err == nil {
 		return utils.Map(response.Proposals, types.ProposalFromV1), info, nil
 	}
@@ -310,10 +315,10 @@ func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error)
 
 	rpc.Logger.Warn().Msg("v1 proposals are not supported, falling back to v1beta1")
 
-	url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=2"
+	url = "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=2"
 
 	var responsev1beta1 govV1beta1Types.QueryProposalsResponse
-	infov1beta1, err := rpc.Get(url, "proposals_v1beta1", &responsev1beta1)
+	infov1beta1, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposals_v1beta1", &responsev1beta1)
 	if err != nil {
 		return nil, info, err
 	}
@@ -328,10 +333,10 @@ func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error)
 }
 
 func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.QueryInfo, error) {
-	url := rpc.Chain.LCDEndpoint + "/cosmos/gov/v1/proposals/" + proposalID
+	url := "/cosmos/gov/v1/proposals/" + proposalID
 
 	var response govV1Types.QueryProposalResponse
-	info, err := rpc.Get(url, "proposal_v1", &response)
+	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposal_v1", &response)
 	if err == nil {
 		return types.ProposalFromV1(response.Proposal), info, nil
 	}
@@ -347,10 +352,10 @@ func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.Que
 
 	rpc.Logger.Warn().Msg("v1 proposal are not supported, falling back to v1")
 
-	url = rpc.Chain.LCDEndpoint + "/cosmos/gov/v1beta1/proposals/" + proposalID
+	url = "/cosmos/gov/v1beta1/proposals/" + proposalID
 
 	var responsev1beta1 govV1beta1Types.QueryProposalResponse
-	infov1beta1, err := rpc.Get(url, "proposal_v1beta1", &responsev1beta1)
+	infov1beta1, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposal_v1beta1", &responsev1beta1)
 	if err != nil {
 		if strings.Contains(err.Error(), "doesn't exist") {
 			return nil, info, nil
@@ -366,43 +371,59 @@ func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.Que
 	return types.ProposalFromV1beta1(responsev1beta1.Proposal), infov1beta1, nil
 }
 
-func (rpc *RPC) GetOld(
+func (rpc *RPC) Get(
+	hosts []string,
 	url string,
 	queryName string,
-	target interface{},
+	target proto.Message,
 ) (types.QueryInfo, error) {
-	info, err := rpc.Client.Get(url, queryName, target)
-	rpc.MetricsManager.LogQueryInfo(info)
-
-	if err != nil {
-		return info, err
+	for attempt := range constants.RetriesCount {
+		host := hosts[rand.Int()%len(hosts)]
+		queryInfo, err := rpc.GetOne(host, url, queryName, target)
+		if err != nil {
+			rpc.Logger.Warn().
+				Str("host", host).
+				Str("url", url).
+				Int("attempt", attempt).
+				Int("max_attempts", constants.RetriesCount).
+				Err(err).
+				Msg("LCD request failed, retrying")
+		} else {
+			return queryInfo, nil
+		}
 	}
 
-	return info, err
+	return types.QueryInfo{}, fmt.Errorf("could not get data after %d attempts", constants.RetriesCount)
 }
 
-func (rpc *RPC) Get(
+func (rpc *RPC) GetOne(
+	host string,
 	url string,
 	queryName string,
 	target proto.Message,
 ) (types.QueryInfo, error) {
 	bytes, queryInfo, err := rpc.Client.GetPlain(
-		url,
+		host+url,
 		queryName,
 	)
 	if err != nil {
-		rpc.Logger.Warn().Str("url", url).Err(err).Msg("LCD request failed")
+		rpc.Logger.Warn().
+			Str("host", host).
+			Str("url", url).
+			Err(err).Msg("LCD request failed")
 		return queryInfo, err
 	}
 
 	// check whether the response is error first
 	var errorResponse types.LCDError
-	if err := json.Unmarshal(bytes, &errorResponse); err == nil {
+	if unmarshalErr := json.Unmarshal(bytes, &errorResponse); unmarshalErr == nil {
 		// if we successfully unmarshalled it into LCDError, so err == nil,
 		// that means the response is indeed an error.
 		if errorResponse.Code != 0 {
-			rpc.Logger.Warn().Str("url", url).
-				Err(err).
+			rpc.Logger.Warn().
+				Str("host", host).
+				Str("url", url).
+				Err(unmarshalErr).
 				Int("code", errorResponse.Code).
 				Str("message", errorResponse.Message).
 				Msg("LCD request returned an error")
