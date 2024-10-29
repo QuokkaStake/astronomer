@@ -78,12 +78,10 @@ func (f *DataFetcher) FindValidatorGeneric(
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-
-			validators, _, err := rpc.GetAllValidators()
+			validators, validatorsErr := f.NodesManager.GetAllValidators(chain)
 			mutex.Lock()
 			validatorsResponses[chain.Name] = validators
-			validatorsErrors[chain.Name] = err
+			validatorsErrors[chain.Name] = validatorsErr
 			mutex.Unlock()
 		}(chain)
 

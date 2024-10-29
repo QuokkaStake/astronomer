@@ -8,6 +8,8 @@ import (
 	"main/pkg/types"
 	"sync"
 
+	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	"github.com/rs/zerolog"
 )
 
@@ -36,12 +38,12 @@ func NewNodeManager(
 	}
 }
 
-func (manager *NodeManager) GetRPC(chain *types.Chain) (*RPC, error) {
+func (manager *NodeManager) GetRPC(chain *types.Chain) *RPC {
 	manager.mutex.Lock()
 	defer manager.mutex.Unlock()
 
 	if rpc, ok := manager.RPCs[chain.Name]; ok {
-		return rpc, nil
+		return rpc
 	}
 
 	rpc := NewRPC(
@@ -52,5 +54,18 @@ func (manager *NodeManager) GetRPC(chain *types.Chain) (*RPC, error) {
 		manager.MetricsManager,
 	)
 	manager.RPCs[chain.Name] = rpc
-	return rpc, nil
+	return rpc
+}
+
+func (manager *NodeManager) GetAllValidators(
+	chain *types.Chain,
+) (*stakingTypes.QueryValidatorsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetAllValidators(hosts)
+	return response, err
 }

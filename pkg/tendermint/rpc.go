@@ -61,11 +61,11 @@ func NewRPC(
 	}
 }
 
-func (rpc *RPC) GetAllValidators() (*stakingTypes.QueryValidatorsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetAllValidators(hosts []string) (*stakingTypes.QueryValidatorsResponse, types.QueryInfo, error) {
 	url := "/cosmos/staking/v1beta1/validators?pagination.count_total=true&pagination.limit=1000"
 
 	var response stakingTypes.QueryValidatorsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "validators", &response)
+	info, err := rpc.Get(hosts, url, "validators", &response)
 	if err != nil {
 		return nil, info, err
 	}

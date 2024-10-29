@@ -49,7 +49,7 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
 	metricsManager := metrics.NewManager(log, config.MetricsConfig)
 	nodesManager := tendermint.NewNodeManager(log, database, converter, metricsManager)
-	dataFetcher := datafetcher.NewDataFetcher(*log, database, converter, metricsManager, nodesManager)
+	dataFetcher := datafetcher.NewDataFetcher(log, database, converter, metricsManager, nodesManager)
 	interacters := []interacterPkg.Interacter{
 		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database, metricsManager),
 	}

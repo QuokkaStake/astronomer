@@ -58,6 +58,6 @@ func (f *DataFetcher) GetRPC(chain *types.Chain) *tendermint.RPC {
 		return rpc
 	}
 
-	f.RPCs[chain.Name] = tendermint.NewRPC(chain, constants.RPCQueryTimeout, f.Logger, f.Converter, f.MetricsManager)
+	f.RPCs[chain.Name] = tendermint.NewRPC(chain, constants.RPCQueryTimeout, &f.Logger, f.Converter, f.MetricsManager)
 	return f.RPCs[chain.Name]
 }
