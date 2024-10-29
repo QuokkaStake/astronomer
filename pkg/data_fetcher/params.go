@@ -133,19 +133,19 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			inflation, _, err := rpc.GetInflation()
+			inflation, inflationErr := f.NodesManager.GetInflation(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].InflationError = err
+			if inflationErr != nil {
+				chainsParams[chain.Name].InflationError = inflationErr
 			} else {
 				chainsParams[chain.Name].Inflation = inflation.Inflation
 			}
-		}(chain, rpc)
+		}(chain)
 	}
 
 	wg.Wait()

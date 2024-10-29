@@ -145,11 +145,11 @@ func (rpc *RPC) GetMintParams(hosts []string) (*mintTypes.QueryParamsResponse, t
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetInflation() (*mintTypes.QueryInflationResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetInflation(hosts []string) (*mintTypes.QueryInflationResponse, types.QueryInfo, error) {
 	url := "/cosmos/mint/v1beta1/inflation"
 
 	var response mintTypes.QueryInflationResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "inflation", &response)
+	info, err := rpc.Get(hosts, url, "inflation", &response)
 	if err != nil {
 		return nil, info, err
 	}

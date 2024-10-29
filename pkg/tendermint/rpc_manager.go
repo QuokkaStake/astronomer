@@ -116,3 +116,14 @@ func (manager *NodeManager) GetMintParams(chain *types.Chain) (*mintTypes.QueryP
 	response, _, err := rpc.GetMintParams(hosts)
 	return response, err
 }
+
+func (manager *NodeManager) GetInflation(chain *types.Chain) (*mintTypes.QueryInflationResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetInflation(hosts)
+	return response, err
+}
