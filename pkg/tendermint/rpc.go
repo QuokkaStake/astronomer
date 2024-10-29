@@ -73,11 +73,11 @@ func (rpc *RPC) GetAllValidators(hosts []string) (*stakingTypes.QueryValidatorsR
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetAllSigningInfos() (*slashingTypes.QuerySigningInfosResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetAllSigningInfos(hosts []string) (*slashingTypes.QuerySigningInfosResponse, types.QueryInfo, error) {
 	url := "/cosmos/slashing/v1beta1/signing_infos?pagination.limit=1000"
 
 	var response slashingTypes.QuerySigningInfosResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "signing_infos", &response)
+	info, err := rpc.Get(hosts, url, "signing_infos", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -109,11 +109,11 @@ func (rpc *RPC) GetStakingParams() (*stakingTypes.QueryParamsResponse, types.Que
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetSlashingParams() (*slashingTypes.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetSlashingParams(hosts []string) (*slashingTypes.QueryParamsResponse, types.QueryInfo, error) {
 	url := "/cosmos/slashing/v1beta1/params"
 
 	var response slashingTypes.QueryParamsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "slashing_params", &response)
+	info, err := rpc.Get(hosts, url, "slashing_params", &response)
 	if err != nil {
 		return nil, info, err
 	}

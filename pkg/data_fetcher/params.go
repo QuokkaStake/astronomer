@@ -43,19 +43,19 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 		}(chain, rpc)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetSlashingParams()
+			params, slashingParamsErr := f.NodesManager.GetSlashingParams(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].SlashingParamsError = err
+			if slashingParamsErr != nil {
+				chainsParams[chain.Name].SlashingParamsError = slashingParamsErr
 			} else {
 				chainsParams[chain.Name].SlashingParams = params.Params
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
 		go func(chain *types.Chain, rpc *tendermint.RPC) {

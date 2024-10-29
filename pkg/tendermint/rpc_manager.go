@@ -8,6 +8,8 @@ import (
 	"main/pkg/types"
 	"sync"
 
+	slashingTypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
+
 	stakingTypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/rs/zerolog"
@@ -57,9 +59,7 @@ func (manager *NodeManager) GetRPC(chain *types.Chain) *RPC {
 	return rpc
 }
 
-func (manager *NodeManager) GetAllValidators(
-	chain *types.Chain,
-) (*stakingTypes.QueryValidatorsResponse, error) {
+func (manager *NodeManager) GetAllValidators(chain *types.Chain) (*stakingTypes.QueryValidatorsResponse, error) {
 	hosts, err := manager.Database.GetLCDHosts(chain)
 	if err != nil {
 		return nil, err
@@ -67,5 +67,27 @@ func (manager *NodeManager) GetAllValidators(
 
 	rpc := manager.GetRPC(chain)
 	response, _, err := rpc.GetAllValidators(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetAllSigningInfos(chain *types.Chain) (*slashingTypes.QuerySigningInfosResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetAllSigningInfos(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetSlashingParams(chain *types.Chain) (*slashingTypes.QueryParamsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetSlashingParams(hosts)
 	return response, err
 }
