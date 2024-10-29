@@ -103,7 +103,7 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
 			blockTime, blockTimeErr := f.NodesManager.GetBlockTime(chain)
@@ -115,7 +115,7 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 			} else {
 				chainsParams[chain.Name].BlockTime = blockTime
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
 		go func(chain *types.Chain) {

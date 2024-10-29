@@ -35,14 +35,12 @@ func (f *DataFetcher) GetActiveProposals(chainNames []string) types.ActivePropos
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-
-			proposals, _, err := rpc.GetActiveProposals()
+			proposals, proposalsErr := f.NodesManager.GetActiveProposals(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainProposals[chain.Name].ProposalsError = err
+			if proposalsErr != nil {
+				chainProposals[chain.Name].ProposalsError = proposalsErr
 			} else {
 				chainProposals[chain.Name].Proposals = proposals
 			}

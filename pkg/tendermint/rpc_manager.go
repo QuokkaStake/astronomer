@@ -242,3 +242,25 @@ func (manager *NodeManager) GetBlockTime(chain *types.Chain) (time.Duration, err
 	response, err := rpc.GetBlockTime(hosts)
 	return response, err
 }
+
+func (manager *NodeManager) GetActiveProposals(chain *types.Chain) ([]*types.Proposal, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return []*types.Proposal{}, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetActiveProposals(hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetSingleProposal(chain *types.Chain, id string) (*types.Proposal, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetSingleProposal(id, hosts)
+	return response, err
+}

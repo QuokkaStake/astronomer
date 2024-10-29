@@ -300,11 +300,11 @@ func (rpc *RPC) GetBlockTime(hosts []string) (time.Duration, error) {
 	return time.Duration(float64(timeDiff.Nanoseconds()) / float64(heightDiff)), nil
 }
 
-func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error) {
+func (rpc *RPC) GetActiveProposals(hosts []string) ([]*types.Proposal, types.QueryInfo, error) {
 	url := "/cosmos/gov/v1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
 
 	var response govV1Types.QueryProposalsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposals_v1", &response)
+	info, err := rpc.Get(hosts, url, "proposals_v1", &response)
 	if err == nil {
 		return utils.Map(response.Proposals, types.ProposalFromV1), info, nil
 	}
@@ -318,7 +318,7 @@ func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error)
 	url = "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=2"
 
 	var responsev1beta1 govV1beta1Types.QueryProposalsResponse
-	infov1beta1, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposals_v1beta1", &responsev1beta1)
+	infov1beta1, err := rpc.Get(hosts, url, "proposals_v1beta1", &responsev1beta1)
 	if err != nil {
 		return nil, info, err
 	}
@@ -332,11 +332,11 @@ func (rpc *RPC) GetActiveProposals() ([]*types.Proposal, types.QueryInfo, error)
 	return utils.Map(responsev1beta1.Proposals, types.ProposalFromV1beta1), infov1beta1, nil
 }
 
-func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.QueryInfo, error) {
+func (rpc *RPC) GetSingleProposal(proposalID string, hosts []string) (*types.Proposal, types.QueryInfo, error) {
 	url := "/cosmos/gov/v1/proposals/" + proposalID
 
 	var response govV1Types.QueryProposalResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposal_v1", &response)
+	info, err := rpc.Get(hosts, url, "proposal_v1", &response)
 	if err == nil {
 		return types.ProposalFromV1(response.Proposal), info, nil
 	}
@@ -355,7 +355,7 @@ func (rpc *RPC) GetSingleProposal(proposalID string) (*types.Proposal, types.Que
 	url = "/cosmos/gov/v1beta1/proposals/" + proposalID
 
 	var responsev1beta1 govV1beta1Types.QueryProposalResponse
-	infov1beta1, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "proposal_v1beta1", &responsev1beta1)
+	infov1beta1, err := rpc.Get(hosts, url, "proposal_v1beta1", &responsev1beta1)
 	if err != nil {
 		if strings.Contains(err.Error(), "doesn't exist") {
 			return nil, info, nil
