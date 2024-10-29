@@ -9,6 +9,7 @@ import (
 	"main/pkg/interacter/telegram"
 	"main/pkg/logger"
 	"main/pkg/metrics"
+	"main/pkg/tendermint"
 	"main/pkg/types"
 
 	"github.com/rs/zerolog"
@@ -47,7 +48,8 @@ func NewApp(configPath string, filesystem fs.FS, version string) *App {
 	converter := converterPkg.NewConverter()
 	database := databasePkg.NewDatabase(log, config.DatabaseConfig)
 	metricsManager := metrics.NewManager(log, config.MetricsConfig)
-	dataFetcher := datafetcher.NewDataFetcher(*log, database, converter, metricsManager)
+	nodesManager := tendermint.NewNodeManager(log, database, converter, metricsManager)
+	dataFetcher := datafetcher.NewDataFetcher(*log, database, converter, metricsManager, nodesManager)
 	interacters := []interacterPkg.Interacter{
 		telegram.NewInteracter(config.TelegramConfig, version, log, dataFetcher, database, metricsManager),
 	}

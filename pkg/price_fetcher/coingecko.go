@@ -16,7 +16,7 @@ type CoingeckoPriceFetcher struct {
 	Logger zerolog.Logger
 }
 
-func NewCoingeckoPriceFetcher(logger zerolog.Logger) *CoingeckoPriceFetcher {
+func NewCoingeckoPriceFetcher(logger *zerolog.Logger) *CoingeckoPriceFetcher {
 	return &CoingeckoPriceFetcher{
 		Client: http.NewClient(logger, "coingecko"),
 		Logger: logger.With().Str("component", "coingecko_price_fetcher").Logger(),

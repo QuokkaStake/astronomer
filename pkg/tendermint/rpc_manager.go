@@ -22,7 +22,7 @@ type NodeManager struct {
 }
 
 func NewNodeManager(
-	logger zerolog.Logger,
+	logger *zerolog.Logger,
 	database *databasePkg.Database,
 	converter *converterPkg.Converter,
 	metricsManager *metrics.Manager,
@@ -47,7 +47,7 @@ func (manager *NodeManager) GetRPC(chain *types.Chain) (*RPC, error) {
 	rpc := NewRPC(
 		chain,
 		constants.RPCQueryTimeout,
-		manager.Logger,
+		&manager.Logger,
 		manager.Converter,
 		manager.MetricsManager,
 	)

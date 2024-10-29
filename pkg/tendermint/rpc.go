@@ -44,7 +44,7 @@ type RPC struct {
 func NewRPC(
 	chain *types.Chain,
 	timeout int,
-	logger zerolog.Logger,
+	logger *zerolog.Logger,
 	converter *converterPkg.Converter,
 	metricsManager *metrics.Manager,
 ) *RPC {

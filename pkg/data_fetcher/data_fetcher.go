@@ -22,14 +22,17 @@ type DataFetcher struct {
 	PriceFetchers  map[constants.PriceFetcherName]priceFetcher.PriceFetcher
 	Cache          *cache.Cache
 	RPCs           map[string]*tendermint.RPC
-	mutex          sync.Mutex
+	NodesManager   *tendermint.NodeManager
+
+	mutex sync.Mutex
 }
 
 func NewDataFetcher(
-	logger zerolog.Logger,
+	logger *zerolog.Logger,
 	database *database.Database,
 	converter *converterPkg.Converter,
 	metricsManager *metrics.Manager,
+	nodesManager *tendermint.NodeManager,
 ) *DataFetcher {
 	priceFetchers := map[constants.PriceFetcherName]priceFetcher.PriceFetcher{
 		constants.PriceFetcherNameCoingecko: priceFetcher.NewCoingeckoPriceFetcher(logger),
@@ -43,6 +46,7 @@ func NewDataFetcher(
 		PriceFetchers:  priceFetchers,
 		Cache:          cache.NewCache(),
 		RPCs:           map[string]*tendermint.RPC{},
+		NodesManager:   nodesManager,
 	}
 }
 
