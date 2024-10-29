@@ -164,3 +164,36 @@ func (manager *NodeManager) GetCommission(chain *types.Chain, address string) (*
 	response, _, err := rpc.GetCommission(address, hosts)
 	return response, err
 }
+
+func (manager *NodeManager) GetDelegations(chain *types.Chain, address string) (*stakingTypes.QueryDelegatorDelegationsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetDelegations(address, hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetRedelegations(chain *types.Chain, address string) (*stakingTypes.QueryRedelegationsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetRedelegations(address, hosts)
+	return response, err
+}
+
+func (manager *NodeManager) GetUnbonds(chain *types.Chain, address string) (*stakingTypes.QueryDelegatorUnbondingDelegationsResponse, error) {
+	hosts, err := manager.Database.GetLCDHosts(chain)
+	if err != nil {
+		return nil, err
+	}
+
+	rpc := manager.GetRPC(chain)
+	response, _, err := rpc.GetUnbonds(address, hosts)
+	return response, err
+}

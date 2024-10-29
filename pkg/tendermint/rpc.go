@@ -202,11 +202,11 @@ func (rpc *RPC) GetCommission(address string, hosts []string) (*distributionType
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetDelegations(address string) (*stakingTypes.QueryDelegatorDelegationsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetDelegations(address string, hosts []string) (*stakingTypes.QueryDelegatorDelegationsResponse, types.QueryInfo, error) {
 	url := "/cosmos/staking/v1beta1/delegations/" + address + "?pagination.limit=1000"
 
 	var response stakingTypes.QueryDelegatorDelegationsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "delegations", &response)
+	info, err := rpc.Get(hosts, url, "delegations", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -214,11 +214,11 @@ func (rpc *RPC) GetDelegations(address string) (*stakingTypes.QueryDelegatorDele
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetRedelegations(address string) (*stakingTypes.QueryRedelegationsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetRedelegations(address string, hosts []string) (*stakingTypes.QueryRedelegationsResponse, types.QueryInfo, error) {
 	url := "/cosmos/staking/v1beta1/delegators/" + address + "/redelegations?pagination.limit=1000"
 
 	var response stakingTypes.QueryRedelegationsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "commission", &response)
+	info, err := rpc.Get(hosts, url, "commission", &response)
 	if err != nil {
 		return nil, info, err
 	}
@@ -226,11 +226,11 @@ func (rpc *RPC) GetRedelegations(address string) (*stakingTypes.QueryRedelegatio
 	return &response, info, nil
 }
 
-func (rpc *RPC) GetUnbonds(address string) (*stakingTypes.QueryDelegatorUnbondingDelegationsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetUnbonds(address string, hosts []string) (*stakingTypes.QueryDelegatorUnbondingDelegationsResponse, types.QueryInfo, error) {
 	url := "/cosmos/staking/v1beta1/delegators/" + address + "/unbonding_delegations?pagination.limit=1000"
 
 	var response stakingTypes.QueryDelegatorUnbondingDelegationsResponse
-	info, err := rpc.Get([]string{rpc.Chain.LCDEndpoint}, url, "unbonds", &response)
+	info, err := rpc.Get(hosts, url, "unbonds", &response)
 	if err != nil {
 		return nil, info, err
 	}

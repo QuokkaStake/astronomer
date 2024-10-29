@@ -118,20 +118,20 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				valoper, err := utils.ConvertBech32Prefix(chainWallet.Address, chain.Bech32ValidatorPrefix)
-				if err != nil {
+				valoper, convertErr := utils.ConvertBech32Prefix(chainWallet.Address, chain.Bech32ValidatorPrefix)
+				if convertErr != nil {
 					mutex.Lock()
-					response.SetCommissionsError(chain.Name, chainWallet, err)
+					response.SetCommissionsError(chain.Name, chainWallet, convertErr)
 					mutex.Unlock()
 					return
 				}
 
-				rewards, err := f.NodesManager.GetCommission(chain, valoper)
+				rewards, rewardsErr := f.NodesManager.GetCommission(chain, valoper)
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				if err != nil {
-					response.SetCommissionsError(chain.Name, chainWallet, err)
+				if rewardsErr != nil {
+					response.SetCommissionsError(chain.Name, chainWallet, rewardsErr)
 					return
 				}
 
@@ -152,14 +152,12 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := f.GetRPC(chain)
-
-				delegations, _, err := rpc.GetDelegations(chainWallet.Address)
+				delegations, delegationsErr := f.NodesManager.GetDelegations(chain, chainWallet.Address)
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				if err != nil {
-					response.SetDelegationsError(chain.Name, chainWallet, err)
+				if delegationsErr != nil {
+					response.SetDelegationsError(chain.Name, chainWallet, delegationsErr)
 					return
 				}
 				walletDelegations := utils.Map(delegations.DelegationResponses, func(b stakingTypes.DelegationResponse) *types.Delegation {
@@ -189,14 +187,12 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := f.GetRPC(chain)
-
-				redelegations, _, err := rpc.GetRedelegations(chainWallet.Address)
+				redelegations, redelegationsErr := f.NodesManager.GetRedelegations(chain, chainWallet.Address)
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				if err != nil {
-					response.SetRedelegationsError(chain.Name, chainWallet, err)
+				if redelegationsErr != nil {
+					response.SetRedelegationsError(chain.Name, chainWallet, redelegationsErr)
 					return
 				}
 				walletRedelegations := []*types.Redelegation{}
@@ -242,14 +238,12 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 			go func(chain *types.Chain, chainWallet *types.WalletLink) {
 				defer wg.Done()
 
-				rpc := f.GetRPC(chain)
-
-				unbonds, _, err := rpc.GetUnbonds(chainWallet.Address)
+				unbonds, unbondsErr := f.NodesManager.GetUnbonds(chain, chainWallet.Address)
 				mutex.Lock()
 				defer mutex.Unlock()
 
-				if err != nil {
-					response.SetUnbondsError(chain.Name, chainWallet, err)
+				if unbondsErr != nil {
+					response.SetUnbondsError(chain.Name, chainWallet, unbondsErr)
 					return
 				}
 
