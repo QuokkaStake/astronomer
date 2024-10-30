@@ -52,3 +52,14 @@ func (d *Database) InsertLCDHost(chain *types.Chain, host string) error {
 
 	return nil
 }
+
+func (d *Database) DeleteLCDHost(chain *types.Chain, host string) (bool, error) {
+	result, err := d.client.Exec("DELETE FROM lcd WHERE chain = $1 AND host = $2", chain.Name, host)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not delete LCD host")
+		return false, err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	return rowsAffected > 0, nil
+}

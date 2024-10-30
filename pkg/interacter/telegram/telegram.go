@@ -101,6 +101,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/denom_add", bot, interacter.GetDenomAddCommand())
 	interacter.AddCommand("/denom_delete", bot, interacter.GetDenomDeleteCommand())
 	interacter.AddCommand("/lcd_add", bot, interacter.GetLCDAddCommand())
+	interacter.AddCommand("/lcd_delete", bot, interacter.GetLCDDeleteCommand())
 
 	interacter.TelegramBot = bot
 }
