@@ -90,7 +90,9 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 			signingInfos, _ := f.NodesManager.GetAllSigningInfos(chain)
 			mutex.Lock()
-			signingInfosResponses[chain.Name] = signingInfos
+			if signingInfos != nil {
+				signingInfosResponses[chain.Name] = signingInfos
+			}
 			mutex.Unlock()
 		}(chain)
 
@@ -99,7 +101,9 @@ func (f *DataFetcher) FindValidatorGeneric(
 
 			slashingParams, _ := f.NodesManager.GetSlashingParams(chain)
 			mutex.Lock()
-			slashingParamsResponses[chain.Name] = slashingParams
+			if slashingParams != nil {
+				slashingParamsResponses[chain.Name] = slashingParams
+			}
 			mutex.Unlock()
 		}(chain)
 	}

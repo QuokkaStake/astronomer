@@ -393,6 +393,12 @@ func (rpc *RPC) Get(
 		}
 	}
 
+	rpc.Logger.Error().
+		Strs("hosts", hosts).
+		Str("url", url).
+		Int("max_attempts", constants.RetriesCount).
+		Msg("All LCD requests failed")
+
 	return types.QueryInfo{}, fmt.Errorf("could not get data after %d attempts", constants.RetriesCount)
 }
 

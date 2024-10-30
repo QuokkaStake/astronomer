@@ -67,8 +67,7 @@ func (interacter *Interacter) Init() {
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	})
 	if err != nil {
-		interacter.Logger.Warn().Err(err).Msg("Could not create Telegram bot")
-		return
+		interacter.Logger.Panic().Err(err).Msg("Could not create Telegram bot")
 	}
 
 	interacter.AddCommand("/start", bot, interacter.GetHelpCommand())
@@ -101,6 +100,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/explorer_delete", bot, interacter.GetExplorerDeleteCommand())
 	interacter.AddCommand("/denom_add", bot, interacter.GetDenomAddCommand())
 	interacter.AddCommand("/denom_delete", bot, interacter.GetDenomDeleteCommand())
+	interacter.AddCommand("/lcd_add", bot, interacter.GetLCDAddCommand())
 
 	interacter.TelegramBot = bot
 }

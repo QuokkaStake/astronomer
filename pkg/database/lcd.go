@@ -38,3 +38,17 @@ func (d *Database) GetLCDHosts(chain *types.Chain) ([]string, error) {
 
 	return hosts, nil
 }
+
+func (d *Database) InsertLCDHost(chain *types.Chain, host string) error {
+	_, err := d.client.Exec(
+		"INSERT INTO lcd (chain, host) VALUES ($1, $2)",
+		chain.Name,
+		host,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not insert LCD host")
+		return err
+	}
+
+	return nil
+}

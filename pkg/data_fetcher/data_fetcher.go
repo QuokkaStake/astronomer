@@ -8,7 +8,6 @@ import (
 	"main/pkg/metrics"
 	priceFetcher "main/pkg/price_fetcher"
 	"main/pkg/tendermint"
-	"sync"
 
 	"github.com/rs/zerolog"
 )
@@ -22,8 +21,6 @@ type DataFetcher struct {
 	Cache          *cache.Cache
 	RPCs           map[string]*tendermint.RPC
 	NodesManager   *tendermint.NodeManager
-
-	mutex sync.Mutex
 }
 
 func NewDataFetcher(

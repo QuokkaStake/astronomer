@@ -31,7 +31,7 @@ func (interacter *Interacter) HandleAddChain(c tele.Context, chainBinds []string
 	}
 
 	chain := types.ChainFromArgs(argsAsMap)
-	if err := chain.Validate(); err != nil {
+	if err := chain.Chain.Validate(); err != nil {
 		return fmt.Sprintf("Invalid data provided: %s", err.Error()), err
 	}
 
