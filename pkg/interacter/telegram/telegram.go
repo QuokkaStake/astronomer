@@ -67,8 +67,7 @@ func (interacter *Interacter) Init() {
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	})
 	if err != nil {
-		interacter.Logger.Warn().Err(err).Msg("Could not create Telegram bot")
-		return
+		interacter.Logger.Panic().Err(err).Msg("Could not create Telegram bot")
 	}
 
 	interacter.AddCommand("/start", bot, interacter.GetHelpCommand())
@@ -84,6 +83,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/validator_unlink", bot, interacter.GetValidatorUnlinkCommand())
 	interacter.AddCommand("/wallets", bot, interacter.GetWalletsCommand())
 	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
+	interacter.AddCommand("/chain", bot, interacter.GetChainInfoCommand())
 	interacter.AddCommand("/balance", bot, interacter.GetBalanceCommand())
 	interacter.AddCommand("/supply", bot, interacter.GetSupplyCommand())
 
@@ -101,6 +101,8 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/explorer_delete", bot, interacter.GetExplorerDeleteCommand())
 	interacter.AddCommand("/denom_add", bot, interacter.GetDenomAddCommand())
 	interacter.AddCommand("/denom_delete", bot, interacter.GetDenomDeleteCommand())
+	interacter.AddCommand("/lcd_add", bot, interacter.GetLCDAddCommand())
+	interacter.AddCommand("/lcd_delete", bot, interacter.GetLCDDeleteCommand())
 
 	interacter.TelegramBot = bot
 }

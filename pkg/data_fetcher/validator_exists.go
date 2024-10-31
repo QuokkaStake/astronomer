@@ -7,9 +7,7 @@ import (
 )
 
 func (f *DataFetcher) DoesValidatorExist(chain *types.Chain, address string) (*stakingTypes.Validator, error) {
-	rpc := f.GetRPC(chain)
-
-	validator, _, err := rpc.GetValidator(address)
+	validator, err := f.NodesManager.GetValidator(chain, address)
 	if err != nil {
 		return nil, err
 	}

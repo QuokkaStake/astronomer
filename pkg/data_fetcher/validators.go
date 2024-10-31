@@ -78,34 +78,32 @@ func (f *DataFetcher) FindValidatorGeneric(
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-
-			validators, _, err := rpc.GetAllValidators()
+			validators, validatorsErr := f.NodesManager.GetAllValidators(chain)
 			mutex.Lock()
 			validatorsResponses[chain.Name] = validators
-			validatorsErrors[chain.Name] = err
+			validatorsErrors[chain.Name] = validatorsErr
 			mutex.Unlock()
 		}(chain)
 
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-
-			signingInfos, _, _ := rpc.GetAllSigningInfos()
+			signingInfos, _ := f.NodesManager.GetAllSigningInfos(chain)
 			mutex.Lock()
-			signingInfosResponses[chain.Name] = signingInfos
+			if signingInfos != nil {
+				signingInfosResponses[chain.Name] = signingInfos
+			}
 			mutex.Unlock()
 		}(chain)
 
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-
-			slashingParams, _, _ := rpc.GetSlashingParams()
+			slashingParams, _ := f.NodesManager.GetSlashingParams(chain)
 			mutex.Lock()
-			slashingParamsResponses[chain.Name] = slashingParams
+			if slashingParams != nil {
+				slashingParamsResponses[chain.Name] = slashingParams
+			}
 			mutex.Unlock()
 		}(chain)
 	}

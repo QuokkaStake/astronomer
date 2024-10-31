@@ -16,8 +16,7 @@ func (f *DataFetcher) GetSingleProposal(chain *types.Chain, proposalID string) t
 	response.Chain = chain
 	response.Explorers = explorers.GetExplorersByChain(chain.Name)
 
-	rpc := f.GetRPC(chain)
-	proposal, _, err := rpc.GetSingleProposal(proposalID)
+	proposal, err := f.NodesManager.GetSingleProposal(chain, proposalID)
 
 	if err != nil {
 		response.Error = err

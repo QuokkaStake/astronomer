@@ -78,3 +78,34 @@ func (d *Database) FindDenoms(denoms []types.ChainWithDenom) (types.Denoms, erro
 
 	return returnDenoms, nil
 }
+func (d *Database) GetDenomsByChain(chain *types.Chain) (types.Denoms, error) {
+	rows, err := d.client.Query(
+		"SELECT chain, denom, display_denom, denom_exponent, coingecko_currency, ignored FROM denoms WHERE chain = $1",
+		chain.Name,
+	)
+	if err != nil {
+		d.logger.Error().Err(err).Msg("Could not get denoms for chains")
+		return []*types.Denom{}, err
+	}
+
+	defer func() {
+		_ = rows.Close()
+		_ = rows.Err() // or modify return value
+	}()
+
+	returnDenoms := []*types.Denom{}
+
+	for rows.Next() {
+		denom := &types.Denom{}
+
+		err = rows.Scan(&denom.Chain, &denom.Denom, &denom.DisplayDenom, &denom.DenomExponent, &denom.CoingeckoCurrency, &denom.Ignored)
+		if err != nil {
+			d.logger.Error().Err(err).Msg("Error getting denom")
+			return returnDenoms, err
+		}
+
+		returnDenoms = append(returnDenoms, denom)
+	}
+
+	return returnDenoms, nil
+}

@@ -1,7 +1,6 @@
 package datafetcher
 
 import (
-	"main/pkg/tendermint"
 	"main/pkg/types"
 	"sync"
 )
@@ -25,127 +24,125 @@ func (f *DataFetcher) GetChainsParams(chainNames []string) types.ChainsParams {
 			Chain: chain,
 		}
 
-		rpc := f.GetRPC(chain)
-
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetStakingParams()
+			params, paramsErr := f.NodesManager.GetStakingParams(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].StakingParamsError = err
+			if paramsErr != nil {
+				chainsParams[chain.Name].StakingParamsError = paramsErr
 			} else {
 				chainsParams[chain.Name].StakingParams = params.Params
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetSlashingParams()
+			params, slashingParamsErr := f.NodesManager.GetSlashingParams(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].SlashingParamsError = err
+			if slashingParamsErr != nil {
+				chainsParams[chain.Name].SlashingParamsError = slashingParamsErr
 			} else {
 				chainsParams[chain.Name].SlashingParams = params.Params
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetGovParams("voting")
+			params, paramsErr := f.NodesManager.GetGovParams(chain, "voting")
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].VotingParamsError = err
+			if paramsErr != nil {
+				chainsParams[chain.Name].VotingParamsError = paramsErr
 			} else {
 				chainsParams[chain.Name].VotingParams = params.VotingParams
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetGovParams("deposit")
+			params, paramsErr := f.NodesManager.GetGovParams(chain, "deposit")
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].DepositParamsError = err
+			if paramsErr != nil {
+				chainsParams[chain.Name].DepositParamsError = paramsErr
 			} else {
 				chainsParams[chain.Name].DepositParams = params.DepositParams
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetGovParams("tallying")
+			params, paramsErr := f.NodesManager.GetGovParams(chain, "tallying")
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].TallyParamsError = err
+			if paramsErr != nil {
+				chainsParams[chain.Name].TallyParamsError = paramsErr
 			} else {
 				chainsParams[chain.Name].TallyParams = params.TallyParams
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			blockTime, err := rpc.GetBlockTime()
+			blockTime, blockTimeErr := f.NodesManager.GetBlockTime(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].BlockTimeError = err
+			if blockTimeErr != nil {
+				chainsParams[chain.Name].BlockTimeError = blockTimeErr
 			} else {
 				chainsParams[chain.Name].BlockTime = blockTime
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			params, _, err := rpc.GetMintParams()
+			params, paramsErr := f.NodesManager.GetMintParams(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].MintParamsError = err
+			if paramsErr != nil {
+				chainsParams[chain.Name].MintParamsError = paramsErr
 			} else {
 				chainsParams[chain.Name].MintParams = params.Params
 			}
-		}(chain, rpc)
+		}(chain)
 
 		wg.Add(1)
-		go func(chain *types.Chain, rpc *tendermint.RPC) {
+		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			inflation, _, err := rpc.GetInflation()
+			inflation, inflationErr := f.NodesManager.GetInflation(chain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsParams[chain.Name].InflationError = err
+			if inflationErr != nil {
+				chainsParams[chain.Name].InflationError = inflationErr
 			} else {
 				chainsParams[chain.Name].Inflation = inflation.Inflation
 			}
-		}(chain, rpc)
+		}(chain)
 	}
 
 	wg.Wait()

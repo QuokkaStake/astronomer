@@ -6,9 +6,7 @@ import (
 )
 
 func (f *DataFetcher) DoesWalletExist(chain *types.Chain, wallet string) error {
-	rpc := f.GetRPC(chain)
-
-	balances, _, err := rpc.GetBalance(wallet)
+	balances, err := f.NodesManager.GetBalance(chain, wallet)
 	if err != nil {
 		return err
 	}

@@ -27,14 +27,13 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-			pool, _, err := rpc.GetPool()
+			pool, poolErr := f.NodesManager.GetPool(chain)
 
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsSupplies[chain.Name].PoolError = err
+			if poolErr != nil {
+				chainsSupplies[chain.Name].PoolError = poolErr
 				return
 			}
 
@@ -60,14 +59,13 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-			supply, _, err := rpc.GetSupply()
+			supply, supplyErr := f.NodesManager.GetSupply(chain)
 
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsSupplies[chain.Name].SupplyError = err
+			if supplyErr != nil {
+				chainsSupplies[chain.Name].SupplyError = supplyErr
 				return
 			}
 
@@ -84,14 +82,13 @@ func (f *DataFetcher) GetSupply(chainNames []string) types.SupplyInfo {
 		go func(chain *types.Chain) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(chain)
-			communityPool, _, err := rpc.GetCommunityPool()
+			communityPool, poolErr := f.NodesManager.GetCommunityPool(chain)
 
 			mutex.Lock()
 			defer mutex.Unlock()
 
-			if err != nil {
-				chainsSupplies[chain.Name].CommunityPoolError = err
+			if poolErr != nil {
+				chainsSupplies[chain.Name].CommunityPoolError = poolErr
 				return
 			}
 

@@ -15,8 +15,7 @@ func (f *DataFetcher) PopulateValidators(validators []*types.ValidatorAddressWit
 		go func(validator *types.ValidatorAddressWithMoniker) {
 			defer wg.Done()
 
-			rpc := f.GetRPC(validator.Chain)
-			validatorFromChain, _, err := rpc.GetValidator(validator.Address)
+			validatorFromChain, err := f.NodesManager.GetValidator(validator.Chain, validator.Address)
 			if err != nil {
 				f.Logger.Error().Err(err).Msg("Could not get validator from chain")
 				return
