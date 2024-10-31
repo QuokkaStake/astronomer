@@ -16,6 +16,13 @@ type ChainWithLCD struct {
 	LCDEndpoint string
 }
 
+type ChainInfo struct {
+	Chain        *Chain
+	Denoms       Denoms
+	Explorers    Explorers
+	LCDEndpoints []string
+}
+
 func ChainFromArgs(args map[string]string) *ChainWithLCD {
 	chain := &ChainWithLCD{
 		Chain: Chain{},

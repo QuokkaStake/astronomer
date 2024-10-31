@@ -83,6 +83,7 @@ func (interacter *Interacter) Init() {
 	interacter.AddCommand("/validator_unlink", bot, interacter.GetValidatorUnlinkCommand())
 	interacter.AddCommand("/wallets", bot, interacter.GetWalletsCommand())
 	interacter.AddCommand("/chains", bot, interacter.GetChainsListCommand())
+	interacter.AddCommand("/chain", bot, interacter.GetChainInfoCommand())
 	interacter.AddCommand("/balance", bot, interacter.GetBalanceCommand())
 	interacter.AddCommand("/supply", bot, interacter.GetSupplyCommand())
 

@@ -1,0 +1,35 @@
+<strong>Chain info</strong>
+Name: <code>{{ .Chain.Name }}</code>
+Pretty name: <code>{{ .Chain.PrettyName }}</code>
+Base denom: <code>{{ .Chain.BaseDenom }}</code>
+Bech32 validator prefix: <code>{{ .Chain.Bech32ValidatorPrefix }}</code>
+{{ if .Denoms }}
+<strong>Denoms ({{ len .Denoms }}):</strong>
+{{- range .Denoms }}
+Denom: <code>{{ .Denom }}</code>
+Display denom: <code>{{ .DisplayDenom }}</code>
+Denom exponent: <code>{{ .DenomExponent }}</code>
+Coingecko currency: <code>{{ .PrintCoingeckoCurrency }}</code>
+{{- end }}
+{{- else }}
+<strong>Denoms:</strong>
+<i>No denoms.</i>
+{{- end }}
+{{ if .Explorers }}
+<strong>Explorers ({{ len .Explorers }}):</strong>
+{{- range .Explorers }}
+Name: <code>{{ .Name }}</code>
+Proposal link pattern: <code>{{ .ProposalLinkPattern }}</code>
+Wallet link pattern: <code>{{ .WalletLinkPattern }}</code>
+Validator link pattern: <code>{{ .ValidatorLinkPattern }}</code>
+Main link: <code>{{ .MainLink }}</code>
+{{- end }}
+{{- else }}
+<strong>Explorers:</strong>
+No explorers.
+{{- end }}
+
+<strong>LCD hosts:</strong>
+{{- range .LCDEndpoints }}
+- <code>{{ . }}</code>
+{{- end }}
