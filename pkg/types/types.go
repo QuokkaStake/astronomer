@@ -21,6 +21,7 @@ import (
 type QueryInfo struct {
 	Chain    string
 	URL      string
+	Host     string
 	Query    string
 	Duration time.Duration
 	Success  bool

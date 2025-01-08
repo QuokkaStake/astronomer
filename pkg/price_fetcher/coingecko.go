@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"main/pkg/constants"
 	"main/pkg/http"
+	"main/pkg/metrics"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"strings"
@@ -12,26 +13,32 @@ import (
 )
 
 type CoingeckoPriceFetcher struct {
-	Client *http.Client
-	Logger zerolog.Logger
+	Client         *http.Client
+	Logger         zerolog.Logger
+	MetricsManager *metrics.Manager
 }
 
-func NewCoingeckoPriceFetcher(logger *zerolog.Logger) *CoingeckoPriceFetcher {
+func NewCoingeckoPriceFetcher(
+	logger *zerolog.Logger,
+	metricsManager *metrics.Manager,
+) *CoingeckoPriceFetcher {
 	return &CoingeckoPriceFetcher{
-		Client: http.NewClient(logger, "coingecko"),
-		Logger: logger.With().Str("component", "coingecko_price_fetcher").Logger(),
+		Client:         http.NewClient(logger, "coingecko"),
+		Logger:         logger.With().Str("component", "coingecko_price_fetcher").Logger(),
+		MetricsManager: metricsManager,
 	}
 }
 
-func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, types.QueryInfo, error) {
+func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, error) {
 	currenciesToFetch := utils.Map(denomInfos, func(denomInfo *types.Denom) string {
 		return denomInfo.CoingeckoCurrency.String
 	})
 
 	var coingeckoResponse map[string]map[string]float64
-	query, err := c.Client.Get(
+	queryInfo, err := c.Client.Get(
+		"https://api.coingecko.com",
 		fmt.Sprintf(
-			"https://api.coingecko.com/api/v3/simple/price?ids=%s&vs_currencies=%s",
+			"/api/v3/simple/price?ids=%s&vs_currencies=%s",
 			strings.Join(currenciesToFetch, ","),
 			constants.CoingeckoBaseCurrency,
 		),
@@ -39,12 +46,14 @@ func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, ty
 		&coingeckoResponse,
 	)
 
+	c.MetricsManager.LogQueryInfo(queryInfo)
+
 	if err != nil {
 		c.Logger.Error().
 			Err(err).
 			Strs("currencies", currenciesToFetch).
 			Msg("Could not get rates, probably rate-limiting")
-		return map[string]map[string]float64{}, query, err
+		return map[string]map[string]float64{}, err
 	}
 
 	result := make(map[string]map[string]float64)
@@ -64,7 +73,7 @@ func (c *CoingeckoPriceFetcher) GetPrices(denomInfos []*types.Denom) (Prices, ty
 		}
 	}
 
-	return result, query, nil
+	return result, nil
 }
 
 func (c *CoingeckoPriceFetcher) Name() string {

@@ -44,12 +44,12 @@ func NewManager(logger *zerolog.Logger, config types.MetricsConfig) *Manager {
 	successQueriesCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: constants.PrometheusMetricsPrefix + "queries_successful",
 		Help: "Counter of successful queries towards the external services.",
-	}, []string{"chain", "query"})
+	}, []string{"chain", "query", "host"})
 
 	failedQueriesCounter := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: constants.PrometheusMetricsPrefix + "queries_failed",
 		Help: "Counter of failed queries towards the external services.",
-	}, []string{"chain", "query"})
+	}, []string{"chain", "query", "host"})
 
 	appVersionGauge := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: constants.PrometheusMetricsPrefix + "version",
@@ -127,11 +127,19 @@ func (m *Manager) LogAppVersion(version string) {
 func (m *Manager) LogQueryInfo(queryInfo types.QueryInfo) {
 	if queryInfo.Success {
 		m.successQueriesCounter.
-			With(prometheus.Labels{"chain": queryInfo.Chain, "query": queryInfo.Query}).
+			With(prometheus.Labels{
+				"chain": queryInfo.Chain,
+				"query": queryInfo.Query,
+				"host":  queryInfo.Host,
+			}).
 			Inc()
 	} else {
 		m.failedQueriesCounter.
-			With(prometheus.Labels{"chain": queryInfo.Chain, "query": queryInfo.Query}).
+			With(prometheus.Labels{
+				"chain": queryInfo.Chain,
+				"query": queryInfo.Query,
+				"host":  queryInfo.Host,
+			}).
 			Inc()
 	}
 }

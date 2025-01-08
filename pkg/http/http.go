@@ -15,7 +15,10 @@ type Client struct {
 	chain  string
 }
 
-func NewClient(logger *zerolog.Logger, chain string) *Client {
+func NewClient(
+	logger *zerolog.Logger,
+	chain string,
+) *Client {
 	return &Client{
 		logger: logger.With().
 			Str("component", "http").
@@ -26,6 +29,7 @@ func NewClient(logger *zerolog.Logger, chain string) *Client {
 }
 
 func (c *Client) GetInternal(
+	host string,
 	url string,
 	query string,
 ) (io.ReadCloser, types.QueryInfo, error) {
@@ -47,11 +51,12 @@ func (c *Client) GetInternal(
 	queryInfo := types.QueryInfo{
 		Success: false,
 		Chain:   c.chain,
+		Host:    host,
 		Query:   query,
 		URL:     url,
 	}
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, host+url, nil)
 	if err != nil {
 		return nil, queryInfo, err
 	}
@@ -73,10 +78,11 @@ func (c *Client) GetInternal(
 }
 
 func (c *Client) GetPlain(
+	host string,
 	url string,
 	query string,
 ) ([]byte, types.QueryInfo, error) {
-	body, queryInfo, err := c.GetInternal(url, query)
+	body, queryInfo, err := c.GetInternal(host, url, query)
 	if err != nil {
 		return nil, queryInfo, err
 	}
@@ -86,15 +92,18 @@ func (c *Client) GetPlain(
 		return nil, queryInfo, err
 	}
 
+	queryInfo.Success = true
+
 	return bytes, queryInfo, nil
 }
 
 func (c *Client) Get(
+	host string,
 	url string,
 	query string,
 	target interface{},
 ) (types.QueryInfo, error) {
-	body, queryInfo, err := c.GetInternal(url, query)
+	body, queryInfo, err := c.GetInternal(host, url, query)
 	if err != nil {
 		return queryInfo, err
 	}
@@ -103,6 +112,8 @@ func (c *Client) Get(
 		c.logger.Warn().Str("url", url).Err(jsonErr).Msg("Error decoding JSON from response")
 		return queryInfo, jsonErr
 	}
+
+	queryInfo.Success = true
 
 	return queryInfo, body.Close()
 }
