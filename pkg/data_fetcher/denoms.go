@@ -92,8 +92,7 @@ func (f *DataFetcher) PopulateDenoms(amounts []*types.AmountWithChain) {
 				return
 			}
 
-			fetcherPrices, queryInfo, denomFetchError := foundPriceFetcher.GetPrices(notCachedDenoms)
-			f.MetricsManager.LogQueryInfo(queryInfo)
+			fetcherPrices, denomFetchError := foundPriceFetcher.GetPrices(notCachedDenoms)
 
 			if denomFetchError != nil {
 				f.Logger.Err(denomFetchError).

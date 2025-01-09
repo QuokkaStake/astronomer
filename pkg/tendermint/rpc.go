@@ -61,131 +61,131 @@ func NewRPC(
 	}
 }
 
-func (rpc *RPC) GetAllValidators(hosts []string) (*stakingTypes.QueryValidatorsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetAllValidators(hosts []string) (*stakingTypes.QueryValidatorsResponse, error) {
 	url := "/cosmos/staking/v1beta1/validators?pagination.count_total=true&pagination.limit=1000"
 
 	var response stakingTypes.QueryValidatorsResponse
-	info, err := rpc.Get(hosts, url, "validators", &response)
+	err := rpc.Get(hosts, url, "validators", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetAllSigningInfos(hosts []string) (*slashingTypes.QuerySigningInfosResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetAllSigningInfos(hosts []string) (*slashingTypes.QuerySigningInfosResponse, error) {
 	url := "/cosmos/slashing/v1beta1/signing_infos?pagination.limit=1000"
 
 	var response slashingTypes.QuerySigningInfosResponse
-	info, err := rpc.Get(hosts, url, "signing_infos", &response)
+	err := rpc.Get(hosts, url, "signing_infos", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetValidator(address string, hosts []string) (*stakingTypes.QueryValidatorResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetValidator(address string, hosts []string) (*stakingTypes.QueryValidatorResponse, error) {
 	url := "/cosmos/staking/v1beta1/validators/" + address
 
 	var response stakingTypes.QueryValidatorResponse
-	info, err := rpc.Get(hosts, url, "validator", &response)
+	err := rpc.Get(hosts, url, "validator", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetStakingParams(hosts []string) (*stakingTypes.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetStakingParams(hosts []string) (*stakingTypes.QueryParamsResponse, error) {
 	url := "/cosmos/staking/v1beta1/params"
 
 	var response stakingTypes.QueryParamsResponse
-	info, err := rpc.Get(hosts, url, "staking_params", &response)
+	err := rpc.Get(hosts, url, "staking_params", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetSlashingParams(hosts []string) (*slashingTypes.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetSlashingParams(hosts []string) (*slashingTypes.QueryParamsResponse, error) {
 	url := "/cosmos/slashing/v1beta1/params"
 
 	var response slashingTypes.QueryParamsResponse
-	info, err := rpc.Get(hosts, url, "slashing_params", &response)
+	err := rpc.Get(hosts, url, "slashing_params", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetGovParams(paramsType string, hosts []string) (*govV1beta1Types.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetGovParams(paramsType string, hosts []string) (*govV1beta1Types.QueryParamsResponse, error) {
 	url := "/cosmos/gov/v1beta1/params/" + paramsType
 
 	var response govV1beta1Types.QueryParamsResponse
-	info, err := rpc.Get(hosts, url, "gov_params_"+paramsType, &response)
+	err := rpc.Get(hosts, url, "gov_params_"+paramsType, &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetMintParams(hosts []string) (*mintTypes.QueryParamsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetMintParams(hosts []string) (*mintTypes.QueryParamsResponse, error) {
 	url := "/cosmos/mint/v1beta1/params"
 
 	var response mintTypes.QueryParamsResponse
-	info, err := rpc.Get(hosts, url, "mint_params", &response)
+	err := rpc.Get(hosts, url, "mint_params", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetInflation(hosts []string) (*mintTypes.QueryInflationResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetInflation(hosts []string) (*mintTypes.QueryInflationResponse, error) {
 	url := "/cosmos/mint/v1beta1/inflation"
 
 	var response mintTypes.QueryInflationResponse
-	info, err := rpc.Get(hosts, url, "inflation", &response)
+	err := rpc.Get(hosts, url, "inflation", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetBalance(address string, hosts []string) (*bankTypes.QueryAllBalancesResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetBalance(address string, hosts []string) (*bankTypes.QueryAllBalancesResponse, error) {
 	url := "/cosmos/bank/v1beta1/balances/" + address
 
 	var response bankTypes.QueryAllBalancesResponse
-	info, err := rpc.Get(hosts, url, "balance", &response)
+	err := rpc.Get(hosts, url, "balance", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetRewards(address string, hosts []string) (*distributionTypes.QueryDelegationTotalRewardsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetRewards(address string, hosts []string) (*distributionTypes.QueryDelegationTotalRewardsResponse, error) {
 	url := "/cosmos/distribution/v1beta1/delegators/" + address + "/rewards"
 
 	var response distributionTypes.QueryDelegationTotalRewardsResponse
-	info, err := rpc.Get(hosts, url, "rewards", &response)
+	err := rpc.Get(hosts, url, "rewards", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetCommission(address string, hosts []string) (*distributionTypes.QueryValidatorCommissionResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetCommission(address string, hosts []string) (*distributionTypes.QueryValidatorCommissionResponse, error) {
 	url := "/cosmos/distribution/v1beta1/validators/" + address + "/commission"
 
 	var response distributionTypes.QueryValidatorCommissionResponse
-	info, err := rpc.Get(hosts, url, "commission", &response)
+	err := rpc.Get(hosts, url, "commission", &response)
 	if err != nil {
 		// not being a validator is acceptable
 		if strings.Contains(err.Error(), "validator does not exist") {
@@ -193,90 +193,90 @@ func (rpc *RPC) GetCommission(address string, hosts []string) (*distributionType
 				Commission: distributionTypes.ValidatorAccumulatedCommission{
 					Commission: make(cosmosTypes.DecCoins, 0),
 				},
-			}, info, nil
+			}, nil
 		}
 
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetDelegations(address string, hosts []string) (*stakingTypes.QueryDelegatorDelegationsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetDelegations(address string, hosts []string) (*stakingTypes.QueryDelegatorDelegationsResponse, error) {
 	url := "/cosmos/staking/v1beta1/delegations/" + address + "?pagination.limit=1000"
 
 	var response stakingTypes.QueryDelegatorDelegationsResponse
-	info, err := rpc.Get(hosts, url, "delegations", &response)
+	err := rpc.Get(hosts, url, "delegations", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetRedelegations(address string, hosts []string) (*stakingTypes.QueryRedelegationsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetRedelegations(address string, hosts []string) (*stakingTypes.QueryRedelegationsResponse, error) {
 	url := "/cosmos/staking/v1beta1/delegators/" + address + "/redelegations?pagination.limit=1000"
 
 	var response stakingTypes.QueryRedelegationsResponse
-	info, err := rpc.Get(hosts, url, "commission", &response)
+	err := rpc.Get(hosts, url, "commission", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetUnbonds(address string, hosts []string) (*stakingTypes.QueryDelegatorUnbondingDelegationsResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetUnbonds(address string, hosts []string) (*stakingTypes.QueryDelegatorUnbondingDelegationsResponse, error) {
 	url := "/cosmos/staking/v1beta1/delegators/" + address + "/unbonding_delegations?pagination.limit=1000"
 
 	var response stakingTypes.QueryDelegatorUnbondingDelegationsResponse
-	info, err := rpc.Get(hosts, url, "unbonds", &response)
+	err := rpc.Get(hosts, url, "unbonds", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetPool(hosts []string) (*stakingTypes.QueryPoolResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetPool(hosts []string) (*stakingTypes.QueryPoolResponse, error) {
 	url := "/cosmos/staking/v1beta1/pool"
 
 	var response stakingTypes.QueryPoolResponse
-	info, err := rpc.Get(hosts, url, "pool", &response)
+	err := rpc.Get(hosts, url, "pool", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetSupply(hosts []string) (*bankTypes.QueryTotalSupplyResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetSupply(hosts []string) (*bankTypes.QueryTotalSupplyResponse, error) {
 	url := "/cosmos/bank/v1beta1/supply?pagination.limit=10000&pagination.offset=0"
 
 	var response bankTypes.QueryTotalSupplyResponse
-	info, err := rpc.Get(hosts, url, "supply", &response)
+	err := rpc.Get(hosts, url, "supply", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
-func (rpc *RPC) GetCommunityPool(hosts []string) (*distributionTypes.QueryCommunityPoolResponse, types.QueryInfo, error) {
+func (rpc *RPC) GetCommunityPool(hosts []string) (*distributionTypes.QueryCommunityPoolResponse, error) {
 	url := "/cosmos/distribution/v1beta1/community_pool?pagination.limit=10000&pagination.offset=0"
 
 	var response distributionTypes.QueryCommunityPoolResponse
-	info, err := rpc.Get(hosts, url, "community_pool", &response)
+	err := rpc.Get(hosts, url, "community_pool", &response)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return &response, info, nil
+	return &response, nil
 }
 
 func (rpc *RPC) GetBlockTime(hosts []string) (time.Duration, error) {
 	var newerBlock cmtservice.GetLatestBlockResponse
-	_, err := rpc.Get(hosts, "/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
+	err := rpc.Get(hosts, "/cosmos/base/tendermint/v1beta1/blocks/latest", "block", &newerBlock)
 	if err != nil {
 		return 0, err
 	}
@@ -284,7 +284,7 @@ func (rpc *RPC) GetBlockTime(hosts []string) (time.Duration, error) {
 	newerHeight := newerBlock.Block.Header.Height - 1000 //nolint:staticcheck
 
 	var olderBlock cmtservice.GetBlockByHeightResponse
-	_, err = rpc.Get(
+	err = rpc.Get(
 		hosts,
 		"/cosmos/base/tendermint/v1beta1/blocks/"+strconv.FormatInt(newerHeight, 10),
 		"block",
@@ -300,17 +300,17 @@ func (rpc *RPC) GetBlockTime(hosts []string) (time.Duration, error) {
 	return time.Duration(float64(timeDiff.Nanoseconds()) / float64(heightDiff)), nil
 }
 
-func (rpc *RPC) GetActiveProposals(hosts []string) ([]*types.Proposal, types.QueryInfo, error) {
+func (rpc *RPC) GetActiveProposals(hosts []string) ([]*types.Proposal, error) {
 	url := "/cosmos/gov/v1/proposals?pagination.limit=1000&proposal_status=PROPOSAL_STATUS_VOTING_PERIOD"
 
 	var response govV1Types.QueryProposalsResponse
-	info, err := rpc.Get(hosts, url, "proposals_v1", &response)
+	err := rpc.Get(hosts, url, "proposals_v1", &response)
 	if err == nil {
-		return utils.Map(response.Proposals, types.ProposalFromV1), info, nil
+		return utils.Map(response.Proposals, types.ProposalFromV1), nil
 	}
 
 	if !strings.Contains(err.Error(), "Not Implemented") {
-		return nil, info, err
+		return nil, err
 	}
 
 	rpc.Logger.Warn().Msg("v1 proposals are not supported, falling back to v1beta1")
@@ -318,36 +318,36 @@ func (rpc *RPC) GetActiveProposals(hosts []string) ([]*types.Proposal, types.Que
 	url = "/cosmos/gov/v1beta1/proposals?pagination.limit=1000&proposal_status=2"
 
 	var responsev1beta1 govV1beta1Types.QueryProposalsResponse
-	infov1beta1, err := rpc.Get(hosts, url, "proposals_v1beta1", &responsev1beta1)
+	err = rpc.Get(hosts, url, "proposals_v1beta1", &responsev1beta1)
 	if err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
 	for _, proposal := range responsev1beta1.Proposals {
 		if err := rpc.Converter.UnpackProposal(proposal); err != nil {
-			return nil, info, err
+			return nil, err
 		}
 	}
 
-	return utils.Map(responsev1beta1.Proposals, types.ProposalFromV1beta1), infov1beta1, nil
+	return utils.Map(responsev1beta1.Proposals, types.ProposalFromV1beta1), nil
 }
 
-func (rpc *RPC) GetSingleProposal(proposalID string, hosts []string) (*types.Proposal, types.QueryInfo, error) {
+func (rpc *RPC) GetSingleProposal(proposalID string, hosts []string) (*types.Proposal, error) {
 	url := "/cosmos/gov/v1/proposals/" + proposalID
 
 	var response govV1Types.QueryProposalResponse
-	info, err := rpc.Get(hosts, url, "proposal_v1", &response)
+	err := rpc.Get(hosts, url, "proposal_v1", &response)
 	if err == nil {
-		return types.ProposalFromV1(response.Proposal), info, nil
+		return types.ProposalFromV1(response.Proposal), nil
 	}
 
 	// failed cases
 	if strings.Contains(err.Error(), "doesn't exist") {
-		return nil, info, nil
+		return nil, nil
 	}
 
 	if !strings.Contains(err.Error(), "Not Implemented") {
-		return nil, info, err
+		return nil, err
 	}
 
 	rpc.Logger.Warn().Msg("v1 proposal are not supported, falling back to v1")
@@ -355,20 +355,20 @@ func (rpc *RPC) GetSingleProposal(proposalID string, hosts []string) (*types.Pro
 	url = "/cosmos/gov/v1beta1/proposals/" + proposalID
 
 	var responsev1beta1 govV1beta1Types.QueryProposalResponse
-	infov1beta1, err := rpc.Get(hosts, url, "proposal_v1beta1", &responsev1beta1)
+	err = rpc.Get(hosts, url, "proposal_v1beta1", &responsev1beta1)
 	if err != nil {
 		if strings.Contains(err.Error(), "doesn't exist") {
-			return nil, info, nil
+			return nil, nil
 		}
 
-		return nil, info, err
+		return nil, err
 	}
 
 	if err := rpc.Converter.UnpackProposal(responsev1beta1.Proposal); err != nil {
-		return nil, info, err
+		return nil, err
 	}
 
-	return types.ProposalFromV1beta1(responsev1beta1.Proposal), infov1beta1, nil
+	return types.ProposalFromV1beta1(responsev1beta1.Proposal), nil
 }
 
 func (rpc *RPC) Get(
@@ -376,10 +376,12 @@ func (rpc *RPC) Get(
 	url string,
 	queryName string,
 	target proto.Message,
-) (types.QueryInfo, error) {
+) error {
 	for attempt := range constants.RetriesCount {
 		host := hosts[rand.Int()%len(hosts)]
 		queryInfo, err := rpc.GetOne(host, url, queryName, target)
+		rpc.MetricsManager.LogQueryInfo(queryInfo)
+
 		if err != nil {
 			rpc.Logger.Warn().
 				Str("host", host).
@@ -389,7 +391,7 @@ func (rpc *RPC) Get(
 				Err(err).
 				Msg("LCD request failed, retrying")
 		} else {
-			return queryInfo, nil
+			return nil
 		}
 	}
 
@@ -399,7 +401,7 @@ func (rpc *RPC) Get(
 		Int("max_attempts", constants.RetriesCount).
 		Msg("All LCD requests failed")
 
-	return types.QueryInfo{}, fmt.Errorf("could not get data after %d attempts", constants.RetriesCount)
+	return fmt.Errorf("could not get data after %d attempts", constants.RetriesCount)
 }
 
 func (rpc *RPC) GetOne(
@@ -409,7 +411,8 @@ func (rpc *RPC) GetOne(
 	target proto.Message,
 ) (types.QueryInfo, error) {
 	bytes, queryInfo, err := rpc.Client.GetPlain(
-		host+url,
+		host,
+		url,
 		queryName,
 	)
 	if err != nil {
@@ -433,12 +436,14 @@ func (rpc *RPC) GetOne(
 				Int("code", errorResponse.Code).
 				Str("message", errorResponse.Message).
 				Msg("LCD request returned an error")
+			queryInfo.Success = false
 			return queryInfo, errors.New(errorResponse.Message)
 		}
 	}
 
 	if decodeErr := rpc.Converter.Unmarshal(bytes, target); decodeErr != nil {
 		rpc.Logger.Warn().Str("url", url).Err(decodeErr).Msg("JSON unmarshalling failed")
+		queryInfo.Success = false
 		return queryInfo, decodeErr
 	}
 

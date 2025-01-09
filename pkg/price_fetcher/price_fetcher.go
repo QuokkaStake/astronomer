@@ -23,6 +23,6 @@ func (p *Prices) Get(chain string, denom string) (float64, bool) {
 }
 
 type PriceFetcher interface {
-	GetPrices(denomInfos []*types.Denom) (Prices, types.QueryInfo, error)
+	GetPrices(denomInfos []*types.Denom) (Prices, error)
 	Name() string
 }

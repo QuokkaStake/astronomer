@@ -74,7 +74,7 @@ func (manager *NodeManager) GetAllValidators(chain *types.Chain) (*stakingTypes.
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetAllValidators(hosts)
+	response, err := rpc.GetAllValidators(hosts)
 	return response, err
 }
 
@@ -85,7 +85,7 @@ func (manager *NodeManager) GetAllSigningInfos(chain *types.Chain) (*slashingTyp
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetAllSigningInfos(hosts)
+	response, err := rpc.GetAllSigningInfos(hosts)
 	return response, err
 }
 
@@ -96,7 +96,7 @@ func (manager *NodeManager) GetValidator(chain *types.Chain, address string) (*s
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetValidator(address, hosts)
+	response, err := rpc.GetValidator(address, hosts)
 	return response, err
 }
 
@@ -107,7 +107,7 @@ func (manager *NodeManager) GetStakingParams(chain *types.Chain) (*stakingTypes.
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetStakingParams(hosts)
+	response, err := rpc.GetStakingParams(hosts)
 	return response, err
 }
 
@@ -118,7 +118,7 @@ func (manager *NodeManager) GetSlashingParams(chain *types.Chain) (*slashingType
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetSlashingParams(hosts)
+	response, err := rpc.GetSlashingParams(hosts)
 	return response, err
 }
 
@@ -129,7 +129,7 @@ func (manager *NodeManager) GetGovParams(chain *types.Chain, paramsType string) 
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetGovParams(paramsType, hosts)
+	response, err := rpc.GetGovParams(paramsType, hosts)
 	return response, err
 }
 
@@ -140,7 +140,7 @@ func (manager *NodeManager) GetMintParams(chain *types.Chain) (*mintTypes.QueryP
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetMintParams(hosts)
+	response, err := rpc.GetMintParams(hosts)
 	return response, err
 }
 
@@ -151,7 +151,7 @@ func (manager *NodeManager) GetInflation(chain *types.Chain) (*mintTypes.QueryIn
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetInflation(hosts)
+	response, err := rpc.GetInflation(hosts)
 	return response, err
 }
 
@@ -162,7 +162,7 @@ func (manager *NodeManager) GetBalance(chain *types.Chain, address string) (*ban
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetBalance(address, hosts)
+	response, err := rpc.GetBalance(address, hosts)
 	return response, err
 }
 
@@ -173,7 +173,7 @@ func (manager *NodeManager) GetRewards(chain *types.Chain, address string) (*dis
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetRewards(address, hosts)
+	response, err := rpc.GetRewards(address, hosts)
 	return response, err
 }
 
@@ -184,7 +184,7 @@ func (manager *NodeManager) GetCommission(chain *types.Chain, address string) (*
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetCommission(address, hosts)
+	response, err := rpc.GetCommission(address, hosts)
 	return response, err
 }
 
@@ -195,7 +195,7 @@ func (manager *NodeManager) GetDelegations(chain *types.Chain, address string) (
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetDelegations(address, hosts)
+	response, err := rpc.GetDelegations(address, hosts)
 	return response, err
 }
 
@@ -206,7 +206,7 @@ func (manager *NodeManager) GetRedelegations(chain *types.Chain, address string)
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetRedelegations(address, hosts)
+	response, err := rpc.GetRedelegations(address, hosts)
 	return response, err
 }
 
@@ -217,7 +217,7 @@ func (manager *NodeManager) GetUnbonds(chain *types.Chain, address string) (*sta
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetUnbonds(address, hosts)
+	response, err := rpc.GetUnbonds(address, hosts)
 	return response, err
 }
 
@@ -228,7 +228,7 @@ func (manager *NodeManager) GetPool(chain *types.Chain) (*stakingTypes.QueryPool
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetPool(hosts)
+	response, err := rpc.GetPool(hosts)
 	return response, err
 }
 
@@ -239,7 +239,7 @@ func (manager *NodeManager) GetSupply(chain *types.Chain) (*bankTypes.QueryTotal
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetSupply(hosts)
+	response, err := rpc.GetSupply(hosts)
 	return response, err
 }
 
@@ -250,7 +250,7 @@ func (manager *NodeManager) GetCommunityPool(chain *types.Chain) (*distributionT
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetCommunityPool(hosts)
+	response, err := rpc.GetCommunityPool(hosts)
 	return response, err
 }
 
@@ -272,7 +272,7 @@ func (manager *NodeManager) GetActiveProposals(chain *types.Chain) ([]*types.Pro
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetActiveProposals(hosts)
+	response, err := rpc.GetActiveProposals(hosts)
 	return response, err
 }
 
@@ -283,6 +283,6 @@ func (manager *NodeManager) GetSingleProposal(chain *types.Chain, id string) (*t
 	}
 
 	rpc := manager.GetRPC(chain)
-	response, _, err := rpc.GetSingleProposal(id, hosts)
+	response, err := rpc.GetSingleProposal(id, hosts)
 	return response, err
 }

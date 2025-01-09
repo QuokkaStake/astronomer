@@ -12,7 +12,7 @@ func TestHttpClientErrorCreating(t *testing.T) {
 
 	logger := loggerPkg.GetNopLogger()
 	client := NewClient(logger, "chain")
-	queryInfo, err := client.Get("://test", "query", nil)
+	queryInfo, err := client.Get("://test", "", "query", nil)
 	require.Error(t, err)
 	require.False(t, queryInfo.Success)
 }

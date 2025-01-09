@@ -31,7 +31,7 @@ func NewDataFetcher(
 	nodesManager *tendermint.NodeManager,
 ) *DataFetcher {
 	priceFetchers := map[constants.PriceFetcherName]priceFetcher.PriceFetcher{
-		constants.PriceFetcherNameCoingecko: priceFetcher.NewCoingeckoPriceFetcher(logger),
+		constants.PriceFetcherNameCoingecko: priceFetcher.NewCoingeckoPriceFetcher(logger, metricsManager),
 	}
 
 	return &DataFetcher{
