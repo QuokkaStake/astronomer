@@ -30,6 +30,8 @@ type Interacter struct {
 	Chains          types.Chains
 	TemplateManager templates.Manager
 	MetricsManager  *metrics.Manager
+
+	StopChannel chan bool
 }
 
 const (
@@ -53,6 +55,7 @@ func NewInteracter(
 		Database:        database,
 		TemplateManager: templates.NewTelegramTemplatesManager(logger),
 		MetricsManager:  metricsManager,
+		StopChannel:     make(chan bool),
 	}
 }
 
@@ -158,7 +161,11 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 }
 
 func (interacter *Interacter) Start() {
-	interacter.TelegramBot.Start()
+	go interacter.TelegramBot.Start()
+
+	<-interacter.StopChannel
+	interacter.Logger.Info().Msg("Shutting down...")
+	interacter.TelegramBot.Stop()
 }
 
 func (interacter *Interacter) Enabled() bool {
@@ -167,6 +174,10 @@ func (interacter *Interacter) Enabled() bool {
 
 func (interacter *Interacter) Name() string {
 	return "telegram"
+}
+
+func (interacter *Interacter) Stop() {
+	interacter.StopChannel <- true
 }
 
 func (interacter *Interacter) BotReply(c tele.Context, msg string) error {
