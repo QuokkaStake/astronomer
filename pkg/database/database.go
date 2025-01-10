@@ -67,6 +67,10 @@ func (d *Database) Init() {
 	d.Migrate()
 }
 
+func (d *Database) SetClient(client *sql.DB) {
+	d.client = client
+}
+
 func (d *Database) Migrate() {
 	goose.SetBaseFS(migrationsPkg.EmbedFS)
 	goose.SetLogger(d.databaseLogger)

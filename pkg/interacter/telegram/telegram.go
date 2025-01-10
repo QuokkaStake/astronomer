@@ -7,6 +7,7 @@ import (
 	"main/pkg/templates"
 	"main/pkg/types"
 	"strconv"
+	"strings"
 	"time"
 
 	"gopkg.in/telebot.v3/middleware"
@@ -184,7 +185,7 @@ func (interacter *Interacter) BotReply(c tele.Context, msg string) error {
 	messages := utils.SplitStringIntoChunks(msg, MaxMessageSize)
 
 	for _, message := range messages {
-		if err := c.Reply(message, tele.ModeHTML, tele.NoPreview); err != nil {
+		if err := c.Reply(strings.TrimSpace(message), tele.ModeHTML, tele.NoPreview); err != nil {
 			interacter.Logger.Error().Err(err).Msg("Could not send Telegram message")
 			return err
 		}
