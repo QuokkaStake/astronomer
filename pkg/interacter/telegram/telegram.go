@@ -7,6 +7,7 @@ import (
 	"main/pkg/templates"
 	"main/pkg/types"
 	"strconv"
+	"strings"
 	"time"
 
 	"gopkg.in/telebot.v3/middleware"
@@ -30,6 +31,8 @@ type Interacter struct {
 	Chains          types.Chains
 	TemplateManager templates.Manager
 	MetricsManager  *metrics.Manager
+
+	StopChannel chan bool
 }
 
 const (
@@ -53,6 +56,7 @@ func NewInteracter(
 		Database:        database,
 		TemplateManager: templates.NewTelegramTemplatesManager(logger),
 		MetricsManager:  metricsManager,
+		StopChannel:     make(chan bool),
 	}
 }
 
@@ -158,7 +162,11 @@ func (interacter *Interacter) AddCommand(query string, bot *tele.Bot, command Co
 }
 
 func (interacter *Interacter) Start() {
-	interacter.TelegramBot.Start()
+	go interacter.TelegramBot.Start()
+
+	<-interacter.StopChannel
+	interacter.Logger.Info().Msg("Shutting down...")
+	interacter.TelegramBot.Stop()
 }
 
 func (interacter *Interacter) Enabled() bool {
@@ -169,11 +177,15 @@ func (interacter *Interacter) Name() string {
 	return "telegram"
 }
 
+func (interacter *Interacter) Stop() {
+	interacter.StopChannel <- true
+}
+
 func (interacter *Interacter) BotReply(c tele.Context, msg string) error {
 	messages := utils.SplitStringIntoChunks(msg, MaxMessageSize)
 
 	for _, message := range messages {
-		if err := c.Reply(message, tele.ModeHTML, tele.NoPreview); err != nil {
+		if err := c.Reply(strings.TrimSpace(message), tele.ModeHTML, tele.NoPreview); err != nil {
 			interacter.Logger.Error().Err(err).Msg("Could not send Telegram message")
 			return err
 		}

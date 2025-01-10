@@ -40,5 +40,4 @@ linters:
     - perfsprint
     - mnd
     - goconst
-    - execinquery
     - nilnil
