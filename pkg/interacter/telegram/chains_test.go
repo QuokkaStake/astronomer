@@ -31,7 +31,7 @@ func TestTelegramChainsErrorFetchingChains(t *testing.T) {
 		types.TelegramResponseHasText("Error fetching chains!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -88,7 +88,7 @@ func TestTelegramChainsErrorFetchingExplorers(t *testing.T) {
 		types.TelegramResponseHasText("Error fetching explorers!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -151,7 +151,7 @@ func TestTelegramChainsOk(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/chains.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 

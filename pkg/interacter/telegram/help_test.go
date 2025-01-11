@@ -30,7 +30,7 @@ func TestTelegramHelpNoChains(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/help-no-chains.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -84,7 +84,7 @@ func TestTelegramHelpSingleChain(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/help-single-chain.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -138,7 +138,7 @@ func TestTelegramHelpMultipleChains(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/help-multiple-chains.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 

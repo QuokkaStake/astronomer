@@ -32,7 +32,7 @@ func TestTelegramWalletsErrorFetchingChainBinds(t *testing.T) {
 		types.TelegramResponseHasText("❌ Error getting wallets list: custom error"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -90,7 +90,7 @@ func TestTelegramWalletsErrorFetchingChains(t *testing.T) {
 		types.TelegramResponseHasText("❌ Error getting wallets list: custom error"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -152,7 +152,7 @@ func TestTelegramWalletsErrorFetchingExplorers(t *testing.T) {
 		types.TelegramResponseHasText("❌ Error getting wallets list: custom error"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -220,7 +220,7 @@ func TestTelegramWalletsErrorNoChains(t *testing.T) {
 		types.TelegramResponseHasText("You are not subscribed to any wallets."),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -284,7 +284,7 @@ func TestTelegramWalletsOk(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/wallets.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
