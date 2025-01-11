@@ -66,6 +66,9 @@ func TestTelegramHelpNoChains(t *testing.T) {
 
 	err = interacter.TelegramBot.Trigger("/help", ctx)
 	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
 
 //nolint:paralleltest // disabled
@@ -120,6 +123,9 @@ func TestTelegramHelpSingleChain(t *testing.T) {
 
 	err = interacter.TelegramBot.Trigger("/help", ctx)
 	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
 
 //nolint:paralleltest // disabled
@@ -173,5 +179,8 @@ func TestTelegramHelpMultipleChains(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/help", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }

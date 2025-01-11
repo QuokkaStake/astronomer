@@ -69,6 +69,9 @@ func TestTelegramChainInvalidInvocation(t *testing.T) {
 
 	err = interacter.TelegramBot.Trigger("/chain", ctx)
 	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
 
 //nolint:paralleltest // disabled
@@ -126,6 +129,9 @@ func TestTelegramChainErrorFindingChain(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/chain", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -187,6 +193,9 @@ func TestTelegramChainErrorChainNotFoundAndFailedToFetch(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/chain", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -251,6 +260,9 @@ func TestTelegramChainErrorChainNotFound(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/chain", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 

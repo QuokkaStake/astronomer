@@ -72,6 +72,9 @@ func TestTelegramWalletsErrorFetchingChainBinds(t *testing.T) {
 
 	err = interacter.TelegramBot.Trigger("/wallets", ctx)
 	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
 
 //nolint:paralleltest // disabled
@@ -133,6 +136,9 @@ func TestTelegramWalletsErrorFetchingChains(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/wallets", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -202,6 +208,9 @@ func TestTelegramWalletsErrorFetchingExplorers(t *testing.T) {
 
 	err = interacter.TelegramBot.Trigger("/wallets", ctx)
 	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
 }
 
 //nolint:paralleltest // disabled
@@ -240,9 +249,6 @@ func TestTelegramWalletsErrorNoChains(t *testing.T) {
 	mock.ExpectQuery("SELECT name, pretty_name, base_denom, bech32_validator_prefix FROM chains").
 		WillReturnRows(sqlmock.NewRows([]string{"name", "pretty_name", "base_denom", "bech32_validator_prefix"}))
 
-	mock.ExpectQuery("SELECT chain, name, proposal_link_pattern, wallet_link_pattern, validator_link_pattern, main_link FROM explorers").
-		WillReturnRows(sqlmock.NewRows([]string{"chain", "name", "proposal_link_pattern", "wallet_link_pattern", "validator_link_pattern", "main_link"}))
-
 	database.SetClient(db)
 
 	interacter := NewInteracter(
@@ -265,6 +271,9 @@ func TestTelegramWalletsErrorNoChains(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/wallets", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -340,5 +349,8 @@ func TestTelegramWalletsOk(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/wallets", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
