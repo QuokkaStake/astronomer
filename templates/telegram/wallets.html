@@ -13,5 +13,6 @@ You are not subscribed to any wallets.
 {{- range .Wallets }}
 - <code>{{ .Address }}</code> -> {{ .Alias.Value }} {{ FormatLinks ($explorers.GetWalletLinks (.)) }}
 {{- end }}
+
 {{ end }}
 {{ end }}
