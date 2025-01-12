@@ -17,7 +17,7 @@ import (
 )
 
 //nolint:paralleltest // disabled
-func TestTelegramChainBindInvalidInvocation(t *testing.T) {
+func TestTelegramDenomAddNotEnoughArgs(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -29,7 +29,7 @@ func TestTelegramChainBindInvalidInvocation(t *testing.T) {
 	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasText("Usage: /chain_bind &lt;chain&gt;"),
+		types.TelegramResponseHasText("Usage: /denom_add &lt;params&gt;"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	logger := loggerPkg.GetNopLogger()
@@ -62,12 +62,12 @@ func TestTelegramChainBindInvalidInvocation(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/chain_bind",
+			Text:   "/denom_add",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/chain_bind", ctx)
+	err = interacter.TelegramBot.Trigger("/denom_add", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -75,7 +75,123 @@ func TestTelegramChainBindInvalidInvocation(t *testing.T) {
 }
 
 //nolint:paralleltest // disabled
-func TestTelegramChainBindFetchChainError(t *testing.T) {
+func TestTelegramDenomAddInvalidInvocation(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder(
+		"POST",
+		"https://api.telegram.org/botxxx:yyy/getMe",
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-bot-ok.json")))
+
+	httpmock.RegisterMatcherResponder(
+		"POST",
+		"https://api.telegram.org/botxxx:yyy/sendMessage",
+		types.TelegramResponseHasText("Invalid input syntax!"),
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
+
+	logger := loggerPkg.GetNopLogger()
+	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
+	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
+	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
+
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+
+	mock.ExpectExec("INSERT INTO queries").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	mock.ExpectQuery("SELECT chain FROM chain_binds").
+		WillReturnRows(sqlmock.NewRows([]string{"chain"}).AddRow("chain1").AddRow("chain2"))
+
+	database.SetClient(db)
+
+	interacter := NewInteracter(
+		types.TelegramConfig{Token: "xxx:yyy", Admins: []int64{1, 2}},
+		"v1.2.3",
+		logger,
+		dataFetcher,
+		database,
+		metricsManager,
+	)
+	interacter.Init()
+
+	ctx := interacter.TelegramBot.NewContext(tele.Update{
+		ID: 1,
+		Message: &tele.Message{
+			Sender: &tele.User{Username: "testuser", ID: 1},
+			Text:   "/denom_add 123",
+			Chat:   &tele.Chat{ID: 2},
+		},
+	})
+
+	err = interacter.TelegramBot.Trigger("/denom_add", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
+}
+
+//nolint:paralleltest // disabled
+func TestTelegramDenomAddInvalidData(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder(
+		"POST",
+		"https://api.telegram.org/botxxx:yyy/getMe",
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-bot-ok.json")))
+
+	httpmock.RegisterMatcherResponder(
+		"POST",
+		"https://api.telegram.org/botxxx:yyy/sendMessage",
+		types.TelegramResponseHasText("Invalid data provided: denom is required"),
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
+
+	logger := loggerPkg.GetNopLogger()
+	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
+	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
+	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
+
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+
+	mock.ExpectExec("INSERT INTO queries").
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	mock.ExpectQuery("SELECT chain FROM chain_binds").
+		WillReturnRows(sqlmock.NewRows([]string{"chain"}).AddRow("chain1").AddRow("chain2"))
+
+	database.SetClient(db)
+
+	interacter := NewInteracter(
+		types.TelegramConfig{Token: "xxx:yyy", Admins: []int64{1, 2}},
+		"v1.2.3",
+		logger,
+		dataFetcher,
+		database,
+		metricsManager,
+	)
+	interacter.Init()
+
+	ctx := interacter.TelegramBot.NewContext(tele.Update{
+		ID: 1,
+		Message: &tele.Message{
+			Sender: &tele.User{Username: "testuser", ID: 1},
+			Text:   "/denom_add chain=chain",
+			Chat:   &tele.Chat{ID: 2},
+		},
+	})
+
+	err = interacter.TelegramBot.Trigger("/denom_add", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
+	require.NoError(t, err)
+}
+
+//nolint:paralleltest // disabled
+func TestTelegramDenomAddErrorInserting(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -104,7 +220,7 @@ func TestTelegramChainBindFetchChainError(t *testing.T) {
 	mock.ExpectQuery("SELECT chain FROM chain_binds").
 		WillReturnRows(sqlmock.NewRows([]string{"chain"}).AddRow("chain1").AddRow("chain2"))
 
-	mock.ExpectQuery("SELECT name, pretty_name, base_denom, bech32_validator_prefix FROM chains").
+	mock.ExpectExec("INSERT INTO denoms").
 		WillReturnError(errors.New("custom error"))
 
 	database.SetClient(db)
@@ -123,12 +239,12 @@ func TestTelegramChainBindFetchChainError(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/chain_bind chain",
+			Text:   "/denom_add chain=nomic denom=unom display-denom=NOM",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/chain_bind", ctx)
+	err = interacter.TelegramBot.Trigger("/denom_add", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -136,7 +252,7 @@ func TestTelegramChainBindFetchChainError(t *testing.T) {
 }
 
 //nolint:paralleltest // disabled
-func TestTelegramChainBindChainNotFound(t *testing.T) {
+func TestTelegramDenomAddDuplicate(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -148,7 +264,7 @@ func TestTelegramChainBindChainNotFound(t *testing.T) {
 	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/chain-not-found.html")),
+		types.TelegramResponseHasText("This denom is already inserted!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	logger := loggerPkg.GetNopLogger()
@@ -165,13 +281,8 @@ func TestTelegramChainBindChainNotFound(t *testing.T) {
 	mock.ExpectQuery("SELECT chain FROM chain_binds").
 		WillReturnRows(sqlmock.NewRows([]string{"chain"}).AddRow("chain1").AddRow("chain2"))
 
-	mock.ExpectQuery("SELECT name, pretty_name, base_denom, bech32_validator_prefix FROM chains WHERE name").
-		WillReturnRows(sqlmock.NewRows([]string{"name", "pretty_name", "base_denom", "bech32_validator_prefix"}))
-
-	mock.ExpectQuery("SELECT name, pretty_name, base_denom, bech32_validator_prefix FROM chains").
-		WillReturnRows(sqlmock.
-			NewRows([]string{"name", "pretty_name", "base_denom", "bech32_validator_prefix"}).
-			AddRow("chain", "Chain", "uatom", "cosmosvaloper"))
+	mock.ExpectExec("INSERT INTO denoms").
+		WillReturnError(errors.New("duplicate key value violates unique constraint \"denoms_chain_denom_key\""))
 
 	database.SetClient(db)
 
@@ -189,12 +300,12 @@ func TestTelegramChainBindChainNotFound(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/chain_bind chain2",
+			Text:   "/denom_add chain=nomic denom=unom display-denom=NOM",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/chain_bind", ctx)
+	err = interacter.TelegramBot.Trigger("/denom_add", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -202,7 +313,7 @@ func TestTelegramChainBindChainNotFound(t *testing.T) {
 }
 
 //nolint:paralleltest // disabled
-func TestTelegramChainBindChainAlreadyBound(t *testing.T) {
+func TestTelegramDenomAddOk(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -214,7 +325,7 @@ func TestTelegramChainBindChainAlreadyBound(t *testing.T) {
 	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasText("This chain is already bound to this chat!"),
+		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/denom-add.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	logger := loggerPkg.GetNopLogger()
@@ -231,144 +342,7 @@ func TestTelegramChainBindChainAlreadyBound(t *testing.T) {
 	mock.ExpectQuery("SELECT chain FROM chain_binds").
 		WillReturnRows(sqlmock.NewRows([]string{"chain"}).AddRow("chain1").AddRow("chain2"))
 
-	mock.ExpectQuery("SELECT name, pretty_name, base_denom, bech32_validator_prefix FROM chains").
-		WillReturnRows(sqlmock.
-			NewRows([]string{"name", "pretty_name", "base_denom", "bech32_validator_prefix"}).
-			AddRow("chain", "Chain", "uatom", "cosmosvaloper"))
-
-	mock.ExpectExec("INSERT INTO chain_binds").
-		WillReturnError(errors.New("duplicate key value violates unique constraint"))
-
-	database.SetClient(db)
-
-	interacter := NewInteracter(
-		types.TelegramConfig{Token: "xxx:yyy", Admins: []int64{1, 2}},
-		"v1.2.3",
-		logger,
-		dataFetcher,
-		database,
-		metricsManager,
-	)
-	interacter.Init()
-
-	ctx := interacter.TelegramBot.NewContext(tele.Update{
-		ID: 1,
-		Message: &tele.Message{
-			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/chain_bind chain",
-			Chat:   &tele.Chat{ID: 2},
-		},
-	})
-
-	err = interacter.TelegramBot.Trigger("/chain_bind", ctx)
-	require.NoError(t, err)
-
-	err = mock.ExpectationsWereMet()
-	require.NoError(t, err)
-}
-
-//nolint:paralleltest // disabled
-func TestTelegramChainBindChainErrorInserting(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.org/botxxx:yyy/getMe",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-bot-ok.json")))
-
-	httpmock.RegisterMatcherResponder(
-		"POST",
-		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasText("Internal error!"),
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
-
-	logger := loggerPkg.GetNopLogger()
-	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
-	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
-	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
-
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-
-	mock.ExpectExec("INSERT INTO queries").
-		WillReturnResult(sqlmock.NewResult(1, 1))
-
-	mock.ExpectQuery("SELECT chain FROM chain_binds").
-		WillReturnRows(sqlmock.NewRows([]string{"chain"}).AddRow("chain1").AddRow("chain2"))
-
-	mock.ExpectQuery("SELECT name, pretty_name, base_denom, bech32_validator_prefix FROM chains").
-		WillReturnRows(sqlmock.
-			NewRows([]string{"name", "pretty_name", "base_denom", "bech32_validator_prefix"}).
-			AddRow("chain", "Chain", "uatom", "cosmosvaloper"))
-
-	mock.ExpectExec("INSERT INTO chain_binds").
-		WillReturnError(errors.New("custom error"))
-
-	database.SetClient(db)
-
-	interacter := NewInteracter(
-		types.TelegramConfig{Token: "xxx:yyy", Admins: []int64{1, 2}},
-		"v1.2.3",
-		logger,
-		dataFetcher,
-		database,
-		metricsManager,
-	)
-	interacter.Init()
-
-	ctx := interacter.TelegramBot.NewContext(tele.Update{
-		ID: 1,
-		Message: &tele.Message{
-			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/chain_bind chain",
-			Chat:   &tele.Chat{ID: 2},
-		},
-	})
-
-	err = interacter.TelegramBot.Trigger("/chain_bind", ctx)
-	require.NoError(t, err)
-
-	err = mock.ExpectationsWereMet()
-	require.NoError(t, err)
-}
-
-//nolint:paralleltest // disabled
-func TestTelegramChainBindOk(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.org/botxxx:yyy/getMe",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-bot-ok.json")))
-
-	httpmock.RegisterMatcherResponder(
-		"POST",
-		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/chain-bind.html")),
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
-
-	logger := loggerPkg.GetNopLogger()
-	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
-	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
-	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
-
-	db, mock, err := sqlmock.New()
-	require.NoError(t, err)
-
-	mock.ExpectExec("INSERT INTO queries").
-		WillReturnResult(sqlmock.NewResult(1, 1))
-
-	mock.ExpectQuery("SELECT chain FROM chain_binds").
-		WillReturnRows(sqlmock.NewRows([]string{"chain"}).AddRow("chain1").AddRow("chain2"))
-
-	mock.ExpectQuery("SELECT name, pretty_name, base_denom, bech32_validator_prefix FROM chains").
-		WillReturnRows(sqlmock.
-			NewRows([]string{"name", "pretty_name", "base_denom", "bech32_validator_prefix"}).
-			AddRow("chain", "Chain", "uatom", "cosmosvaloper"))
-
-	mock.ExpectExec("INSERT INTO chain_binds").
+	mock.ExpectExec("INSERT INTO denoms").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	database.SetClient(db)
@@ -387,12 +361,12 @@ func TestTelegramChainBindOk(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/chain_bind chain",
+			Text:   "/denom_add chain=nomic denom=unom display-denom=NOM",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/chain_bind", ctx)
+	err = interacter.TelegramBot.Trigger("/denom_add", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()

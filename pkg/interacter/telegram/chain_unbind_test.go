@@ -151,7 +151,7 @@ func TestTelegramChainUnbindChainNotFound(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/chain-not-found.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -217,7 +217,7 @@ func TestTelegramChainUnbindChainNotBound(t *testing.T) {
 		types.TelegramResponseHasText("Chain is not bound to this chat!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -283,7 +283,7 @@ func TestTelegramChainUnbindChainErrorDeleting(t *testing.T) {
 		types.TelegramResponseHasText("Internal error!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -349,7 +349,7 @@ func TestTelegramChainUnbindChainOk(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/chain-unbind.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)

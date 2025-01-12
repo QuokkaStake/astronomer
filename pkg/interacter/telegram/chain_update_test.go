@@ -398,7 +398,7 @@ func TestTelegramChainUpdateChainNotUpdated(t *testing.T) {
 		types.TelegramResponseHasText("Chain was not found!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
@@ -465,7 +465,7 @@ func TestTelegramChainUpdateChainOk(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/chain-update.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	dataFetcher := datafetcher.NewDataFetcher(logger, database, nil, metricsManager, nil)
