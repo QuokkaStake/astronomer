@@ -155,7 +155,7 @@ func (interacter *Interacter) SingleChainItemParser(
 		// 0 or >=2 chains bound to a chat and there's not enough info from query
 		// to understand which chain to query.
 		return false, html.EscapeString(fmt.Sprintf(
-			"Usage: %s [chain] <%s>",
+			"Usage: %s <chain> <%s>",
 			args[0],
 			argumentName,
 		)), SingleChainItemArgs{}

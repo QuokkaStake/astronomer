@@ -103,7 +103,7 @@ func TestSingleChainItem(t *testing.T) {
 
 	valid1, usage1, args1 := interacter.SingleChainItemParser("/command", []string{}, "proposal")
 	require.False(t, valid1)
-	require.Equal(t, html.EscapeString("Usage: /command [chain] <proposal>"), usage1)
+	require.Equal(t, html.EscapeString("Usage: /command <chain> <proposal>"), usage1)
 	require.Empty(t, args1)
 
 	valid2, usage2, args2 := interacter.SingleChainItemParser("/command ID", []string{"chain"}, "proposal")
