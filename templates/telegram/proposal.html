@@ -6,7 +6,7 @@
 <i>🗳Proposal ID:</i> {{ .Proposal.ID }}
 <i>📝Status:</i> {{ .Proposal.FormatStatus }}
 <i>📝Title:</i> {{ .Proposal.Title }}
-<i>⏳Voting ends at:</i> {{ .Proposal.VotingEndTime }} ({{ FormatSince .Proposal.VotingEndTime }})
+<i>⏳Voting ends at:</i> {{ .Proposal.VotingEndTime }} ({{ FormatDuration .GetTimeLeft }})
 {{- if .Explorers }}
 🌐{{ FormatLinks (.Explorers.GetProposalLinks (.Proposal.ID)) }}
 {{- end }}

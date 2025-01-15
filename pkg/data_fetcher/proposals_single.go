@@ -2,10 +2,13 @@ package datafetcher
 
 import (
 	"main/pkg/types"
+	"time"
 )
 
 func (f *DataFetcher) GetSingleProposal(chain *types.Chain, proposalID string) types.SingleProposal {
-	response := types.SingleProposal{}
+	response := types.SingleProposal{
+		RenderTime: time.Now(),
+	}
 
 	explorers, err := f.Database.GetExplorersByChains([]string{chain.Name})
 	if err != nil {
