@@ -7,6 +7,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -55,6 +56,7 @@ func TestTelegramChainInvalidInvocation(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -116,6 +118,7 @@ func TestTelegramChainErrorFindingChain(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -180,6 +183,7 @@ func TestTelegramChainErrorChainNotFoundAndFailedToFetch(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -247,6 +251,7 @@ func TestTelegramChainErrorChainNotFound(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -314,6 +319,7 @@ func TestTelegramChainErrorFetchingExplorers(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -386,6 +392,7 @@ func TestTelegramChainErrorFetchingDenoms(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -459,6 +466,7 @@ func TestTelegramChainErrorFetchingLCDHosts(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -545,6 +553,7 @@ func TestTelegramChainOk(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 

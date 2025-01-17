@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"main/pkg/utils"
 	"main/templates"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -15,14 +17,17 @@ import (
 type TelegramTemplatesManager struct {
 	Templates map[string]*template.Template
 	Logger    zerolog.Logger
+	Time      timePkg.Time
 }
 
 func NewTelegramTemplatesManager(
 	logger *zerolog.Logger,
+	time timePkg.Time,
 ) *TelegramTemplatesManager {
 	return &TelegramTemplatesManager{
 		Templates: map[string]*template.Template{},
 		Logger:    logger.With().Str("component", "telegram_templates_manager").Logger(),
+		Time:      time,
 	}
 }
 
@@ -63,7 +68,7 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 		"FormatPercent":    utils.FormatPercent,
 		"FormatPercentDec": utils.FormatPercentDec,
 		"FormatFloat":      utils.FormatFloat,
-		"FormatSince":      utils.FormatSince,
+		"FormatSince":      m.FormatSince,
 		"FormatLink":       m.FormatLink,
 		"FormatLinks":      m.FormatLinks,
 		"SerializeAmount":  m.SerializeAmount,
@@ -75,6 +80,10 @@ func (m *TelegramTemplatesManager) GetTemplate(templateName string) (*template.T
 	m.Templates[templateName] = t
 
 	return t, nil
+}
+
+func (m *TelegramTemplatesManager) FormatSince(sinceTime time.Time) string {
+	return utils.FormatSince(m.Time.Since(sinceTime))
 }
 
 func (m *TelegramTemplatesManager) FormatLink(link types.Link) template.HTML {

@@ -9,8 +9,8 @@ import (
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
 	"main/pkg/tendermint"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
-	"strings"
 	"testing"
 	"time"
 
@@ -59,6 +59,7 @@ func TestProposalSingleInvalidInvocation(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -126,6 +127,7 @@ func TestProposalSingleChainNotFound(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -187,6 +189,7 @@ func TestProposalSingleErrorFetchingChain(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -254,6 +257,7 @@ func TestProposalSingleErrorFetchingExplorers(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -333,6 +337,7 @@ func TestProposalSingleErrorFetchingProposal(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -362,9 +367,10 @@ func TestProposalSingleOk(t *testing.T) {
 		"https://api.telegram.org/botxxx:yyy/getMe",
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-bot-ok.json")))
 
-	httpmock.RegisterResponder(
+	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
+		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/proposal.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	httpmock.RegisterResponder(
@@ -397,12 +403,15 @@ func TestProposalSingleOk(t *testing.T) {
 	mock.ExpectQuery("SELECT chain, name, proposal_link_pattern, wallet_link_pattern, validator_link_pattern, main_link FROM explorers").
 		WillReturnRows(sqlmock.
 			NewRows([]string{"chain", "name", "proposal_link_pattern", "wallet_link_pattern", "validator_link_pattern", "main_link"}).
-			AddRow("chain", "Ping", "https://example.com/proposal/{id}", "", "", ""))
+			AddRow("chain", "Ping", "https://example.com/proposal/%s", "", "", ""))
 
 	mock.ExpectQuery("SELECT host FROM lcd").
 		WillReturnRows(sqlmock.NewRows([]string{"host"}).AddRow("https://example.com"))
 
 	database.SetClient(db)
+
+	renderTime, err := time.Parse(time.RFC3339, "2023-11-17T21:00:27.879790211Z")
+	require.NoError(t, err)
 
 	interacter := NewInteracter(
 		types.TelegramConfig{Token: "xxx:yyy", Admins: []int64{1, 2}},
@@ -411,6 +420,7 @@ func TestProposalSingleOk(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.StubTime{NowTime: renderTime},
 	)
 	interacter.Init()
 
@@ -428,63 +438,4 @@ func TestProposalSingleOk(t *testing.T) {
 
 	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
-}
-
-//nolint:paralleltest // disabled
-func TestProposalRender(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.org/botxxx:yyy/getMe",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-bot-ok.json")))
-
-	httpmock.RegisterResponder(
-		"POST",
-		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
-
-	logger := loggerPkg.GetNopLogger()
-	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
-	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
-	converter := converterPkg.NewConverter()
-	nodesManager := tendermint.NewNodeManager(logger, database, converter, metricsManager)
-	dataFetcher := datafetcher.NewDataFetcher(logger, database, converter, metricsManager, nodesManager)
-
-	interacter := NewInteracter(
-		types.TelegramConfig{Token: "xxx:yyy", Admins: []int64{1, 2}},
-		"v1.2.3",
-		logger,
-		dataFetcher,
-		database,
-		metricsManager,
-	)
-	interacter.Init()
-
-	renderTime, err := time.Parse(time.RFC3339, "2024-01-15T02:03:04Z")
-	require.NoError(t, err)
-
-	response, err := interacter.TemplateManager.Render("proposal", types.SingleProposal{
-		RenderTime: renderTime,
-		Chain:      &types.Chain{Name: "chain"},
-		Explorers: []*types.Explorer{{
-			Name:                "explorer",
-			ProposalLinkPattern: "https://example.com/proposal/%s",
-		}},
-		Proposal: &types.Proposal{
-			ID:              "123",
-			Status:          "PROPOSAL_STATUS_VOTING_PERIOD",
-			VotingStartTime: renderTime.Add(-7 * 24 * time.Hour),
-			VotingEndTime:   renderTime.Add(7 * 24 * time.Hour),
-			Title:           "Proposal title",
-			Summary:         "Proposal summary",
-		},
-	})
-	require.NoError(t, err)
-	require.Equal(
-		t,
-		strings.TrimSpace(response),
-		string(assets.GetBytesOrPanic("responses/proposal.html")),
-	)
 }

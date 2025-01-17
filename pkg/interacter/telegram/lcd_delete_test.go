@@ -7,6 +7,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -55,6 +56,7 @@ func TestTelegramLCDDeleteNotEnoughArgs(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -116,6 +118,7 @@ func TestTelegramLCDDeleteErrorFetchingChain(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -183,6 +186,7 @@ func TestTelegramLCDDeleteErrorFetchingLCDHosts(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -250,6 +254,7 @@ func TestTelegramLCDDeleteDeletingSingleLCDHost(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -324,6 +329,7 @@ func TestTelegramLCDDeleteErrorDeleting(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -398,6 +404,7 @@ func TestTelegramLCDDeleteLCDNotFound(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -472,6 +479,7 @@ func TestTelegramLCDDeleteOk(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 

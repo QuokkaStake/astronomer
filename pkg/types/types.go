@@ -139,15 +139,10 @@ type ChainActiveProposals struct {
 }
 
 type SingleProposal struct {
-	RenderTime time.Time
-	Chain      *Chain
-	Explorers  Explorers
-	Proposal   *Proposal
-	Error      error
-}
-
-func (s SingleProposal) GetTimeLeft() time.Duration {
-	return s.Proposal.VotingEndTime.Sub(s.RenderTime)
+	Chain     *Chain
+	Explorers Explorers
+	Proposal  *Proposal
+	Error     error
 }
 
 type ValidatorsInfo struct {

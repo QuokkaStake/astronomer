@@ -7,6 +7,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -55,6 +56,7 @@ func TestTelegramDenomDeleteNotEnoughArgs(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -116,6 +118,7 @@ func TestTelegramDenomDeleteErrorDeleting(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -177,6 +180,7 @@ func TestTelegramDenomDeleteNotFound(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -238,6 +242,7 @@ func TestTelegramDenomOk(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 

@@ -7,6 +7,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -55,6 +56,7 @@ func TestTelegramChainAddNotEnoughArgs(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -113,6 +115,7 @@ func TestTelegramChainAddInvalidInvocation(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -171,6 +174,7 @@ func TestTelegramChainAddNotValid(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -234,6 +238,7 @@ func TestTelegramChainAddChainAlreadyExists(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -297,6 +302,7 @@ func TestTelegramChainAddChainErrorInserting(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -365,6 +371,7 @@ func TestTelegramChainAddChainOk(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 

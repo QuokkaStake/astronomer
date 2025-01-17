@@ -9,6 +9,7 @@ import (
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
 	"main/pkg/tendermint"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -57,6 +58,7 @@ func TestTelegramValidatorLinkInvalidInvocation(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -118,6 +120,7 @@ func TestTelegramValidatorLinkErrorFetchingChain(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -185,6 +188,7 @@ func TestTelegramValidatorLinkChainNotFound(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -259,6 +263,7 @@ func TestTelegramValidatorLinkErrorFetchingValidator(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -336,6 +341,7 @@ func TestTelegramValidatorLinkErrorInserting(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -413,6 +419,7 @@ func TestTelegramValidatorLinkDuplicate(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -490,6 +497,7 @@ func TestTelegramValidatorLinkOk(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 

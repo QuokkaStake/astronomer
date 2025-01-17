@@ -5,6 +5,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -52,6 +53,7 @@ func TestTelegramHelpNoChains(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -109,6 +111,7 @@ func TestTelegramHelpSingleChain(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -166,6 +169,7 @@ func TestTelegramHelpMultipleChains(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 

@@ -9,6 +9,7 @@ import (
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
 	"main/pkg/tendermint"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -57,6 +58,7 @@ func TestTelegramWalletLinkInvalidInvocation(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -118,6 +120,7 @@ func TestTelegramWalletLinkErrorFindingChain(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -185,6 +188,7 @@ func TestTelegramWalletLinkChainNotFound(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -254,6 +258,7 @@ func TestTelegramWalletLinkWalletDoesNotExist(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -328,6 +333,7 @@ func TestTelegramWalletLinkErrorFetchingBalance(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -405,6 +411,7 @@ func TestTelegramWalletLinkErrorInsertingWallet(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -479,6 +486,7 @@ func TestTelegramWalletLinkEmptyWallet(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -556,6 +564,7 @@ func TestTelegramWalletLinkDuplicate(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -636,6 +645,7 @@ func TestTelegramWalletLinkErrorGettingExplorers(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -719,6 +729,7 @@ func TestTelegramWalletLinkOk(t *testing.T) {
 		dataFetcher,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
