@@ -2,10 +2,6 @@ package telegram
 
 import (
 	"errors"
-	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/require"
-	tele "gopkg.in/telebot.v3"
 	"main/assets"
 	converterPkg "main/pkg/converter"
 	datafetcher "main/pkg/data_fetcher"
@@ -17,6 +13,11 @@ import (
 	"main/pkg/types"
 	"testing"
 	"time"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/require"
+	tele "gopkg.in/telebot.v3"
 )
 
 //nolint:paralleltest // disabled
@@ -299,7 +300,7 @@ func TestTelegramBalanceChainNotFound(t *testing.T) {
 		},
 	})
 
-	interacter.TelegramBot.Trigger("/balance", ctx)
+	_ = interacter.TelegramBot.Trigger("/balance", ctx)
 }
 
 //nolint:paralleltest // disabled
@@ -469,7 +470,7 @@ func TestTelegramBalanceOk(t *testing.T) {
 			AddRow("chain", "Ping", "", "https://example.com/wallet/%s", "https://example.com/validator/%s", ""))
 
 	// 3x6 per each wallet - 1 when bech32 conversion failed
-	for _ = range 17 {
+	for range 17 {
 		mock.ExpectQuery("SELECT host FROM lcd").
 			WillReturnRows(sqlmock.NewRows([]string{"host"}).AddRow("https://example.com"))
 	}
@@ -480,7 +481,7 @@ func TestTelegramBalanceOk(t *testing.T) {
 			AddRow("chain", "uatom", "ATOM", 6, "cosmos", false),
 		)
 
-	for _ = range 4 {
+	for range 4 {
 		mock.ExpectQuery("SELECT host FROM lcd").
 			WillReturnRows(sqlmock.NewRows([]string{"host"}).AddRow("https://example.com"))
 	}
