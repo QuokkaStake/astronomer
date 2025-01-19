@@ -5,6 +5,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -30,7 +31,7 @@ func TestTelegramHelpNoChains(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/help-no-chains.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -52,6 +53,7 @@ func TestTelegramHelpNoChains(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -65,6 +67,9 @@ func TestTelegramHelpNoChains(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/help", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -84,7 +89,7 @@ func TestTelegramHelpSingleChain(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/help-single-chain.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -106,6 +111,7 @@ func TestTelegramHelpSingleChain(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -119,6 +125,9 @@ func TestTelegramHelpSingleChain(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/help", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -138,7 +147,7 @@ func TestTelegramHelpMultipleChains(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/help-multiple-chains.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -160,6 +169,7 @@ func TestTelegramHelpMultipleChains(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -173,5 +183,8 @@ func TestTelegramHelpMultipleChains(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/help", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }

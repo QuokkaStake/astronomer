@@ -34,18 +34,21 @@ func (interacter *Interacter) HandleDeleteLCD(c tele.Context, chainBinds []strin
 		return "Error finding LCD hosts!", err
 	}
 
-	if len(allLCDs) <= 1 {
+	if len(allLCDs) <= 1 && host == allLCDs[0] {
 		return "Cannot remove the only chain LCD!", constants.ErrWrongInvocation
 	}
 
-	deleted, insertErr := interacter.Database.DeleteLCDHost(chain, host)
-	if insertErr != nil {
-		return "Error deleting LCD host!", insertErr
+	deleted, deleteErr := interacter.Database.DeleteLCDHost(chain, host)
+	if deleteErr != nil {
+		return "Error deleting LCD host!", deleteErr
 	}
 
 	if !deleted {
 		return "Chain LCD host was not found!", constants.ErrLCDNotFound
 	}
 
-	return interacter.TemplateManager.Render("lcd_delete", types.ChainWithLCD{Chain: *chain, LCDEndpoint: host})
+	return interacter.TemplateManager.Render("lcd_delete", types.ChainWithLCD{
+		Chain:       *chain,
+		LCDEndpoint: host,
+	})
 }

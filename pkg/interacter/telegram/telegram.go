@@ -5,6 +5,7 @@ import (
 	databasePkg "main/pkg/database"
 	"main/pkg/metrics"
 	"main/pkg/templates"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"strconv"
 	"strings"
@@ -46,6 +47,7 @@ func NewInteracter(
 	dataFetcher *datafetcher.DataFetcher,
 	database *databasePkg.Database,
 	metricsManager *metrics.Manager,
+	time timePkg.Time,
 ) *Interacter {
 	return &Interacter{
 		Token:           config.Token,
@@ -54,7 +56,7 @@ func NewInteracter(
 		Version:         version,
 		DataFetcher:     dataFetcher,
 		Database:        database,
-		TemplateManager: templates.NewTelegramTemplatesManager(logger),
+		TemplateManager: templates.NewTelegramTemplatesManager(logger, time),
 		MetricsManager:  metricsManager,
 		StopChannel:     make(chan bool),
 	}

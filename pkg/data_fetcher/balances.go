@@ -97,7 +97,7 @@ func (f *DataFetcher) GetBalances(userID, reporter string) *types.WalletsBalance
 				defer mutex.Unlock()
 
 				if rewardsErr != nil {
-					response.SetRewardsError(chain.Name, chainWallet, err)
+					response.SetRewardsError(chain.Name, chainWallet, rewardsErr)
 					return
 				}
 

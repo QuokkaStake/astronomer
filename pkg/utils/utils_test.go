@@ -172,8 +172,8 @@ func TestParseArgsAsMap(t *testing.T) {
 func TestFormatSince(t *testing.T) {
 	t.Parallel()
 
-	assert.Equal(t, "in 1 minute", FormatSince(time.Now().Add(time.Minute+time.Second)))
-	assert.Equal(t, "1 minute ago", FormatSince(time.Now().Add(-time.Minute)))
+	assert.Equal(t, "in 1 minute", FormatSince(-time.Minute))
+	assert.Equal(t, "1 minute ago", FormatSince(time.Minute))
 }
 
 func TestConvertBech32PrefixInvalid(t *testing.T) {

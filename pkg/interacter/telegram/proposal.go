@@ -30,6 +30,6 @@ func (interacter *Interacter) HandleSingleProposal(
 		return "", err
 	}
 
-	proposalsInfo := interacter.DataFetcher.GetSingleProposal(chain, args.ItemID)
-	return interacter.TemplateManager.Render("proposal", proposalsInfo)
+	proposalInfo := interacter.DataFetcher.GetSingleProposal(chain, args.ItemID)
+	return interacter.TemplateManager.Render("proposal", proposalInfo)
 }

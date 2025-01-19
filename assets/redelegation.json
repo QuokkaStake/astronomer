@@ -1,0 +1,28 @@
+{
+  "redelegation_responses": [
+    {
+      "redelegation": {
+        "delegator_address": "cosmos1xqz9pemz5e5zycaa89kys5aw6m8rhgsvtp9lt2",
+        "validator_src_address": "cosmosvaloper1xqz9pemz5e5zycaa89kys5aw6m8rhgsvw4328e",
+        "validator_dst_address": "cosmosvaloper1jlr62guqwrwkdt4m3y00zh2rrsamhjf9num5xr",
+        "entries": null
+      },
+      "entries": [
+        {
+          "redelegation_entry": {
+            "creation_height": 23986608,
+            "completion_time": "2025-02-06T06:24:38.863765325Z",
+            "initial_balance": "60247797",
+            "shares_dst": "60247797.000000000000000000",
+            "unbonding_id": 1156259
+          },
+          "balance": "60247797"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "next_key": null,
+    "total": "0"
+  }
+}

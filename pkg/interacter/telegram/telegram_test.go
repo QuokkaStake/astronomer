@@ -6,6 +6,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"strings"
 	"testing"
@@ -28,6 +29,7 @@ func TestTelegramInitNoTokenProvided(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -58,6 +60,7 @@ func TestTelegramInitCannotFetchBot(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 }
@@ -79,6 +82,7 @@ func TestTelegramStartOkay(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -108,6 +112,7 @@ func TestTelegramSendMultilineFail(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -149,6 +154,7 @@ func TestTelegramSendMultilineOk(t *testing.T) {
 		nil,
 		nil,
 		nil,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -181,7 +187,7 @@ func TestTelegramAddCommandFailedToInsertQuery(t *testing.T) {
 		types.TelegramResponseHasText("Internal error!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -199,6 +205,7 @@ func TestTelegramAddCommandFailedToInsertQuery(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -231,7 +238,7 @@ func TestTelegramAddCommandFailedToFetchChains(t *testing.T) {
 		types.TelegramResponseHasText("Internal error!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -253,6 +260,7 @@ func TestTelegramAddCommandFailedToFetchChains(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 

@@ -57,7 +57,7 @@ func (interacter *Interacter) HandleWalletLinkCommand(c tele.Context, chainBinds
 
 	explorers, err := interacter.Database.GetExplorersByChains([]string{args.ChainName})
 	if err != nil {
-		return "Error fetching chains!", err
+		return "Error fetching explorers!", err
 	}
 
 	return interacter.TemplateManager.Render("wallet_link", types.ChainWallet{

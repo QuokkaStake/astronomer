@@ -6,6 +6,7 @@ import (
 	databasePkg "main/pkg/database"
 	loggerPkg "main/pkg/logger"
 	"main/pkg/metrics"
+	timePkg "main/pkg/time"
 	"main/pkg/types"
 	"testing"
 
@@ -31,7 +32,7 @@ func TestTelegramChainsErrorFetchingChains(t *testing.T) {
 		types.TelegramResponseHasText("Error fetching chains!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -56,6 +57,7 @@ func TestTelegramChainsErrorFetchingChains(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -69,6 +71,9 @@ func TestTelegramChainsErrorFetchingChains(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/chains", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -88,7 +93,7 @@ func TestTelegramChainsErrorFetchingExplorers(t *testing.T) {
 		types.TelegramResponseHasText("Error fetching explorers!"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -119,6 +124,7 @@ func TestTelegramChainsErrorFetchingExplorers(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -132,6 +138,9 @@ func TestTelegramChainsErrorFetchingExplorers(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/chains", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }
 
@@ -151,7 +160,7 @@ func TestTelegramChainsOk(t *testing.T) {
 		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/chains.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
-	logger := loggerPkg.GetDefaultLogger()
+	logger := loggerPkg.GetNopLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 
@@ -192,6 +201,7 @@ func TestTelegramChainsOk(t *testing.T) {
 		nil,
 		database,
 		metricsManager,
+		&timePkg.SystemTime{},
 	)
 	interacter.Init()
 
@@ -205,5 +215,8 @@ func TestTelegramChainsOk(t *testing.T) {
 	})
 
 	err = interacter.TelegramBot.Trigger("/chains", ctx)
+	require.NoError(t, err)
+
+	err = mock.ExpectationsWereMet()
 	require.NoError(t, err)
 }

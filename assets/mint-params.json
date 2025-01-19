@@ -1,0 +1,10 @@
+{
+  "params": {
+    "mint_denom": "uatom",
+    "inflation_rate_change": "1.000000000000000000",
+    "inflation_max": "0.100000000000000000",
+    "inflation_min": "0.070000000000000000",
+    "goal_bonded": "0.670000000000000000",
+    "blocks_per_year": "4360000"
+  }
+}
