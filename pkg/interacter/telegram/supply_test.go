@@ -20,7 +20,7 @@ import (
 )
 
 //nolint:paralleltest // disabled
-func TestParamsInvalidInvocation(t *testing.T) {
+func TestSupplyInvalidInvocation(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -32,7 +32,7 @@ func TestParamsInvalidInvocation(t *testing.T) {
 	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasText("Usage: /params [chain]"),
+		types.TelegramResponseHasText("Usage: /supply [chain]"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	logger := loggerPkg.GetNopLogger()
@@ -67,12 +67,12 @@ func TestParamsInvalidInvocation(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/params",
+			Text:   "/supply",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/params", ctx)
+	err = interacter.TelegramBot.Trigger("/supply", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -80,7 +80,7 @@ func TestParamsInvalidInvocation(t *testing.T) {
 }
 
 //nolint:paralleltest // disabled
-func TestParamsErrorFetchingChains(t *testing.T) {
+func TestSupplyErrorFetchingChains(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -92,7 +92,7 @@ func TestParamsErrorFetchingChains(t *testing.T) {
 	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasText("❌ Error getting chains params: custom error"),
+		types.TelegramResponseHasText("❌ Error getting supply: custom error"),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	logger := loggerPkg.GetNopLogger()
@@ -131,12 +131,12 @@ func TestParamsErrorFetchingChains(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/params chain",
+			Text:   "/supply chain",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/params", ctx)
+	err = interacter.TelegramBot.Trigger("/supply", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -144,7 +144,7 @@ func TestParamsErrorFetchingChains(t *testing.T) {
 }
 
 //nolint:paralleltest // disabled
-func TestParamsAllFail(t *testing.T) {
+func TestSupplyAllFail(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -156,7 +156,7 @@ func TestParamsAllFail(t *testing.T) {
 	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/params-fail.html")),
+		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/supply-fail.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	logger := loggerPkg.GetNopLogger()
@@ -181,7 +181,7 @@ func TestParamsAllFail(t *testing.T) {
 			AddRow("chain", "Chain", "uatom", "cosmosvaloper"),
 		)
 
-	for range 8 {
+	for range 3 {
 		mock.ExpectQuery("SELECT host FROM lcd").
 			WillReturnRows(sqlmock.NewRows([]string{"host"}).AddRow("https://example.com"))
 	}
@@ -203,12 +203,12 @@ func TestParamsAllFail(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/params chain",
+			Text:   "/supply chain",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/params", ctx)
+	err = interacter.TelegramBot.Trigger("/supply", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
@@ -216,7 +216,7 @@ func TestParamsAllFail(t *testing.T) {
 }
 
 //nolint:paralleltest // disabled
-func TestParamsOk(t *testing.T) {
+func TestSupplyOk(t *testing.T) {
 	httpmock.Activate()
 	defer httpmock.DeactivateAndReset()
 
@@ -228,55 +228,30 @@ func TestParamsOk(t *testing.T) {
 	httpmock.RegisterMatcherResponder(
 		"POST",
 		"https://api.telegram.org/botxxx:yyy/sendMessage",
-		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/params.html")),
+		types.TelegramResponseHasBytes(assets.GetBytesOrPanic("responses/supply.html")),
 		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("telegram-send-message-ok.json")))
 
 	httpmock.RegisterResponder(
 		"GET",
-		"https://example.com/cosmos/slashing/v1beta1/params",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("slashing-params.json")))
+		"https://example.com/cosmos/bank/v1beta1/supply?pagination.limit=10000&pagination.offset=0",
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("supply.json")))
 
 	httpmock.RegisterResponder(
 		"GET",
-		"https://example.com/cosmos/staking/v1beta1/params",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("staking-params.json")))
+		"https://example.com/cosmos/staking/v1beta1/pool",
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("pool.json")))
 
 	httpmock.RegisterResponder(
 		"GET",
-		"https://example.com/cosmos/mint/v1beta1/inflation",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("inflation.json")))
+		"https://example.com/cosmos/distribution/v1beta1/community_pool?pagination.limit=10000&pagination.offset=0",
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("community-pool.json")))
 
 	httpmock.RegisterResponder(
 		"GET",
-		"https://example.com/cosmos/gov/v1beta1/params/tallying",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("gov-params-tallying.json")))
+		"https://api.coingecko.com/api/v3/simple/price?ids=cosmos&vs_currencies=usd",
+		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("coingecko.json")))
 
-	httpmock.RegisterResponder(
-		"GET",
-		"https://example.com/cosmos/gov/v1beta1/params/voting",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("gov-params-voting.json")))
-
-	httpmock.RegisterResponder(
-		"GET",
-		"https://example.com/cosmos/gov/v1beta1/params/deposit",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("gov-params-deposit.json")))
-
-	httpmock.RegisterResponder(
-		"GET",
-		"https://example.com/cosmos/mint/v1beta1/params",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("mint-params.json")))
-
-	httpmock.RegisterResponder(
-		"GET",
-		"https://example.com/cosmos/base/tendermint/v1beta1/blocks/latest",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("blocks-latest.json")))
-
-	httpmock.RegisterResponder(
-		"GET",
-		"/cosmos/base/tendermint/v1beta1/blocks/24026995",
-		httpmock.NewBytesResponder(200, assets.GetBytesOrPanic("block-previous.json")))
-
-	logger := loggerPkg.GetNopLogger()
+	logger := loggerPkg.GetDefaultLogger()
 	metricsManager := metrics.NewManager(logger, types.MetricsConfig{})
 	database := databasePkg.NewDatabase(logger, types.DatabaseConfig{})
 	converter := converterPkg.NewConverter()
@@ -298,10 +273,16 @@ func TestParamsOk(t *testing.T) {
 			AddRow("chain", "Chain", "uatom", "cosmosvaloper"),
 		)
 
-	for range 8 {
+	for range 3 {
 		mock.ExpectQuery("SELECT host FROM lcd").
 			WillReturnRows(sqlmock.NewRows([]string{"host"}).AddRow("https://example.com"))
 	}
+
+	mock.ExpectQuery("SELECT chain, denom, display_denom, denom_exponent, coingecko_currency, ignored FROM denoms").
+		WillReturnRows(sqlmock.
+			NewRows([]string{"chain", "denom", "display_denom", "denom_exponent", "coingecko_currency", "ignored"}).
+			AddRow("chain", "uatom", "ATOM", 6, "cosmos", false),
+		)
 
 	database.SetClient(db)
 
@@ -320,12 +301,12 @@ func TestParamsOk(t *testing.T) {
 		ID: 1,
 		Message: &tele.Message{
 			Sender: &tele.User{Username: "testuser", ID: 1},
-			Text:   "/params chain",
+			Text:   "/supply chain",
 			Chat:   &tele.Chat{ID: 2},
 		},
 	})
 
-	err = interacter.TelegramBot.Trigger("/params", ctx)
+	err = interacter.TelegramBot.Trigger("/supply", ctx)
 	require.NoError(t, err)
 
 	err = mock.ExpectationsWereMet()
